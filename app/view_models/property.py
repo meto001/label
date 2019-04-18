@@ -1,7 +1,16 @@
 # _*_ coding:utf-8 _*_
 __author__ = 'meto'
 __date__ = '2019/4/15 15:12'
+dict2 = {"properties": [
+    {"id": 12,"label_type_name": "人脸质量标注","prop_name": "肤色"},
+    {"id": 13,"label_type_name": "人脸质量标注","prop_name": "肤色"},
+    {"id": 15,"label_type_name": "行人","prop_name": "衣服"},
+    {"id": 16,"label_type_name": "行人","prop_name": "衣服"},
+    {"id": 17,"label_type_name": "行人","prop_name": "衣服"}]}
 
+dict1 = {"properties":[{"label_type_name": "人脸质量标注", "property_value":[{"id": 12,"prop_name":"肤色"},{"id": 13,"prop_name":"衣服"}]},
+                {"label_type_name": "行人", "property_value":[{"id": 14,"prop_name":"帽子"},{"id": 15,"prop_name":"鞋子"}]}
+              ]}
 
 class PropertyViewModel:
 
@@ -14,9 +23,21 @@ class PropertyViewModel:
 
 class PropertyCollection:
     def __init__(self):
+        self.property_type = []
         self.properties = []
 
+
+
+    def value_fill(self,property_value):
+        pass
+
+
     def fill(self, label_properties):
+        # list1 = []
+        for label_property in label_properties:
+            if label_property.label_type.name not in self.property_type:
+                self.property_type.append(label_property.label_type.name)
+
         self.properties =[PropertyViewModel(label_property) for label_property in label_properties]
 
 

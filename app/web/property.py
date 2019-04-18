@@ -23,6 +23,7 @@ def show_property():
     label_properties = Property.get_property()
     property_values = PropertyCollection()
     property_values.fill(label_properties)
+    # dict1 = json.loads(json.dumps(property_values, default=lambda o:o.__dict__))
     return json.dumps(property_values, default=lambda o:o.__dict__)
 
 
