@@ -57,7 +57,6 @@ def add_property():
          {'id':30,'delete':1}]}
 
     if request.method == 'POST':
-        label_type = Label_type()
 
         # 1.将prop_name、label_type、prop_type 插入到property表中
         with db.auto_commit():
