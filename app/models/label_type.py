@@ -15,3 +15,6 @@ class Label_type(Base):
 
     # 新增合格率字段
     pass_rate = Column(Float)
+
+    # 新增抽检率
+    sampling_rate = Column(Float)

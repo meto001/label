@@ -2,7 +2,8 @@
 from sqlalchemy.orm import relationship
 
 from app.models.base import Base
-from sqlalchemy import Column, String, Integer, ForeignKey
+from sqlalchemy import Column, String, Integer, ForeignKey, desc
+
 __author__ = 'meto'
 __date__ = '2019/4/12 14:41'
 
@@ -23,6 +24,7 @@ class Property(Base):
 
     @classmethod
     def get_property(cls):
-        label_property = Property.query.filter_by().all()
+        label_property = Property.query.filter_by().order_by(
+            desc(Property.id)).all()
         return label_property
 

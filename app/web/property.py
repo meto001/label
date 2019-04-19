@@ -30,7 +30,8 @@ def show_property():
 @web.route('/show_property_value', methods=['GET', 'POST'])
 # @login_required
 def show_property_value():
-    form = {'prop_id':12}
+    # form = {'prop_id':12}
+    form = json.loads(request.data)
     property_value_tb = Property_value()
 
     # 查询数据库符合条件的数据
@@ -44,18 +45,18 @@ def show_property_value():
 # @login_required
 def add_property():
 
-    # 新增传进来的form
-    form = {'prop_name': '衣服', 'label_type_id': 2, 'prop_type': 1, 'property_value':
-        [{'value_id': 1, 'value_name': '黄皮'},
-         {'value_id': 2, 'value_name': '黑皮'},
-         {'value_id': 3, 'value_name': '白皮'}]}
-
-    # 修改传进来的form
-    form = {'prop_id':12, 'property_value':
-        [{'id': 16, 'value_id': 4, 'value_name': '吧lue皮'},
-         {'value_id': 5, 'value_name': '花皮'},
-         {'id':30,'delete':1}]}
-
+    # # 新增传进来的form
+    # form = {'prop_name': '衣服', 'label_type_id': 2, 'prop_type': 1, 'property_value':
+    #     [{'value_id': 1, 'value_name': '黄皮'},
+    #      {'value_id': 2, 'value_name': '黑皮'},
+    #      {'value_id': 3, 'value_name': '白皮'}]}
+    #
+    # # 修改传进来的form
+    # form = {'prop_id':12, 'property_value':
+    #     [{'id': 16, 'value_id': 4, 'value_name': '吧lue皮'},
+    #      {'value_id': 5, 'value_name': '花皮'},
+    #      {'id':30,'delete':1}]}
+    form = json.loads(request.data)
     if request.method == 'POST':
 
         # 1.将prop_name、label_type、prop_type 插入到property表中
@@ -97,4 +98,4 @@ def add_property():
 
     print('继续执行')
     # return json.dumps(form)
-    return '成功'
+    return json.dumps({'status' : 'success'})

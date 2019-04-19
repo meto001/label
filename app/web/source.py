@@ -1,6 +1,7 @@
 # _*_ coding:utf-8 _*_
 from flask import request
 from flask_login import login_required
+from werkzeug.datastructures import MultiDict
 
 from app.models.base import db
 from app.view_models.source import SourceViewModel, SourceCollection
@@ -40,8 +41,9 @@ def source():
 # @login_required
 def add_source():
     # 假数据
-    form = {'source_name': 'wwtest2', 'label_type_id': 2, 'file_url': 'F:/数据需求/标注系统测试/1'}
-
+    # form = {'source_name': 'wwtest2', 'label_type_id': 2, 'file_url': 'F:/数据需求/标注系统测试/1'}
+    # form = MultiDict(json.loads(request.data))
+    form = json.loads(request.data)
     if request.method == 'POST':
         source_image_path = Source_image_path()
         files = source_image_path.select_files_path(form['file_url'])
@@ -59,4 +61,4 @@ def add_source():
                 source_image_path.set_attrs(form)
                 db.session.add(source_image_path)
 
-    return 'success'
+    return json.dumps({'status' : 'success'})

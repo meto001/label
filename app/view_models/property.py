@@ -23,7 +23,7 @@ class PropertyViewModel:
 
 class PropertyCollection:
     def __init__(self):
-        self.property_type = []
+        self.all_property_type = []
         self.properties = []
 
 
@@ -35,8 +35,8 @@ class PropertyCollection:
     def fill(self, label_properties):
         # list1 = []
         for label_property in label_properties:
-            if label_property.label_type.name not in self.property_type:
-                self.property_type.append(label_property.label_type.name)
+            if label_property.label_type.name not in self.all_property_type:
+                self.all_property_type.append(label_property.label_type.name)
 
         self.properties =[PropertyViewModel(label_property) for label_property in label_properties]
 
