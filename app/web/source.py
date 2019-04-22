@@ -29,7 +29,6 @@ def source():
     len(source)
     sources = SourceCollection()
     sources.fill(len(source),source)
-    sources
 
     return json.dumps(sources,default=lambda o:o.__dict__)
     # return json.dumps(testuser.__dict__)

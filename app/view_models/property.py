@@ -54,10 +54,14 @@ class PropertyValueViewModel:
     # 处理一组数据
     def __parse(self,property_values):
         prop = property_values[0]
-        self.label_type = prop.property.label_type_id
+        self.label_type = prop.property.label_type.name
         self.prop_id = prop.property.id
         self.prop_name = prop.property.prop_name
-        self.prop_type = prop.value_id
+        if prop.value_id == 1:
+            self.prop_type = '单选'
+        if prop.value_id == 2:
+            self.prop_type = '画框'
+        # self.prop_type = prop.value_id
         self.property_values = [self.__map_to_property(label_property) for label_property in property_values]
 
     # 处理单个数据
