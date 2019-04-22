@@ -16,8 +16,8 @@ class User(UserMixin, Base):
     nickname = Column(String(24), nullable=False)
     realname = Column(String(24), nullable=False)
     _password = Column('password',String(128), nullable=False)
-    phone_number = Column(String(18), unique=True)
-    level = Column(Integer)
+    email = Column(String(50), unique=True)
+    groupid = Column(Integer)
     wx_open_id = Column(String(50))
     wx_name = Column(String(32))
 

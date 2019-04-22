@@ -51,7 +51,7 @@ class PropertyValueViewModel:
         self.property_values = []
         self.__parse(label_property)
 
-     # 处理一组数据
+    # 处理一组数据
     def __parse(self,property_values):
         prop = property_values[0]
         self.label_type = prop.property.label_type_id

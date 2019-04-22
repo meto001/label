@@ -40,6 +40,7 @@ def source():
 @web.route('/add_source', methods=['POST'])
 # @login_required
 def add_source():
+
     # 假数据
     # form = {'source_name': 'wwtest2', 'label_type_id': 2, 'file_url': 'F:/数据需求/标注系统测试/1'}
     # form = MultiDict(json.loads(request.data))

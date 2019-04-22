@@ -31,14 +31,16 @@ class RegisterForm(Form):
 
     realname = StringField(validators=[DataRequired(), Length(2,10, message='姓名至少需要2个字符，最多10个字符')])
 
-    phone_number = StringField(validators=[DataRequired(),Length(11, message='手机号不符合规范')])
+    email = StringField(validators=[DataRequired(), Length(8, 64),Email(message='电子邮箱不符合规范')])
+
+    groupid = IntegerField(DataRequired())
 
     def validate_nickname(self, field):
         if User.query.filter_by(nickname=field.data).first():
             raise ValidationError('昵称已被注册')
 
-    def validate_phone_number(self, field):
-        if User.query.filter_by(phone_number=field.data).first():
-            raise ValidationError('手机号已注册')
+    def validate_email(self, field):
+        if User.query.filter_by(email=field.data).first():
+            raise ValidationError('邮箱已注册')
 
 

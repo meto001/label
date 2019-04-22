@@ -8,9 +8,10 @@ class SourceViewModel:
     def __init__(self,source):
         self.id = source.id
         self.source_name = source.source_name
-        self.label_type_id = source.label_type.name
+        self.label_type = source.label_type.name
         self.create_time = source.create_time
         self.count = source.count
+
 
 
 class SourceCollection:
@@ -22,4 +23,3 @@ class SourceCollection:
     def fill(self, total, sources):
         self.total = total
         self.sources = [SourceViewModel(source) for source in sources]
-        pass
