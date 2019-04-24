@@ -27,8 +27,11 @@ class Task(Base):
     is_complete = Column(Integer)
 
     @classmethod
-    def get_urls(cls):
-        return Source_image_path.query.filter_by(source_id=Task.source_id).all()
+    def get_urls(cls,source_id):
+        print("taskid:",Task.source_id)
+        print(str(Source_image_path.query.filter_by(source_id=source_id)))
+        urls = Source_image_path.query.filter_by(source_id=source_id).all()
+        return urls
 
     @classmethod
     def get_task(cls, page, rows):
@@ -43,3 +46,17 @@ class Task(Base):
             start_num).all()
 
         return task
+
+    @classmethod
+    def get_undone_task(cls, page, rows):
+        if not page or not rows:
+            page = 1
+            # 默认10条
+            rows = 10
+        start_num = (int(page) - 1) * int(rows)
+
+        tasks = Task.query.filter_by(is_complete=0).order_by(
+            desc(Task.id)).limit(rows).offset(
+            start_num).all()
+
+        return tasks

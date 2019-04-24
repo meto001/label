@@ -5,6 +5,7 @@ __date__ = '2019/4/19 10:18'
 
 class TaskViewModel:
 
+
     def __init__(self, task):
         self.task_id = task.id
         self.task_name = task.task_name
@@ -30,6 +31,7 @@ class TaskCollection:
 
 class SourcesAndPorps:
 
+
     def __init__(self, sources, props, label_type_id):
         self.label_type_id = label_type_id
         self.sources = []
@@ -51,3 +53,5 @@ class SourcesAndPorps:
     def __parse(self, sources, props):
         self.sources = [self.__map_to_source(source) for source in sources]
         self.props = [self.__map_to_prop(prop) for prop in props]
+
+
