@@ -26,8 +26,11 @@ def register():
             user.set_attrs(form.data)
             db.session.add(user)
         return json.dumps({'status': 'success'})
-    form.errors
-    return json.dumps({'status': 'fail'})
+    msg = ''
+    for k,v in form.errors.items():
+        # print(k,v)
+        msg = msg+v[0]+' '
+    return json.dumps({'status':'fail','msg':msg})
 
 
 @web.route('/login', methods=['GET', 'POST'])
@@ -56,8 +59,11 @@ def login():
             # flash('用户不存在或密码错误')
     # return render_template('auth/login.html', form=form)
     else:
-
-        result = {'status': 300, 'msg': "格式不符合要求"}
+        msg = ''
+        for k, v in form.errors.items():
+            # print(k,v)
+            msg = msg + v[0] + ' '
+        result = {'status': 300, 'msg': msg}
     return json.dumps(result)
     # return render_template('auth/login.html',form=form)
 
