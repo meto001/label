@@ -8,6 +8,7 @@ from app.models.property import Property
 from app.models.source import Source
 from app.models.task import Task
 from app.models.task_details import Task_details
+from app.view_models.labeler_task import LabelTaskViewModel, LabelTaskCollection
 from app.view_models.task import TaskCollection, SourcesAndPorps
 from .blue_print import web
 
@@ -70,11 +71,21 @@ def labeler_task():
 
     page = request.args.get('page')
     rows = request.args.get('pagerows')
-    user_id = request.args.get('userid')
+    user = request.args.get('user')
 
+    # 任务数量
     tasks = Task.get_undone_task(page,rows)
 
+    labeler_task = LabelTaskCollection()
+    labeler_task.fill(tasks,user)
+
+        # task.get('already_count') =Ta a
+        # labeltaskviewmodel = LabelTaskViewModel()
+
+
     # 此处还差已完成数量、当前用户标注量、当前用户框数三个信息。
+
+    return json.dumps(labeler_task, default=lambda o:o.__dict__)
 
 
 @web.route('/task/show_task_detail',methods=['GET','POST'])
@@ -83,6 +94,5 @@ def show_task_detail():
     form = {'user':'meto','task_id':5,'type':1}
     # 点击开始标注 接收一条已被该用户锁定或未标注的数据
     Task_details.query.filter_by().order_by()
-
 
     return json.dumps()
