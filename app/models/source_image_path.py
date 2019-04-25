@@ -23,7 +23,9 @@ class Source_image_path(Base):
                 file_path = root + '/' + file
 
                 # 判断文件类型
-                if imghdr.what(file_path) in imgType_list and file.split('.')[-1] in imgType_list:
+                # if imghdr.what(file_path) in imgType_list and file.split('.')[-1] in imgType_list:
+                if file.split('.')[-1] in imgType_list:
                     file_path = file_path.replace('\\','/')
                     file_list.append(file_path)
+        print('file_list Length:',len(file_list))
         return file_list

@@ -27,7 +27,9 @@ db = SQLAlchemy()
 class Base(db.Model):
     __abstract__ = True
 
+    # 1为有效，0为废弃
     status = Column(SmallInteger, default=1)
+
     create_time = Column('create_time', Integer)
 
     def __init__(self):

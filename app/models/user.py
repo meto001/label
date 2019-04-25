@@ -13,7 +13,7 @@ __date__ = '2019/3/20 18:25'
 class User(UserMixin, Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     # email = Column(String(30), nullable=False)
-    nickname = Column(String(24), nullable=False)
+    nickname = Column(String(24), nullable=False, unique=True)
     realname = Column(String(24), nullable=False)
     _password = Column('password',String(128), nullable=False)
     email = Column(String(50), unique=True)

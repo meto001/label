@@ -79,6 +79,9 @@ def labeler_task():
 
 @web.route('/task/show_task_detail',methods=['GET','POST'])
 def show_task_detail():
+
+    form = {'user':'meto','task_id':5,'type':1}
+    # 点击开始标注 接收一条已被该用户锁定或未标注的数据
     Task_details.query.filter_by().order_by()
 
 
