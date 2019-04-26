@@ -25,10 +25,10 @@ def source():
     page = request.args.get('page')
     rows = request.args.get('pagerows')
     source = Source.get_source(page, rows)
+    source_count =Source.get_source_count()
     # source = Source.query.filter_by().all()
-    len(source)
     sources = SourceCollection()
-    sources.fill(len(source),source)
+    sources.fill(source_count,source)
 
     return json.dumps(sources,default=lambda o:o.__dict__)
     # return json.dumps(testuser.__dict__)

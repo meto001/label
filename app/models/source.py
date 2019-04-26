@@ -34,3 +34,7 @@ class Source(Base):
             start_num).all()
 
         return source
+
+    @classmethod
+    def get_source_count(cls):
+        return Source.query.filter_by().count()

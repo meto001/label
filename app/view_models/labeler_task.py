@@ -27,10 +27,11 @@ class LabelTaskViewModel:
 class LabelTaskCollection:
 
     def __init__(self):
+        self.total = 0
         self.tasks = []
 
-    def fill(self, tasks, user):
-
+    def fill(self,total, tasks, user):
+        self.total = total
         for task in tasks:
             print(task.id)
             # 已经完成的数量

@@ -46,6 +46,9 @@ class Task(Base):
             start_num).all()
 
         return task
+    @classmethod
+    def get_task_count(cls):
+        return Task.query.filter_by().count()
 
     @classmethod
     def get_undone_task(cls, page, rows):
@@ -60,3 +63,7 @@ class Task(Base):
             start_num).all()
 
         return tasks
+
+    @classmethod
+    def get_undone_task_count(cls):
+        return  Task.query.filter_by(is_complete=0).count()

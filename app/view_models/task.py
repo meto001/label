@@ -23,9 +23,11 @@ class TaskViewModel:
 class TaskCollection:
 
     def __init__(self):
+        self.total = 0
         self.tasks = []
 
-    def fill(self, tasks):
+    def fill(self,total, tasks):
+        self.total = total
         self.tasks = [TaskViewModel(task) for task in tasks]
 
 

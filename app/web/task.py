@@ -61,7 +61,8 @@ def admin_task():
     rows = request.args.get('pagerows')
     tasks = Task.get_task(page, rows)
     task = TaskCollection()
-    task.fill(tasks)
+    all_task_count = Task.get_task_count()
+    task.fill(all_task_count, tasks)
 
     return json.dumps(task,default=lambda o:o.__dict__)
 
@@ -69,15 +70,19 @@ def admin_task():
 @web.route('/task/labeler',methods=['GET','POST'])
 def labeler_task():
 
+    """
+    展示当前用户任务列表
+    :return:
+    """
     page = request.args.get('page')
     rows = request.args.get('pagerows')
     user = request.args.get('user')
 
     # 任务数量
     tasks = Task.get_undone_task(page,rows)
-
+    undone_task_count = Task.get_undone_task_count()
     labeler_task = LabelTaskCollection()
-    labeler_task.fill(tasks,user)
+    labeler_task.fill(undone_task_count,tasks,user)
 
         # task.get('already_count') =Ta a
         # labeltaskviewmodel = LabelTaskViewModel()
@@ -93,6 +98,9 @@ def show_task_detail():
 
     form = {'user':'meto','task_id':5,'type':1}
     # 点击开始标注 接收一条已被该用户锁定或未标注的数据
-    Task_details.query.filter_by().order_by()
+    # Task_details.query.filter_by().order_by()
 
-    return json.dumps()
+    dict1 = {'photo_path':'url','props':[
+        {'prop_id':'12','prop_name':'衣服','prop_value_name': [{'1':'黄皮'},{'2':'黑皮'},{3:'绿皮'}]},
+        {'prop_id':'13', 'prop_name':'颜色','prop_value_name':[{'4':'黄'},{'5':'黑'},{6:'绿'}]}]}
+    return json.dumps(dict1)
