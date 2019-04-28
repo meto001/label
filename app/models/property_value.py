@@ -13,9 +13,9 @@ class Property_value(Base):
     property = relationship('Property')
     prop_id =Column(Integer, ForeignKey('property.id'), nullable=False)
 
-    value_id = Column(Integer, nullable=False)
+    option_value = Column(Integer, nullable=False)
 
-    value_name = Column(String(30), nullable=ForeignKey)
+    option_name = Column(String(30), nullable=ForeignKey)
 
     @classmethod
     def get_property_value(cls,id):

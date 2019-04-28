@@ -12,7 +12,7 @@ login_manager = LoginManager()
 
 def create_app():
     app = Flask(__name__)
-    CORS(app, resources=r'/*')
+    CORS(app, resources=r'/*',support_credentials=True )
     app.config.from_object('app.secure')
     register_blueprint(app)
     db.init_app(app)

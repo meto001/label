@@ -1,4 +1,5 @@
 # _*_ coding:utf-8 _*_
+from flask import json
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, Integer, String
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -42,3 +43,4 @@ class User(UserMixin, Base):
 @login_manager.user_loader
 def get_user(uid):
     return User.query.get(int(uid))
+

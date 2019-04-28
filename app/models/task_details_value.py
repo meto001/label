@@ -20,6 +20,6 @@ class Task_details_value(Base):
 
     prop_id = Column(Integer)
 
-    prop_value_id = Column(Integer)
+    prop_option_id = Column(Integer)
 
     create_user = Column(String(24))

@@ -47,15 +47,15 @@ def add_property():
 
     # # 新增传进来的form
     # form = {'prop_name': '衣服', 'label_type_id': 2, 'prop_type': 1, 'property_value':
-    #     [{'value_id': 1, 'value_name': '黄皮'},
-    #      {'value_id': 2, 'value_name': '黑皮'},
-    #      {'value_id': 3, 'value_name': '白皮'}]}
+    #     [{'option_value': 1, 'option_name': '黄皮'},
+    #      {'option_value': 2, 'option_name': '黑皮'},
+    #      {'option_value': 3, 'option_name': '白皮'}]}
     #
     # # 修改传进来的form
     # form = {'prop_id':12, 'property_value':
-    #     [{'id': 16, 'value_id': 4, 'value_name': '吧lue皮'},
-    #      {'value_id': 5, 'value_name': '花皮'},
-    #      {'id':30,'delete':1}]}
+    #     [{'option_id': 16, 'option_value': 4, 'option_name': '吧lue皮'},
+    #      {'option_value': 5, 'option_name': '花皮'},
+    #      {'option_id':30,'delete':1}]}
     form = json.loads(request.data)
     if request.method == 'POST':
 
@@ -82,15 +82,15 @@ def add_property():
                 value['prop_id'] = prop_id
 
                 # 修改property_value
-                if value.get('id'):
-                    id = value['id']
+                if value.get('option_id'):
+                    id = value['option_id']
                     already_exist = property_value.query.filter_by(id=id).first()
                     # 判断是否要删除
                     if value.get('delete'):
                         db.session.delete(already_exist)
                     else:
-                        already_exist.value_id = value['value_id']
-                        already_exist.value_name = value['value_name']
+                        already_exist.option_value = value['option_value']
+                        already_exist.option_name = value['option_name']
 
                 else:
                     property_value.set_attrs(value)

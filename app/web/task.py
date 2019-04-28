@@ -99,8 +99,9 @@ def show_task_detail():
     form = {'user':'meto','task_id':5,'type':1}
     # 点击开始标注 接收一条已被该用户锁定或未标注的数据
     # Task_details.query.filter_by().order_by()
-
-    dict1 = {'photo_path':'url','props':[
-        {'prop_id':'12','prop_name':'衣服','prop_value_name': [{'1':'黄皮'},{'2':'黑皮'},{3:'绿皮'}]},
-        {'prop_id':'13', 'prop_name':'颜色','prop_value_name':[{'4':'黄'},{'5':'黑'},{6:'绿'}]}]}
+    dict1 = {'photo_path': 'url','props': [
+        {'prop_id': '12','prop_name': '衣服','property_values': [
+            {'选项id': '1','选项名字': '黄皮'},{'选项id': '2','选项名字': '黑皮'},{'选项id': '3','选项名字': '绿皮'}]},
+        {'prop_id': '13','prop_name': '衣服','property_values': [
+            {'选项id': '4','选项名字': '穿衣服'},{'选项id': '2','选项名字': '没穿衣服'},{'选项id': '3','选项名字': '穿了衣服'}]}]}
     return json.dumps(dict1)

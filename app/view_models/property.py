@@ -57,9 +57,9 @@ class PropertyValueViewModel:
         self.label_type = prop.property.label_type.name
         self.prop_id = prop.property.id
         self.prop_name = prop.property.prop_name
-        if prop.value_id == 1:
+        if prop.property.prop_type == 1:
             self.prop_type = '单选'
-        if prop.value_id == 2:
+        if prop.property.prop_type == 2:
             self.prop_type = '画框'
         # self.prop_type = prop.value_id
         self.property_values = [self.__map_to_property(label_property) for label_property in property_values]
@@ -67,7 +67,7 @@ class PropertyValueViewModel:
     # 处理单个数据
     def __map_to_property(self,prop):
         return dict(
-            id=prop.id,
-            value_id=prop.value_id,
-            value_name=prop.value_name
+            option_id=prop.id,
+            option_value=prop.option_value,
+            option_name=prop.option_name
         )

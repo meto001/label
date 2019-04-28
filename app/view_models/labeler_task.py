@@ -7,6 +7,7 @@ __date__ = '2019/4/25 17:09'
 
 class LabelTaskViewModel:
 
+
     def __init__(self, task, already_count, user_already_count):
         self.task_id = task.id
         self.task_name = task.task_name
@@ -26,6 +27,7 @@ class LabelTaskViewModel:
 
 class LabelTaskCollection:
 
+
     def __init__(self):
         self.total = 0
         self.tasks = []
@@ -40,3 +42,39 @@ class LabelTaskCollection:
             user_already_count = task_detail.get_user_already_count(task.id, user)
 
             self.tasks.append(LabelTaskViewModel(task,already_count,user_already_count))
+
+
+
+class LabelTaskDetailViewModel:
+    # 设计最底层的选项
+    dict1 = {'photo_path': 'url', 'props': [
+        {'prop_id': '12', 'prop_name': '衣服', 'property_values': [
+            {'option_id': '1', 'option_name': '黄皮'}, {'option_id': '2', 'option_name': '黑皮'}, {'option_id': '3', 'option_name': '绿皮'}]},
+        {'prop_id': '13', 'prop_name': '衣服', 'property_values': [
+            {'option_id': '4', 'option_name': '穿衣服'}, {'option_id': '2', 'option_name': '没穿衣服'}, {'option_id': '3', 'option_name': '穿了衣服'}]}]}
+
+    def __init__(self,url):
+
+        self.photo_path = url
+        self.props = []
+
+    def __parse_two(self,prop_ids):
+        prop_ids = list(eval(prop_ids))
+        self.props = [self.__first_fill(prop) for prop in prop_ids]
+
+
+    # 处理属性里面的选项
+    def __first_fill(self,prop):
+        self.prop_id = prop.id
+        self.prop_name = prop.prop_name
+        self.property_values = []
+        self.__parse()
+
+    def __parse(self,options):
+       self.property_values = [self.__map_to_option(option) for option in options]
+
+    def __map_to_option(self,option):
+        return dict(
+            option_id = option.id,
+            option_name = option.name
+        )

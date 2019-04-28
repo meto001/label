@@ -1,11 +1,12 @@
 # _*_ coding:utf-8 _*_
 from flask import render_template, request, redirect, url_for, flash
+from flask_cors import cross_origin
 from werkzeug.datastructures import MultiDict
 
 from app.models.base import db
 from app.forms.auth import RegisterForm, LoginForm
 from app.models.user import User
-from flask_login import login_user
+from flask_login import login_user, logout_user
 import json
 
 __author__ = 'meto'
@@ -32,7 +33,7 @@ def register():
         msg = msg+v[0]+' '
     return json.dumps({'status':'fail','msg':msg})
 
-
+@cross_origin
 @web.route('/login', methods=['GET', 'POST'])
 def login():
     """
@@ -71,3 +72,9 @@ def login():
 @web.route('/forget_password_request')
 def forget_password_request():
     return 'None'
+
+
+@web.route('/logout',methods=['GET','POST'])
+def logout():
+    logout_user()
+    return json.dumps({'status' : 'success'})
