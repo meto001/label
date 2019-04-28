@@ -8,7 +8,8 @@ from app.models.property import Property
 from app.models.source import Source
 from app.models.task import Task
 from app.models.task_details import Task_details
-from app.view_models.labeler_task import LabelTaskViewModel, LabelTaskCollection
+from app.view_models.labeler_task import LabelTaskViewModel, LabelTaskCollection, LabelTaskDetailViewModel, \
+    LabelTaskDetailCollection
 from app.view_models.task import TaskCollection, SourcesAndPorps
 from .blue_print import web
 
@@ -95,13 +96,25 @@ def labeler_task():
 
 @web.route('/task/show_task_detail',methods=['GET','POST'])
 def show_task_detail():
-
-    form = {'user':'meto','task_id':5,'type':1}
+    # type类型暂时定为是下一张还是上一张
+    form = {'user':'meto','task_id':4,'type':1}
     # 点击开始标注 接收一条已被该用户锁定或未标注的数据
-    # Task_details.query.filter_by().order_by()
-    dict1 = {'photo_path': 'url','props': [
-        {'prop_id': '12','prop_name': '衣服','property_values': [
-            {'选项id': '1','选项名字': '黄皮'},{'选项id': '2','选项名字': '黑皮'},{'选项id': '3','选项名字': '绿皮'}]},
-        {'prop_id': '13','prop_name': '衣服','property_values': [
-            {'选项id': '4','选项名字': '穿衣服'},{'选项id': '2','选项名字': '没穿衣服'},{'选项id': '3','选项名字': '穿了衣服'}]}]}
-    return json.dumps(dict1)
+
+    user = form.get('user')
+    task_id = form.get('task_id')
+    # 查询是否有锁定数据
+    new_data = Task_details().get_has_locks(user, task_id)
+    # 如果没有锁定数据
+    if new_data is None:
+        new_data = Task_details().get_new_data(task_id)
+    url = new_data.photo_path
+    prop_ids = new_data.task.prop_ids
+    prop_ids = list(eval(prop_ids))
+    label_detail = LabelTaskDetailCollection()
+    label_detail.fill(url, prop_ids)
+
+    # 更新数据，将该条数据锁定
+    with db.auto_commit():
+        new_data.locks = 1
+        new_data.operate_user = user
+    return json.dumps(label_detail, default=lambda o:o.__dict__)

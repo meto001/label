@@ -46,10 +46,10 @@ def show_property_value():
 def add_property():
 
     # # 新增传进来的form
-    # form = {'prop_name': '衣服', 'label_type_id': 2, 'prop_type': 1, 'property_value':
-    #     [{'option_value': 1, 'option_name': '黄皮'},
-    #      {'option_value': 2, 'option_name': '黑皮'},
-    #      {'option_value': 3, 'option_name': '白皮'}]}
+    # form = {'prop_name': '肤色', 'label_type_id': 1, 'prop_type': 1, 'property_value':
+    #     [{'option_value': 2, 'option_name': '黄'},
+    #      {'option_value': 1, 'option_name': '黑'},
+    #      {'option_value': 3, 'option_name': '白'}]}
     #
     # # 修改传进来的form
     # form = {'prop_id':12, 'property_value':

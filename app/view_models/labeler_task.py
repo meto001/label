@@ -1,4 +1,6 @@
 # _*_ coding:utf-8 _*_
+from app.models.property import Property
+from app.models.property_value import Property_value
 from app.models.task_details import Task_details
 
 __author__ = 'meto'
@@ -44,37 +46,36 @@ class LabelTaskCollection:
             self.tasks.append(LabelTaskViewModel(task,already_count,user_already_count))
 
 
-
 class LabelTaskDetailViewModel:
-    # 设计最底层的选项
-    dict1 = {'photo_path': 'url', 'props': [
-        {'prop_id': '12', 'prop_name': '衣服', 'property_values': [
-            {'option_id': '1', 'option_name': '黄皮'}, {'option_id': '2', 'option_name': '黑皮'}, {'option_id': '3', 'option_name': '绿皮'}]},
-        {'prop_id': '13', 'prop_name': '衣服', 'property_values': [
-            {'option_id': '4', 'option_name': '穿衣服'}, {'option_id': '2', 'option_name': '没穿衣服'}, {'option_id': '3', 'option_name': '穿了衣服'}]}]}
 
-    def __init__(self,url):
-
-        self.photo_path = url
-        self.props = []
-
-    def __parse_two(self,prop_ids):
-        prop_ids = list(eval(prop_ids))
-        self.props = [self.__first_fill(prop) for prop in prop_ids]
-
-
-    # 处理属性里面的选项
-    def __first_fill(self,prop):
+    def __init__(self,prop):
         self.prop_id = prop.id
         self.prop_name = prop.prop_name
         self.property_values = []
         self.__parse()
 
-    def __parse(self,options):
-       self.property_values = [self.__map_to_option(option) for option in options]
+    # property_values
+    def __parse(self):
+        options = Property_value.query.filter_by(prop_id=self.prop_id).all()
+        self.property_values = [self.__map_to_option(option) for option in options]
 
     def __map_to_option(self,option):
         return dict(
             option_id = option.id,
-            option_name = option.name
+            option_name = option.option_name
         )
+
+
+class LabelTaskDetailCollection:
+
+    def __init__(self):
+        self.photo_path = ''
+        self.props = []
+
+    def fill(self,url, prop_ids):
+        self.photo_path = url
+
+        # 查询出所有的属性
+        prop_ids = Property.query.filter(Property.id.in_(prop_ids)).all()
+
+        self.props = [LabelTaskDetailViewModel(prop) for prop in prop_ids]

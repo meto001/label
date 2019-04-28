@@ -42,3 +42,11 @@ class Task_details(Base):
         user_already_count = Task_details.query.filter_by(task_id=task_id,is_complete=1,operate_user=user).count()
 
         return user_already_count
+
+    def get_has_locks(self,user, task_id):
+        locks = Task_details.query.filter_by(operate_user=user,task_id=task_id, locks=1).first()
+        return locks
+
+    def get_new_data(self, task_id):
+        new_data =Task_details.query.filter_by(is_complete=0, locks=0, task_id=task_id).first()
+        return new_data
