@@ -49,6 +49,7 @@ class LabelTaskCollection:
 class LabelTaskDetailViewModel:
 
     def __init__(self,prop):
+        self.prop_type = prop.prop_type
         self.prop_id = prop.id
         self.prop_name = prop.prop_name
         self.property_values = []
@@ -61,20 +62,23 @@ class LabelTaskDetailViewModel:
 
     def __map_to_option(self,option):
         return dict(
-            option_id = option.id,
-            option_name = option.option_name
+            option_value=option.option_value,
+            option_name=option.option_name
         )
 
 
 class LabelTaskDetailCollection:
 
     def __init__(self):
+        self.task_id = ''
+        self.task_detail_id = ''
         self.photo_path = ''
         self.props = []
 
-    def fill(self,url, prop_ids):
+    def fill(self,task_id, task_detail_id, url, prop_ids):
         self.photo_path = url
-
+        self.task_id=task_id
+        self.task_detail_id = task_detail_id
         # 查询出所有的属性
         prop_ids = Property.query.filter(Property.id.in_(prop_ids)).all()
 

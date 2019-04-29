@@ -107,14 +107,26 @@ def show_task_detail():
     # 如果没有锁定数据
     if new_data is None:
         new_data = Task_details().get_new_data(task_id)
+    task_detail_id = new_data.id
     url = new_data.photo_path
     prop_ids = new_data.task.prop_ids
+
     prop_ids = list(eval(prop_ids))
     label_detail = LabelTaskDetailCollection()
-    label_detail.fill(url, prop_ids)
+    label_detail.fill(task_id,task_detail_id ,url, prop_ids)
 
     # 更新数据，将该条数据锁定
     with db.auto_commit():
         new_data.locks = 1
         new_data.operate_user = user
     return json.dumps(label_detail, default=lambda o:o.__dict__)
+
+
+@web.route('/task/save_data', methods=['POST'])
+def save_data():
+    pass
+    # 如果prop_type=2的话，则prop_option_id 值为坐标值
+    form = {'photo_path': 'C:/Users/Administrator/Pictures/Saved Pictures/微信图片_20180920160850.jpg', 'task_id': 4, 'task_detail_id': 6319,
+            'props':[{'prop_id':11,'prop_option_value':3,'prop_type':1},{'prop_id': 13,'prop_option_value': 2,'proptype':'2'}]}
+
+    return json.dumps(form)

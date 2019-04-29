@@ -20,6 +20,12 @@ class Task_details_value(Base):
 
     prop_id = Column(Integer)
 
-    prop_option_id = Column(Integer)
+    prop_type = Column(Integer)
+
+    # 如果prop_type=2的话，则prop_option_id 值为坐标值
+    prop_option_value = Column(String)
+
+
+    photo_path = Column(String(300))
 
     create_user = Column(String(24))
