@@ -12,18 +12,20 @@ class Task_details_value(Base):
 
     id = Column(Integer,primary_key=True,autoincrement=True)
 
-    task_detail = relationship('Task_details')
+    task_details = relationship('Task_details')
 
-    task_detail_id = Column(Integer, ForeignKey('task_detail.id'))
+    task_detail_id = Column(Integer, ForeignKey('task_details.id'))
 
     task_id = Column(Integer)
 
-    prop_id = Column(Integer)
+    prop = relationship('Property')
+
+    prop_id = Column(Integer, ForeignKey('property.id'))
 
     prop_type = Column(Integer)
 
     # 如果prop_type=2的话，则prop_option_id 值为坐标值
-    prop_option_value = Column(String)
+    prop_option_value = Column(String(24))
 
 
     photo_path = Column(String(300))

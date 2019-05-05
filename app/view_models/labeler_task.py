@@ -10,7 +10,7 @@ __date__ = '2019/4/25 17:09'
 class LabelTaskViewModel:
 
 
-    def __init__(self, task, already_count, user_already_count):
+    def __init__(self, task, completed_count, my_label_count):
         self.task_id = task.id
         self.task_name = task.task_name
         self.label_type = task.source.label_type.name
@@ -18,13 +18,13 @@ class LabelTaskViewModel:
         self.all_count = task.source.count
 
         # 该任务已完成数量
-        self.already_count = already_count
+        self.completed_count = completed_count
 
         # 该用户已完成数量
-        self.user_already_count = user_already_count
+        self.my_label_count = my_label_count
 
         # 用户已完成框数（标注不需要）
-        self.user_already_freame_count = ''
+        self.my_frame_count = ''
 
 
 class LabelTaskCollection:
@@ -40,10 +40,10 @@ class LabelTaskCollection:
             print(task.id)
             # 已经完成的数量
             task_detail = Task_details()
-            already_count = task_detail.get_already_count(task.id)
-            user_already_count = task_detail.get_user_already_count(task.id, user)
+            completed_count = task_detail.get_already_count(task.id)
+            my_label_count = task_detail.get_user_already_count(task.id, user)
 
-            self.tasks.append(LabelTaskViewModel(task,already_count,user_already_count))
+            self.tasks.append(LabelTaskViewModel(task,completed_count,my_label_count))
 
 
 class LabelTaskDetailViewModel:
