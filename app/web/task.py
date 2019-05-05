@@ -15,7 +15,7 @@ from app.view_models.labeler_task import LabelTaskViewModel, LabelTaskCollection
     LabelTaskDetailCollection
 from app.view_models.task import TaskCollection, SourcesAndPorps
 from .blue_print import web
-
+from app.libs.img_stream import return_img_stream
 __author__ = 'meto'
 __date__ = '2019/3/25 17:50'
 
@@ -109,6 +109,9 @@ def show_task_detail():
     if new_data:
         task_detail_id = new_data.id
         url = new_data.photo_path
+
+        url = return_img_stream(url)
+
         prop_ids = new_data.task.prop_ids
         tuple_prop_ids = eval(prop_ids)
         if type(tuple_prop_ids) is int:
