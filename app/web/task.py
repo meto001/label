@@ -96,10 +96,10 @@ def labeler_task():
 @web.route('/task/show_task_detail', methods=['GET', 'POST'])
 def show_task_detail():
     # type类型暂时定为是下一张还是上一张
-    form = {'user': 'meto', 'task_id': 4, 'type': 1}
+    # form = {'nickname': 'meto', 'task_id': 4, 'type': 1}
     # 点击开始标注 接收一条已被该用户锁定或未标注的数据
-
-    user = form.get('user')
+    form = json.loads(request.data)
+    user = form.get('nickname')
     task_id = form.get('task_id')
     # 查询是否有锁定数据
     new_data = Task_details().get_has_locks(user, task_id)
