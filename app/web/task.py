@@ -110,8 +110,11 @@ def show_task_detail():
         task_detail_id = new_data.id
         url = new_data.photo_path
         prop_ids = new_data.task.prop_ids
-
-        prop_ids = list(eval(prop_ids))
+        tuple_prop_ids = eval(prop_ids)
+        if type(tuple_prop_ids) is int:
+            prop_ids = [tuple_prop_ids]
+        else:
+            prop_ids = list(tuple_prop_ids)
         label_detail = LabelTaskDetailCollection()
         label_detail.fill(task_id, task_detail_id, url, prop_ids)
 
