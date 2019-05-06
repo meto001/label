@@ -1,4 +1,6 @@
 # _*_ coding:utf-8 _*_
+import socket
+
 from flask import request
 from flask_login import login_required
 from werkzeug.datastructures import MultiDict
@@ -22,6 +24,7 @@ def source():
         此处要使用view_models ,将testuser转化为对象。然后再进行__dict__操作
     :return:
     """
+    print(request.remote_addr)
     page = request.args.get('page')
     rows = request.args.get('pagerows')
     source = Source.get_source(page, rows)
@@ -43,10 +46,11 @@ def add_source():
     # 假数据
     # form = {'source_name': 'wwtest2', 'label_type_id': 2, 'file_url': 'F:/数据需求/标注系统测试/1'}
     # form = MultiDict(json.loads(request.data))
+    addr = socket.gethostbyname(socket.getfqdn(socket.gethostname()))
     form = json.loads(request.data)
     if request.method == 'POST':
         source_image_path = Source_image_path()
-        files = source_image_path.select_files_path(form['file_url'])
+        files = source_image_path.select_files_path(form['file_url'], addr)
         count = len(files)
         with db.auto_commit():
             source = Source()

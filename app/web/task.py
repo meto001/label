@@ -110,7 +110,8 @@ def show_task_detail():
         task_detail_id = new_data.id
         url = new_data.photo_path
 
-        url = return_img_stream(url)
+        # 此方法是直接返回图片流，暂不使用
+        # url = return_img_stream(url)
 
         prop_ids = new_data.task.prop_ids
         tuple_prop_ids = eval(prop_ids)

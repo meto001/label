@@ -1,4 +1,6 @@
 # _*_ coding:utf-8 _*_
+import socket
+
 from sqlalchemy import Column, Integer, ForeignKey, String
 from sqlalchemy.orm import relationship
 import imghdr
@@ -14,14 +16,14 @@ class Source_image_path(Base):
     source_id = Column(Integer, ForeignKey('source.id'))
     image_url = Column(String(1024), nullable=False)
 
-    def select_files_path(self,url):
+    def select_files_path(self,url, addr):
         file_list = []
         imgType_list = {'jpg', 'bmp', 'png', 'jpeg', 'rgb', 'tif'}
         for root, b, files in os.walk(url):
             for file in files:
                 # if file.endswith()
-                file_path = root + '/' + file
-
+                # file_path = root + '/' + file
+                file_path = addr+':82/static' +root.split('static')[-1]+'/'+file
                 # 判断文件类型
                 # if imghdr.what(file_path) in imgType_list and file.split('.')[-1] in imgType_list:
                 if file.split('.')[-1] in imgType_list:
