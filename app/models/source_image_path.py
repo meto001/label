@@ -23,7 +23,7 @@ class Source_image_path(Base):
             for file in files:
                 # if file.endswith()
                 # file_path = root + '/' + file
-                file_path = addr+':82/static' +root.split('static')[-1]+'/'+file
+                file_path = 'http://'+addr+':82/static' +root.split('static')[-1]+'/'+file
                 # 判断文件类型
                 # if imghdr.what(file_path) in imgType_list and file.split('.')[-1] in imgType_list:
                 if file.split('.')[-1] in imgType_list:

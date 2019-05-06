@@ -46,7 +46,10 @@ def add_source():
     # 假数据
     # form = {'source_name': 'wwtest2', 'label_type_id': 2, 'file_url': 'F:/数据需求/标注系统测试/1'}
     # form = MultiDict(json.loads(request.data))
-    addr = socket.gethostbyname(socket.getfqdn(socket.gethostname()))
+    try:
+        addr = socket.gethostbyname(socket.getfqdn(socket.gethostname()))
+    except:
+        addr = '10.136.187.164'
     form = json.loads(request.data)
     if request.method == 'POST':
         source_image_path = Source_image_path()
