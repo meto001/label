@@ -1,4 +1,6 @@
 # _*_ coding:utf-8 _*_
+from sqlalchemy import desc
+
 from app.models.property import Property
 from app.models.property_value import Property_value
 from app.models.task_details import Task_details
@@ -57,7 +59,7 @@ class LabelTaskDetailViewModel:
 
     # property_values
     def __parse(self):
-        options = Property_value.query.filter_by(prop_id=self.prop_id).all()
+        options = Property_value.query.filter_by(prop_id=self.prop_id).order_by(desc(Property_value.option_value)).all()
         self.property_values = [self.__map_to_option(option) for option in options]
 
     def __map_to_option(self,option):
