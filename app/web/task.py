@@ -95,44 +95,92 @@ def labeler_task():
 
 @web.route('/task/show_task_detail', methods=['GET', 'POST'])
 def show_task_detail():
-    # type类型暂时定为是下一张还是上一张
-    # form = {'nickname': 'meto', 'task_id': 4, 'type': 1}
+    # type 1,新的一页;2,上一张;3,下一张
+    # form = {'nickname': 'meto', 'task_id': 4, 'detail_type': 3, 'task_detail_id': 6500}
     # 点击开始标注 接收一条已被该用户锁定或未标注的数据
     form = json.loads(request.data)
     user = form.get('nickname')
     task_id = form.get('task_id')
-    # 查询是否有锁定数据
-    new_data = Task_details().get_has_locks(user, task_id)
-    # 如果没有锁定数据
-    if new_data is None:
-        new_data = Task_details().get_new_data(task_id)
-    if new_data:
-        task_detail_id = new_data.id
-        url = new_data.photo_path
+    detail_type = form.get('detail_type')
+
+    # 新的一页
+    if detail_type == 1:
+        # 查询是否有锁定数据
+        new_data = Task_details().get_has_locks(user, task_id)
+        # 如果没有锁定数据
+        if new_data is None:
+            new_data = Task_details().get_new_data(task_id)
+        if new_data:
+            task_detail_id = new_data.id
+            url = new_data.photo_path
+
+            # 此方法是直接返回图片流，暂不使用
+            # url = return_img_stream(url)
+
+            prop_ids = new_data.task.prop_ids
+            tuple_prop_ids = eval(prop_ids)
+            prop_option_value = 0
+            if type(tuple_prop_ids) is int:
+                prop_ids = [tuple_prop_ids]
+            else:
+                prop_ids = list(tuple_prop_ids)
+            label_detail = LabelTaskDetailCollection()
+            label_detail.fill(task_id, task_detail_id, url, prop_ids,detail_type)
+
+            # 更新数据，将该条数据锁定
+            with db.auto_commit():
+                new_data.locks = 1
+                new_data.operate_user = user
+            return json.dumps(label_detail, default=lambda o: o.__dict__)
+        else:
+            return json.dumps({'status':'该任务已结束'})
+
+    # 上一页
+    elif detail_type == 2 or detail_type == 3:
+        task_detail_id = form.get('task_detail_id')
+        # 当前时间
+        now_time = int(time.time())
+        # 今天凌晨的时间戳
+        today_time = now_time - now_time % 86400 + time.timezone
+        if detail_type == 2:
+            # form = {'nickname': 'meto', 'task_id': 4, 'detail_type': 2, 'task_detail_id':7657}
+            history_data = Task_details().get_last_data(user, task_id, task_detail_id, now_time, today_time)
+            if history_data is None:
+                return json.dumps({'msg':'已经是今天最早的数据了，想查询更多，请移步历史记录'})
+        elif detail_type == 3:
+            history_data = Task_details().get_next_data(user, task_id, task_detail_id, now_time, today_time)
+            if history_data is None:
+                return json.dumps({'msg':'已经是今天做的最后一条数据了，如果想做新的，请点击“新的一页'})
+        task_detail_id = history_data.id
+        url = history_data.photo_path
 
         # 此方法是直接返回图片流，暂不使用
         # url = return_img_stream(url)
 
-        prop_ids = new_data.task.prop_ids
+        prop_ids = history_data.task.prop_ids
         tuple_prop_ids = eval(prop_ids)
+        prop_option_value = 0
         if type(tuple_prop_ids) is int:
             prop_ids = [tuple_prop_ids]
         else:
             prop_ids = list(tuple_prop_ids)
         label_detail = LabelTaskDetailCollection()
-        label_detail.fill(task_id, task_detail_id, url, prop_ids)
+        label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type)
 
-        # 更新数据，将该条数据锁定
-        with db.auto_commit():
-            new_data.locks = 1
-            new_data.operate_user = user
+
+        # select * from task_details WHERE  operate_user = 'meto' AND task_id = 4 and is_complete =1 and
+        # operate_create_time >10000 and operate_create_time < 2556709299 and id < 6320 ORDER BY id DESC LIMIT 1
         return json.dumps(label_detail, default=lambda o: o.__dict__)
-    else:
-        return json.dumps({'status':'该任务已结束'})
+
+    # 下一页
+    # elif detail_type == 3:
+    #     task_detail_id = form.get('task_detail_id')
+        # select * from task_details WHERE  operate_user = 'meto' AND task_id = 4 and is_complete =1 and
+        # operate_create_time >10000 and operate_create_time < 2556709299 and id > 6320 ORDER BY id ASC LIMIT 1
+
 
 @web.route('/task/save_data', methods=['POST'])
 def save_data():
-    pass
 
     # 如果prop_type=2的话，则prop_option_id 值为坐标值
     form = {'create_user': 'meto',

@@ -5,7 +5,7 @@ __date__ = '2019/4/17 15:41'
 from sqlalchemy.orm import relationship
 
 from app.models.base import Base
-from sqlalchemy import Column, String, Integer, ForeignKey, Float, SmallInteger
+from sqlalchemy import Column, String, Integer, ForeignKey, Float, SmallInteger, desc, asc
 
 
 class Task_details(Base):
@@ -50,3 +50,19 @@ class Task_details(Base):
     def get_new_data(self, task_id):
         new_data =Task_details.query.filter_by(is_complete=0, locks=0, task_id=task_id).first()
         return new_data
+
+    def get_last_data(self, user, task_id, task_detail_id, now_time, today_time):
+        # select * from task_details WHERE  operate_user = 'meto' AND task_id = 4 and is_complete =1 and
+        # operate_create_time >10000 and operate_create_time < 2556709299 and id < 6320 ORDER BY id DESC LIMIT 1
+        last_data = Task_details.query.filter(Task_details.operate_user == user, Task_details.task_id == task_id,
+                                              Task_details.is_complete == 1, Task_details.operate_create_time > today_time,
+                                              Task_details.operate_create_time < now_time, Task_details.id < task_detail_id).order_by(
+            desc(Task_details.id)).first()
+        return last_data
+
+    def get_next_data(self, user, task_id, task_detail_id, now_time, today_time):
+        next_data = Task_details.query.filter(Task_details.operate_user == user, Task_details.task_id == task_id,
+                                              Task_details.is_complete == 1, Task_details.operate_create_time > today_time,
+                                              Task_details.operate_create_time < now_time, Task_details.id > task_detail_id).order_by(
+            asc(Task_details.id)).first()
+        return next_data

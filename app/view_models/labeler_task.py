@@ -4,6 +4,7 @@ from sqlalchemy import desc
 from app.models.property import Property
 from app.models.property_value import Property_value
 from app.models.task_details import Task_details
+from app.models.task_details_value import Task_details_value
 
 __author__ = 'meto'
 __date__ = '2019/4/25 17:09'
@@ -50,16 +51,25 @@ class LabelTaskCollection:
 
 class LabelTaskDetailViewModel:
 
-    def __init__(self,prop):
+    def __init__(self,prop, task_detail_id, detail_type):
         self.prop_type = prop.prop_type
         self.prop_id = prop.id
         self.prop_name = prop.prop_name
+
+        # 如果是新数据，此值为空，如果是查询历史数据，使用此值
+        self.prop_option_value = 0
+
         self.property_values = []
-        self.__parse()
+        self.__parse(task_detail_id, detail_type)
 
     # property_values
-    def __parse(self):
-        options = Property_value.query.filter_by(prop_id=self.prop_id).order_by(desc(Property_value.option_value)).all()
+    def __parse(self, task_detail_id, detail_type):
+        # task_detail_values = Task_details_value()
+        if detail_type == 2 or detail_type == 3:
+            prop_option_value = Task_details_value().query.filter_by(prop_id=self.prop_id, task_detail_id=task_detail_id).first()
+            self.prop_option_value = prop_option_value.prop_option_value
+
+        options = Property_value.query.filter_by(prop_id=self.prop_id).order_by(Property_value.option_value).all()
         self.property_values = [self.__map_to_option(option) for option in options]
 
     def __map_to_option(self,option):
@@ -77,11 +87,11 @@ class LabelTaskDetailCollection:
         self.photo_path = ''
         self.props = []
 
-    def fill(self,task_id, task_detail_id, url, prop_ids):
+    def fill(self,task_id, task_detail_id, url, prop_ids, detail_type):
         self.photo_path = url
         self.task_id=task_id
         self.task_detail_id = task_detail_id
         # 查询出所有的属性
         prop_ids = Property.query.filter(Property.id.in_(prop_ids)).all()
 
-        self.props = [LabelTaskDetailViewModel(prop) for prop in prop_ids]
+        self.props = [LabelTaskDetailViewModel(prop,task_detail_id, detail_type) for prop in prop_ids]
