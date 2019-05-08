@@ -49,7 +49,7 @@ def add_source():
     try:
         addr = socket.gethostbyname(socket.getfqdn(socket.gethostname()))
     except:
-        addr = '10.136.187.164'
+        addr = '127.0.0.1'
     form = json.loads(request.data)
     if request.method == 'POST':
         source_image_path = Source_image_path()

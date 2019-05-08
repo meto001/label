@@ -33,10 +33,13 @@ class Task_details(Base):
     # 操作更新时间（包括修改等）
     operate_time = Column(Integer)
 
+    # 质检，-1为返工, 0为未质检，1为已生成质检，2为质检完成
+    Quality_inspection= Column(Integer,default=0)
+
     def get_already_count(self,task_id):
         already_count = Task_details.query.filter_by(task_id=task_id,is_complete=1).count()
 
-        return  already_count
+        return already_count
 
     def get_user_already_count(self,task_id,user):
         user_already_count = Task_details.query.filter_by(task_id=task_id,is_complete=1,operate_user=user).count()

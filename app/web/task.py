@@ -16,6 +16,7 @@ from app.view_models.labeler_task import LabelTaskViewModel, LabelTaskCollection
 from app.view_models.task import TaskCollection, SourcesAndPorps
 from .blue_print import web
 from app.libs.img_stream import return_img_stream
+
 __author__ = 'meto'
 __date__ = '2019/3/25 17:50'
 
@@ -96,9 +97,9 @@ def labeler_task():
 @web.route('/task/show_task_detail', methods=['GET', 'POST'])
 def show_task_detail():
     # type 1,新的一页;2,上一张;3,下一张
-    # form = {'nickname': 'meto', 'task_id': 4, 'detail_type': 3, 'task_detail_id': 6500}
+    form = {'nickname': 'meto', 'task_id': 4, 'detail_type': 1, 'task_detail_id': 6320}
     # 点击开始标注 接收一条已被该用户锁定或未标注的数据
-    form = json.loads(request.data)
+    # form = json.loads(request.data)
     user = form.get('nickname')
     task_id = form.get('task_id')
     detail_type = form.get('detail_type')
@@ -125,7 +126,7 @@ def show_task_detail():
             else:
                 prop_ids = list(tuple_prop_ids)
             label_detail = LabelTaskDetailCollection()
-            label_detail.fill(task_id, task_detail_id, url, prop_ids,detail_type)
+            label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type)
 
             # 更新数据，将该条数据锁定
             with db.auto_commit():
@@ -133,24 +134,24 @@ def show_task_detail():
                 new_data.operate_user = user
             return json.dumps(label_detail, default=lambda o: o.__dict__)
         else:
-            return json.dumps({'status':'该任务已结束'})
+            return json.dumps({'status': '该任务已结束'})
 
-    # 上一页
     elif detail_type == 2 or detail_type == 3:
         task_detail_id = form.get('task_detail_id')
         # 当前时间
         now_time = int(time.time())
         # 今天凌晨的时间戳
         today_time = now_time - now_time % 86400 + time.timezone
+        # 上一页
         if detail_type == 2:
             # form = {'nickname': 'meto', 'task_id': 4, 'detail_type': 2, 'task_detail_id':7657}
             history_data = Task_details().get_last_data(user, task_id, task_detail_id, now_time, today_time)
             if history_data is None:
-                return json.dumps({'msg':'已经是今天最早的数据了，想查询更多，请移步历史记录'})
+                return json.dumps({'msg': '已经是今天最早的数据了，想查询更多，请移步历史记录'})
         elif detail_type == 3:
             history_data = Task_details().get_next_data(user, task_id, task_detail_id, now_time, today_time)
             if history_data is None:
-                return json.dumps({'msg':'已经是今天做的最后一条数据了，如果想做新的，请点击“新的一页'})
+                return json.dumps({'msg': '已经是今天做的最后一条数据了，如果想做新的，请点击“新的一页'})
         task_detail_id = history_data.id
         url = history_data.photo_path
 
@@ -167,27 +168,29 @@ def show_task_detail():
         label_detail = LabelTaskDetailCollection()
         label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type)
 
-
         # select * from task_details WHERE  operate_user = 'meto' AND task_id = 4 and is_complete =1 and
         # operate_create_time >10000 and operate_create_time < 2556709299 and id < 6320 ORDER BY id DESC LIMIT 1
         return json.dumps(label_detail, default=lambda o: o.__dict__)
 
+    else:
+        return json.dumps({'msg': '传入的参数不正确，请重新输入'})
     # 下一页
     # elif detail_type == 3:
     #     task_detail_id = form.get('task_detail_id')
-        # select * from task_details WHERE  operate_user = 'meto' AND task_id = 4 and is_complete =1 and
-        # operate_create_time >10000 and operate_create_time < 2556709299 and id > 6320 ORDER BY id ASC LIMIT 1
+    # select * from task_details WHERE  operate_user = 'meto' AND task_id = 4 and is_complete =1 and
+    # operate_create_time >10000 and operate_create_time < 2556709299 and id > 6320 ORDER BY id ASC LIMIT 1
 
 
 @web.route('/task/save_data', methods=['POST'])
 def save_data():
-
     # 如果prop_type=2的话，则prop_option_id 值为坐标值
-    form = {'create_user': 'meto',
-            'photo_path': 'C:/Users/Administrator/Pictures/Saved Pictures/微信图片_20180920160854.jpg',
-            'task_id': 4, 'task_detail_id': 6320,
-            'props': [{'prop_id': 11, 'prop_option_value': 3, 'prop_type': 1},
-                      {'prop_id': 13, 'prop_option_value': 2, 'prop_type': 2}]}
+    form = json.loads(request.data)
+    if form is None:
+        form = {'create_user': 'meto',
+                'photo_path': 'C:/Users/Administrator/Pictures/Saved Pictures/微信图片_20180920160854.jpg',
+                'task_id': 4, 'task_detail_id': 6320,
+                'props': [{'prop_id': 11, 'prop_option_value': 3, 'prop_type': 1},
+                          {'prop_id': 13, 'prop_option_value': 2, 'prop_type': 2}]}
 
     props = form.get('props')
     for prop in props:
@@ -211,3 +214,25 @@ def save_data():
         task_detail.is_complete = 1
         task_detail.operate_create_time = time.time()
     return json.dumps({'status': 'success'})
+
+
+@web.route('/task/modify_data', methods=['POST'])
+def modify_data():
+    form = {
+        "photo_path": "C:/Users/Administrator/Pictures/Saved Pictures/微信图片_20180920160858.jpg",
+        "create_user": "paopao",
+        "task_detail_id": 6321,
+        "task_id": 4,
+        "props": [
+            {
+                "prop_id": 11, "prop_name": "衣服", "prop_option_value": 0, "prop_type": 1,
+                "property_values": [
+                    {"option_name": "黄皮", "option_value": 1},
+                    {"option_name": "黑皮", "option_value": 2},
+                    {"option_name": "白皮", "option_value": 3}]
+            },
+            {"prop_id": 13, "prop_name": "肤色", "prop_option_value": 0, "prop_type": 1,
+             "property_values": [
+                 {"option_name": "黑", "option_value": 1},
+                 {"option_name": "黄", "option_value": 2}, ]
+             }], }

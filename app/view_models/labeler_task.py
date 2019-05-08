@@ -32,7 +32,6 @@ class LabelTaskViewModel:
 
 class LabelTaskCollection:
 
-
     def __init__(self):
         self.total = 0
         self.tasks = []
