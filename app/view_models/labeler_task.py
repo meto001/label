@@ -90,6 +90,7 @@ class LabelTaskDetailCollection:
         self.photo_path = url
         self.task_id=task_id
         self.task_detail_id = task_detail_id
+        self.detail_type = detail_type
         # 查询出所有的属性
         prop_ids = Property.query.filter(Property.id.in_(prop_ids)).all()
 

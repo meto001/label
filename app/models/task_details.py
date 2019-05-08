@@ -34,7 +34,7 @@ class Task_details(Base):
     operate_time = Column(Integer)
 
     # 质检，-1为返工, 0为未质检，1为已生成质检，2为质检完成
-    Quality_inspection= Column(Integer,default=0)
+    quality_inspection= Column(Integer,default=0)
 
     def get_already_count(self,task_id):
         already_count = Task_details.query.filter_by(task_id=task_id,is_complete=1).count()
@@ -69,3 +69,11 @@ class Task_details(Base):
                                               Task_details.operate_create_time < now_time, Task_details.id > task_detail_id).order_by(
             asc(Task_details.id)).first()
         return next_data
+
+    def is_check(self, task_detail_id):
+        boolean = True
+        data = Task_details.query.filter_by(id=task_detail_id).first()
+        # 生成过质检则为True，返工或者未生成质检为False
+        if data.quality_inspection <=0:
+            boolean = False
+        return boolean

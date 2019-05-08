@@ -54,6 +54,7 @@ def add_task():
                     task_details.set_attrs(form)
                     db.session.add(task_details)
         except Exception as e:
+            print(e)
             return json.dumps({'status': 'error'})
         return json.dumps({'status': 'success'})
 
@@ -97,9 +98,12 @@ def labeler_task():
 @web.route('/task/show_task_detail', methods=['GET', 'POST'])
 def show_task_detail():
     # type 1,新的一页;2,上一张;3,下一张
-    form = {'nickname': 'meto', 'task_id': 4, 'detail_type': 1, 'task_detail_id': 6320}
+    if request.data:
+        form = json.loads(request.data)
+    else:
+        form = {'nickname': 'meto', 'task_id': 4, 'detail_type': 1, 'task_detail_id': 6320}
     # 点击开始标注 接收一条已被该用户锁定或未标注的数据
-    # form = json.loads(request.data)
+
     user = form.get('nickname')
     task_id = form.get('task_id')
     detail_type = form.get('detail_type')
@@ -184,8 +188,9 @@ def show_task_detail():
 @web.route('/task/save_data', methods=['POST'])
 def save_data():
     # 如果prop_type=2的话，则prop_option_id 值为坐标值
-    form = json.loads(request.data)
-    if form is None:
+    if request.data:
+        form = json.loads(request.data)
+    else:
         form = {'create_user': 'meto',
                 'photo_path': 'C:/Users/Administrator/Pictures/Saved Pictures/微信图片_20180920160854.jpg',
                 'task_id': 4, 'task_detail_id': 6320,
@@ -218,21 +223,68 @@ def save_data():
 
 @web.route('/task/modify_data', methods=['POST'])
 def modify_data():
-    form = {
-        "photo_path": "C:/Users/Administrator/Pictures/Saved Pictures/微信图片_20180920160858.jpg",
-        "create_user": "paopao",
-        "task_detail_id": 6321,
-        "task_id": 4,
-        "props": [
-            {
-                "prop_id": 11, "prop_name": "衣服", "prop_option_value": 0, "prop_type": 1,
-                "property_values": [
-                    {"option_name": "黄皮", "option_value": 1},
-                    {"option_name": "黑皮", "option_value": 2},
-                    {"option_name": "白皮", "option_value": 3}]
-            },
-            {"prop_id": 13, "prop_name": "肤色", "prop_option_value": 0, "prop_type": 1,
-             "property_values": [
-                 {"option_name": "黑", "option_value": 1},
-                 {"option_name": "黄", "option_value": 2}, ]
-             }], }
+    if request.data:
+        form = json.loads(request.data)
+    else:
+        form = {
+            "photo_path": "C:/Users/Administrator/Pictures/Saved Pictures/微信图片_20180920160858.jpg",
+            "detail_type": 2,
+            "create_user": "paopao",
+            "task_detail_id": 6320,
+            "task_id": 4,
+            "props": [
+                {
+                    "prop_id": 11, "prop_name": "衣服", "prop_option_value": 1, "prop_type": 1,
+                    "property_values": [
+                        {"option_name": "黄皮", "option_value": 1},
+                        {"option_name": "黑皮", "option_value": 2},
+                        {"option_name": "白皮", "option_value": 3}]
+                },
+                {"prop_id": 13, "prop_name": "肤色", "prop_option_value": 1, "prop_type": 1,
+                 "property_values": [
+                     {"option_name": "黑", "option_value": 1},
+                     {"option_name": "黄", "option_value": 2}, ]
+                 }], }
+
+    if form.get('detail_type') == 1:
+        return json.dumps({'msg': '请点击新的一张进行保存，新数据不可使用此按钮保存'})
+
+    task_detail_id = form.get('task_detail_id')
+
+    # 判断是否已经生成过质检
+    boolean = Task_details().is_check(task_detail_id)
+    user = Task_details().query.filter_by(id=task_detail_id).first().operate_user
+    if boolean:
+        return json.dumps({'msg':'该数据已生成质检，无法修改'})
+    elif user == form.get('create_user'):
+        # 删除task_details_value里面的数据
+        with db.auto_commit():
+            task_details_value = Task_details_value()
+            values = task_details_value.query.filter_by(task_detail_id=task_detail_id).all()
+            for value in values:
+                db.session.delete(value)
+        # 新增数据
+        props = form.get('props')
+        for prop in props:
+            print(prop)
+            data = {}
+            with db.auto_commit():
+                task_details_value = Task_details_value()
+                data['photo_path'] = form.get('photo_path')
+                data['task_id'] = form.get('task_id')
+                data['task_detail_id'] = form.get('task_detail_id')
+                data['create_user'] = form.get('create_user')
+                data['prop_id'] = prop.get('prop_id')
+                data['prop_option_value'] = prop.get('prop_option_value')
+                data['prop_type'] = prop.get('prop_type')
+                task_details_value.set_attrs(data)
+                db.session.add(task_details_value)
+        return json.dumps({'status': 'success'})
+    else:
+        return json.dumps({'msg': '这不是您做的数据，无法进行修改！'})
+
+
+
+
+
+

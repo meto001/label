@@ -18,6 +18,7 @@ class SQLAlchemy(_SQLAlchemy):
             self.session.commit()
         except Exception as e:
             db.session.rollback()
+            print(e)
             raise e
 
 
