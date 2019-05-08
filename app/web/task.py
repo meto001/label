@@ -199,7 +199,7 @@ def save_data():
 
     props = form.get('props')
     for prop in props:
-        print(prop)
+        # print(prop)
         data = {}
         with db.auto_commit():
             task_details_value = Task_details_value()
@@ -266,7 +266,7 @@ def modify_data():
         # 新增数据
         props = form.get('props')
         for prop in props:
-            print(prop)
+            # print(prop)
             data = {}
             with db.auto_commit():
                 task_details_value = Task_details_value()

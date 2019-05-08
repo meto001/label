@@ -69,3 +69,8 @@ def add_source():
                 db.session.add(source_image_path)
 
     return json.dumps({'status' : 'success'})
+
+
+@web.route('/view_source_image')
+def view_source_image():
+    pass
