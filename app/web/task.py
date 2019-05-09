@@ -97,7 +97,7 @@ def labeler_task():
 
 @web.route('/task/show_task_detail', methods=['GET', 'POST'])
 def show_task_detail():
-    # type 1,新的一页;2,上一张;3,下一张
+    # detail_type 1,新的一页;2,上一张;3,下一张
     if request.data:
         form = json.loads(request.data)
     else:
@@ -155,7 +155,7 @@ def show_task_detail():
         elif detail_type == 3:
             history_data = Task_details().get_next_data(user, task_id, task_detail_id, now_time, today_time)
             if history_data is None:
-                return json.dumps({'msg': '已经是今天做的最后一条数据了，如果想做新的，请点击“新的一页'})
+                return json.dumps({'msg': '已经是今天做的最后一条数据了，如果想做新的，请点击“新的一张”'})
         task_detail_id = history_data.id
         url = history_data.photo_path
 

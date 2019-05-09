@@ -23,3 +23,15 @@ class SourceCollection:
     def fill(self, total, sources):
         self.total = total
         self.sources = [SourceViewModel(source) for source in sources]
+
+
+class SourceImageViewModel:
+    def __init__(self):
+        self.source_id = 0
+        self.source_image_id = 0
+        self.image_url = ''
+
+    def fill(self, source_id, source_image_id, image_url):
+        self.source_id = source_id
+        self.source_image_id = source_image_id
+        self.image_url = image_url

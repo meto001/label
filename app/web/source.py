@@ -6,7 +6,7 @@ from flask_login import login_required
 from werkzeug.datastructures import MultiDict
 
 from app.models.base import db
-from app.view_models.source import SourceViewModel, SourceCollection
+from app.view_models.source import SourceViewModel, SourceCollection, SourceImageViewModel
 from .blue_print import web
 
 __author__ = 'meto'
@@ -71,6 +71,24 @@ def add_source():
     return json.dumps({'status' : 'success'})
 
 
-@web.route('/view_source_image')
+@web.route('/view_source_image',methods=['POST'])
 def view_source_image():
-    pass
+    if request.data:
+        form = json.loads(request.data)
+    else:
+        # source_img_type 1为初始请求，3为下一张，2为上一张
+        form = {'source_id': 30, 'source_img_type': 2,'source_image_id':15799}
+
+    source_img_type = form.get('source_img_type')
+    source_id = form.get('source_id')
+    source_image_id = form.get('source_image_id')
+    source_image_path = Source_image_path()
+    source_img_data = source_image_path.get_source_img_data(source_id, source_img_type, source_image_id)
+    if source_img_data is None:
+        return json.dumps({'msg':'已经到头了！'})
+    new_source_image_id = source_img_data.id
+    image_url = source_img_data.image_url
+    source_image = SourceImageViewModel()
+    source_image.fill(source_id, new_source_image_id, image_url)
+
+    return json.dumps(source_image,default=lambda o: o.__dict__)
