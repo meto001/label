@@ -94,4 +94,4 @@ class LabelTaskDetailCollection:
         # 查询出所有的属性
         prop_ids = Property.query.filter(Property.id.in_(prop_ids)).all()
 
-        self.props = [LabelTaskDetailViewModel(prop,task_detail_id, detail_type) for prop in prop_ids]
+        self.props = [LabelTaskDetailViewModel(prop, task_detail_id, detail_type) for prop in prop_ids]

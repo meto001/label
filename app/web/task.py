@@ -191,13 +191,32 @@ def save_data():
     if request.data:
         form = json.loads(request.data)
     else:
-        form = {'create_user': 'meto',
-                'photo_path': 'C:/Users/Administrator/Pictures/Saved Pictures/微信图片_20180920160854.jpg',
-                'task_id': 4, 'task_detail_id': 6320,
-                'props': [{'prop_id': 11, 'prop_option_value': 3, 'prop_type': 1},
-                          {'prop_id': 13, 'prop_option_value': 2, 'prop_type': 2}]}
+        form = {
+            "photo_path": "C:/Users/Administrator/Pictures/Saved Pictures/微信图片_20180920160858.jpg",
+            "detail_type": 2,
+            "create_user": "paopao",
+            "task_detail_id": 6320,
+            "task_id": 4,
+            "props": [
+                {
+                    "prop_id": 11, "prop_name": "衣服", "prop_option_value": 1, "prop_type": 1,
+                    "property_values": [
+                        {"option_name": "黄皮", "option_value": 1},
+                        {"option_name": "黑皮", "option_value": 2},
+                        {"option_name": "白皮", "option_value": 3}]
+                },
+                {"prop_id": 13, "prop_name": "肤色", "prop_option_value": 1, "prop_type": 1,
+                 "property_values": [
+                     {"option_name": "黑", "option_value": 1},
+                     {"option_name": "黄", "option_value": 2}, ]
+                 }], }
 
     props = form.get('props')
+    # 判断是否已经保存，此处有bug，如果点击速度过快，仍会有一定概率重复保存
+    if Task_details_value.query.filter_by(task_detail_id=form.get('task_detail_id'), prop_id=props[0].get('prop_id')).first():
+        print('已经存过了')
+        return json.dumps({'mag': '不可重复存入'})
+    print('还没有存过')
     for prop in props:
         # print(prop)
         data = {}
