@@ -2,8 +2,11 @@
 import math
 import random
 
+from app import db
 from app.models.task import Task
 from app.models.task_details import Task_details
+from models.check_data_info import Check_data_info
+from models.check_user import Check_user
 from .blue_print import web
 
 __author__ = 'meto'
@@ -21,7 +24,7 @@ def auto_generate_quality_check():
     today_time = now_time - now_time % 86400 + time.timezone
 
     # 昨天凌晨的时间戳
-    yesterday_time = today_time-86400
+    yesterday_time = today_time - 86400
 
     # 假数据
     today_time = 1557504000
@@ -30,24 +33,36 @@ def auto_generate_quality_check():
     # 查询所有未完成的任务
     tasks = Task().check_get_undone_task()
     for task in tasks:
-        users = Task_details().get_users(yesterday_time, today_time,task)
-        print('任务名字为：',task.task_name)
+        users = Task_details().get_users(yesterday_time, today_time, task)
+        print('任务名字为：', task.task_name)
         for user_tuple in users:
             user = user_tuple[0]
-            print('user：', user,end=';')
+            print('user：', user, end=';')
             task_details = Task_details().get_uncheck_task_details(yesterday_time, today_time, task, user)
             count = len(task_details)
-            print('完成的总数为：',count,end=';')
+            print('完成的总数为：', count, end=';')
 
             if count:
                 # 抽检率
                 sampling_rate = task.source.label_type.sampling_rate
                 sampling_rate = 0.1
-                print('抽检率为：',sampling_rate,end=';')
+                print('抽检率为：', sampling_rate, end=';')
                 # 抽检张数
 
                 check_count = math.ceil(count * sampling_rate)
-                print('抽检数量为：',check_count)
+                print('抽检数量为：', check_count)
+
+            # 保存信息到check_user表中
+            with db.auto_commit():
+                check_user = Check_user()
+                data = {}
+                data['user'] = user
+                data['task_id'] = task.id
+                data['check_num'] = check_count
+                data['total_num'] = count
+                check_user.set_attrs(data)
+                db.session.add(check_user)
+
             check_tasks = []
             # 随机到抽检的张数
             for i in range(check_count):
@@ -59,6 +74,13 @@ def auto_generate_quality_check():
                 count -= 1
 
             # 将随机出来的task_details 生成质检,存到两个表中
-            check_tasks
+            with db.auto_commit():
+                for check_task in check_tasks:
+                    check_data_info = Check_data_info()
+                    data = {}
+                    data['check_user_id'] = check_user.id
+                    data['task_details_id'] = check_task.id
+                    check_data_info.set_attrs(data)
+                    db.session.add(check_data_info)
 
     return "hello"
