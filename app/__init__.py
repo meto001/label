@@ -10,6 +10,7 @@ from flask_cors import CORS
 
 login_manager = LoginManager()
 
+
 def create_app():
     app = Flask(__name__)
     CORS(app, resources=r'/*',support_credentials=True )

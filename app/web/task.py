@@ -101,7 +101,7 @@ def show_task_detail():
     if request.data:
         form = json.loads(request.data)
     else:
-        form = {'nickname': 'meto', 'task_id': 4, 'detail_type': 1, 'task_detail_id': 6320}
+        form = {'nickname': 'meto', 'task_id': 9, 'detail_type': 1, 'task_detail_id': 6320}
     # 点击开始标注 接收一条已被该用户锁定或未标注的数据
 
     user = form.get('nickname')
@@ -116,6 +116,12 @@ def show_task_detail():
         if new_data is None:
             new_data = Task_details().get_new_data(task_id)
         if new_data:
+
+            # 更新数据，将该条数据锁定
+            with db.auto_commit():
+                new_data.locks = 1
+                new_data.operate_user = user
+
             task_detail_id = new_data.id
             url = new_data.photo_path
 
@@ -132,10 +138,7 @@ def show_task_detail():
             label_detail = LabelTaskDetailCollection()
             label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type)
 
-            # 更新数据，将该条数据锁定
-            with db.auto_commit():
-                new_data.locks = 1
-                new_data.operate_user = user
+
             return json.dumps(label_detail, default=lambda o: o.__dict__)
         else:
             return json.dumps({'status': '该任务已结束'})
@@ -214,13 +217,13 @@ def save_data():
     props = form.get('props')
     # 判断是否已经保存，此处有bug，如果点击速度过快，仍会有一定概率重复保存
     if Task_details_value.query.filter_by(task_detail_id=form.get('task_detail_id'), prop_id=props[0].get('prop_id')).first():
-        print('已经存过了')
+        print('task_detail_id:',form.get('task_detail_id'),' 已经存过了')
         return json.dumps({'mag': '不可重复存入'})
-    print('还没有存过')
-    for prop in props:
-        # print(prop)
-        data = {}
-        with db.auto_commit():
+    print('task_detail_id:', form.get('task_detail_id'), ' 还没有存过')
+    with db.auto_commit():
+        for prop in props:
+            # print(prop)
+            data = {}
             task_details_value = Task_details_value()
             data['photo_path'] = form.get('photo_path')
             data['task_id'] = form.get('task_id')
@@ -284,10 +287,11 @@ def modify_data():
                 db.session.delete(value)
         # 新增数据
         props = form.get('props')
-        for prop in props:
-            # print(prop)
-            data = {}
-            with db.auto_commit():
+        with db.auto_commit():
+            for prop in props:
+                # print(prop)
+                data = {}
+
                 task_details_value = Task_details_value()
                 data['photo_path'] = form.get('photo_path')
                 data['task_id'] = form.get('task_id')

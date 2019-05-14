@@ -19,7 +19,7 @@ class Property(Base):
 
     prop_name = Column(String(30), nullable= False)
 
-    # 1 单选， 2 画框
+    # 1 单选， 2 文本框
     prop_type = Column(Integer, nullable=False)
 
     @classmethod

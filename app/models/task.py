@@ -67,3 +67,8 @@ class Task(Base):
     @classmethod
     def get_undone_task_count(cls):
         return  Task.query.filter_by(is_complete=0).count()
+
+    @classmethod
+    def check_get_undone_task(cls):
+        return Task.query.filter_by(is_complete=0).all()
+
