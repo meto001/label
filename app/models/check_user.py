@@ -14,6 +14,10 @@ class Check_user(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     task = relationship('Task')
     task_id = Column(Integer, ForeignKey('task.id'))
+
+    check_task = relationship('Check_task')
+    check_task_id = Column(Integer, ForeignKey('check_task.id'))
+
     user = Column(String(50))
     check_data = Column(String(50))
     check_num = Column(Integer)
