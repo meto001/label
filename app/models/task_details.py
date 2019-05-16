@@ -36,6 +36,8 @@ class Task_details(Base):
     # 质检，-1为返工, 0为未质检，1为已生成质检，2为质检完成
     quality_inspection= Column(Integer,default=0)
 
+    quality_lock = Column(Integer,comment='质检锁，仅在返工时使用，1为锁定，当锁定时，此数据不允许标注员修改')
+
     @classmethod
     def get_already_count(cls,task_id):
         already_count = Task_details.query.filter_by(task_id=task_id,is_complete=1).count()

@@ -12,7 +12,7 @@ from app.models.base import db
 from flask_login import LoginManager
 from flask_cors import CORS
 from flask_apscheduler import APScheduler
-from config import APSchedulerJobConfig
+from app.config import APSchedulerJobConfig
 login_manager = LoginManager()
 # 注册APScheduler
 scheduler = APScheduler()

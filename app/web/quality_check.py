@@ -1,8 +1,9 @@
 # _*_ coding:utf-8 _*_
+import json
 import math
 import random
 
-from flask import current_app
+from flask import current_app, request
 
 from app import db
 from app import create_app
@@ -11,6 +12,7 @@ from app.models.task_details import Task_details
 from models.check_data_info import Check_data_info
 from models.check_task import Check_task
 from models.check_user import Check_user
+from view_models.check_task import CheckTaskCollection, CheckUserCollection
 from .blue_print import web
 from app import scheduler
 __author__ = 'meto'
@@ -64,9 +66,9 @@ def auto_generate_quality_check():
                     print('完成的总数为：', count, end=';')
 
                     # 将昨天的任务改为已生成质检状态  测试时暂时屏蔽
-                    # with db.auto_commit():
-                    #     for task_detail in task_details:
-                    #         task_detail.quality_inspection = 1
+                    with db.auto_commit():
+                        for task_detail in task_details:
+                            task_detail.quality_inspection = 1
 
                     if count:
                         # 抽检率
@@ -101,13 +103,17 @@ def auto_generate_quality_check():
                             task_details.remove(task_details[randint])
                             count -= 1
 
-                        # 将随机出来的task_details 生成质检,存到两个表中
+                        # 将随机出来的task_details 生成质检,存到check_data_info表中
                         with db.auto_commit():
                             for one_check_task in check_tasks:
                                 check_data_info = Check_data_info()
                                 data = {}
                                 data['check_user_id'] = check_user.id
                                 data['task_details_id'] = one_check_task.id
+
+                                # 将task_details表中该条数据锁定，不允许标注员修改
+                                one_check_task.quality_lock = 1
+
                                 check_data_info.set_attrs(data)
                                 db.session.add(check_data_info)
 
@@ -116,8 +122,68 @@ def auto_generate_quality_check():
     return "hello"
 
 
-# @web.route('/test2',methods=['GET','POST'])
-# def timing():
-#
-#     result =current_app.apscheduler.add_job(func=__name__+':'+job['func'], id=job['id'], trigger='cron', second='*/10')
-#     return '成功调用'
+@web.route('/view_check_task',methods=['GET','POST'])
+def view_check_task():
+    form = {
+    "quality_data": [
+        {
+            "date": "2019-05-14",
+            "check_task_id": 6,
+            "tasks": [
+                {
+                    "task_name": "完整的标注测试",
+                    "task_id": 8,
+                    "task_type": "人脸质量标注"
+                },
+                {
+                    "task_name": "文本框",
+                    "task_id": 10,
+                    "task_type": "人脸质量标注"
+                },
+                {
+                    "task_name": "标记年龄",
+                    "task_id": 11,
+                    "task_type": "人脸质量标注"
+                }
+            ]
+        },
+        {
+            "date": "2019-05-15",
+            "check_task_id": 7,
+            "tasks": [
+                {
+                    "task_name": "标记年龄",
+                    "task_id": 11,
+                    "task_type": "人脸质量标注"
+                }
+            ]
+        }
+    ]
+}
+
+    check_tasks = Check_task().get_check_date()
+
+    check_collection = CheckTaskCollection()
+    check_collection.fill(check_tasks)
+    return json.dumps(check_collection, default=lambda o:o.__dict__)
+
+@web.route('/view_check_task_user',methods=['GET','POST'])
+def view_check_task_user():
+    if request.data:
+        form = json.loads(request.data)
+    else:
+        form = {'check_task_id': 6, 'task_id':8}
+
+    check_task_id =form.get('check_task_id')
+    task_id = form.get('task_id')
+
+    check_users = Check_user.get_check_user(check_task_id, task_id)
+    data = {
+        'users':[
+            {'check_user': 'paopao', 'check_num': 100, 'total_num': 200, 'error_num': 2, 'already_num': 50},
+            {'check_user': 'wangwei', 'check_num': 60, 'total_num': 300, 'error_num': 4, 'already_num': 40}
+        ]
+    }
+    check_user_collection = CheckUserCollection()
+    check_user_collection.fill(check_users)
+    return json.dumps(check_user_collection,default=lambda o: o.__dict__)

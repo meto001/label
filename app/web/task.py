@@ -101,7 +101,7 @@ def show_task_detail():
     if request.data:
         form = json.loads(request.data)
     else:
-        form = {'nickname': 'meto', 'task_id': 9, 'detail_type': 1, 'task_detail_id': 6320}
+        form = {'nickname': 'meto', 'task_id': 8, 'detail_type': 1, 'task_detail_id': 6320}
     # 点击开始标注 接收一条已被该用户锁定或未标注的数据
 
     user = form.get('nickname')
@@ -231,6 +231,7 @@ def save_data():
             data['create_user'] = form.get('create_user')
             data['prop_id'] = prop.get('prop_id')
             data['prop_option_value'] = prop.get('prop_option_value')
+            data['prop_option_value_final'] = prop.get('prop_option_value')
             data['prop_type'] = prop.get('prop_type')
             task_details_value.set_attrs(data)
             db.session.add(task_details_value)
@@ -252,7 +253,9 @@ def modify_data():
             "photo_path": "C:/Users/Administrator/Pictures/Saved Pictures/微信图片_20180920160858.jpg",
             "detail_type": 2,
             "create_user": "paopao",
+            "user_group_id":2,
             "task_detail_id": 6320,
+            "quality_lock":None,
             "task_id": 4,
             "props": [
                 {
@@ -267,6 +270,11 @@ def modify_data():
                      {"option_name": "黑", "option_value": 1},
                      {"option_name": "黄", "option_value": 2}, ]
                  }], }
+
+    # 修改时增加判断，quality_lock==1，并且是标注员，则不可以修改。此处在前端也要进行判断
+    if form.get('quality_lock') == 1 and form.get('user_group_id') == 2:
+        return json.dumps({'msg': '被质检员修改过的数据不可进行修改'})
+
 
     if form.get('detail_type') == 1:
         return json.dumps({'msg': '请点击新的一张进行保存，新数据不可使用此按钮保存'})
@@ -299,6 +307,7 @@ def modify_data():
                 data['create_user'] = form.get('create_user')
                 data['prop_id'] = prop.get('prop_id')
                 data['prop_option_value'] = prop.get('prop_option_value')
+                data['prop_option_value_final'] = prop.get('prop_option_value')
                 data['prop_type'] = prop.get('prop_type')
                 task_details_value.set_attrs(data)
                 db.session.add(task_details_value)
