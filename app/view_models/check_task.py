@@ -17,7 +17,7 @@ class CheckTaskViewModel:
         self.__parse(check_task)
 
     def __parse(self, check_task):
-        timeArray = time.localtime(check_task.create_time-86400)
+        timeArray = time.localtime(check_task.create_time - 86400)
         self.date = time.strftime('%Y-%m-%d', timeArray)
         # 通过id查询到数据,
         task_ids = db.session.query(Check_user.task_id).filter(Check_user.check_task_id==check_task.id).group_by(Check_user.task_id).all()
@@ -25,11 +25,15 @@ class CheckTaskViewModel:
         task_id = []
         for id in task_ids:
             task_id.append(id[0])
-        self.tasks = [self.__map_to_task(id) for id in task_id]
+        self.tasks = [self.__map_to_task(id,check_task) for id in task_id]
 
-    def __map_to_task(self,id):
+    def __map_to_task(self,id,check_task):
         task = Task.query.filter_by(id=id).first()
+        timeArray = time.localtime(check_task.create_time-86400)
+        date = time.strftime('%Y-%m-%d', timeArray)
         return dict(
+            check_task_id = check_task.id,
+            date = date,
             task_name=task.task_name,
             task_id=id,
             task_type = task.source.label_type.name

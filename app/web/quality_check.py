@@ -122,8 +122,8 @@ def auto_generate_quality_check():
     return "hello"
 
 
-@web.route('/view_check_task',methods=['GET','POST'])
-def view_check_task():
+@web.route('/check_task',methods=['GET','POST'])
+def check_task():
     form = {
     "quality_data": [
         {
@@ -167,8 +167,9 @@ def view_check_task():
     check_collection.fill(check_tasks)
     return json.dumps(check_collection, default=lambda o:o.__dict__)
 
-@web.route('/view_check_task_user',methods=['GET','POST'])
-def view_check_task_user():
+
+@web.route('/check_task_user',methods=['GET','POST'])
+def check_task_user():
     if request.data:
         form = json.loads(request.data)
     else:
@@ -187,3 +188,7 @@ def view_check_task_user():
     check_user_collection = CheckUserCollection()
     check_user_collection.fill(check_users)
     return json.dumps(check_user_collection,default=lambda o: o.__dict__)
+
+@web.route('/check_task_details',methods=['GET', 'POST'])
+def check_task_details():
+    pass

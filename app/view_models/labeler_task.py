@@ -57,7 +57,7 @@ class LabelTaskDetailViewModel:
 
         # 如果是新数据，此值为空，如果是查询历史数据，使用此值
         self.prop_option_value = 0
-
+        self.prop_option_value_final = 0
         self.property_values = []
         self.__parse(task_detail_id, detail_type)
 

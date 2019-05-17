@@ -101,7 +101,7 @@ def show_task_detail():
     if request.data:
         form = json.loads(request.data)
     else:
-        form = {'nickname': 'meto', 'task_id': 8, 'detail_type': 1, 'task_detail_id': 6320}
+        form = {'nickname': 'meto','group_id':2, 'task_id': 8, 'detail_type': 1, 'task_detail_id': 6320}
     # 点击开始标注 接收一条已被该用户锁定或未标注的数据
 
     user = form.get('nickname')
@@ -198,6 +198,7 @@ def save_data():
             "photo_path": "C:/Users/Administrator/Pictures/Saved Pictures/微信图片_20180920160858.jpg",
             "detail_type": 2,
             "create_user": "paopao",
+            "group_id":2,
             "task_detail_id": 6320,
             "task_id": 4,
             "props": [
@@ -253,9 +254,9 @@ def modify_data():
             "photo_path": "C:/Users/Administrator/Pictures/Saved Pictures/微信图片_20180920160858.jpg",
             "detail_type": 2,
             "create_user": "paopao",
-            "user_group_id":2,
+            "group_id":2,
             "task_detail_id": 6320,
-            "quality_lock":None,
+            "quality_lock":"",
             "task_id": 4,
             "props": [
                 {
@@ -268,13 +269,12 @@ def modify_data():
                 {"prop_id": 13, "prop_name": "肤色", "prop_option_value": 1, "prop_type": 1,
                  "property_values": [
                      {"option_name": "黑", "option_value": 1},
-                     {"option_name": "黄", "option_value": 2}, ]
+                     {"option_name": "黄", "option_value": 2}]
                  }], }
 
     # 修改时增加判断，quality_lock==1，并且是标注员，则不可以修改。此处在前端也要进行判断
-    if form.get('quality_lock') == 1 and form.get('user_group_id') == 2:
+    if form.get('quality_lock') == 1 and form.get('group_id') == 2:
         return json.dumps({'msg': '被质检员修改过的数据不可进行修改'})
-
 
     if form.get('detail_type') == 1:
         return json.dumps({'msg': '请点击新的一张进行保存，新数据不可使用此按钮保存'})
