@@ -84,6 +84,7 @@ class LabelTaskDetailCollection:
         self.task_id = ''
         self.task_detail_id = ''
         self.photo_path = ''
+        self.quality_lock = ''
         self.props = []
 
     def fill(self,task_id, task_detail_id, url, prop_ids, detail_type):
@@ -93,5 +94,7 @@ class LabelTaskDetailCollection:
         self.detail_type = detail_type
         # 查询出所有的属性
         prop_ids = Property.query.filter(Property.id.in_(prop_ids)).all()
+
+        self.quality_lock = Task_details().query.filter_by(id = task_detail_id).first().quality_lock
 
         self.props = [LabelTaskDetailViewModel(prop, task_detail_id, detail_type) for prop in prop_ids]

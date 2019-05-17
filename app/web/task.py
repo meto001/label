@@ -199,6 +199,7 @@ def save_data():
             "detail_type": 2,
             "create_user": "paopao",
             "group_id":2,
+            "quality_lock": "",
             "task_detail_id": 6320,
             "task_id": 4,
             "props": [

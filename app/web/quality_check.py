@@ -108,7 +108,7 @@ def auto_generate_quality_check():
                             for one_check_task in check_tasks:
                                 check_data_info = Check_data_info()
                                 data = {}
-                                data['check_user_id'] = check_user.id
+                                data['check_user'] = check_user.name
                                 data['task_details_id'] = one_check_task.id
 
                                 # 将task_details表中该条数据锁定，不允许标注员修改
@@ -191,4 +191,9 @@ def check_task_user():
 
 @web.route('/check_task_details',methods=['GET', 'POST'])
 def check_task_details():
-    pass
+
+    if request.data:
+        form = json.loads(request.data)
+
+    else:
+        form = {'nickname':'huahua','group_id':3, }
