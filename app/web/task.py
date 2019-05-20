@@ -115,33 +115,32 @@ def show_task_detail():
         # 如果没有锁定数据
         if new_data is None:
             new_data = Task_details().get_new_data(task_id)
-        if new_data:
+            if new_data:
 
-            # 更新数据，将该条数据锁定
-            with db.auto_commit():
-                new_data.locks = 1
-                new_data.operate_user = user
-
-            task_detail_id = new_data.id
-            url = new_data.photo_path
-
-            # 此方法是直接返回图片流，暂不使用
-            # url = return_img_stream(url)
-
-            prop_ids = new_data.task.prop_ids
-            tuple_prop_ids = eval(prop_ids)
-            prop_option_value = 0
-            if type(tuple_prop_ids) is int:
-                prop_ids = [tuple_prop_ids]
+                # 更新数据，将该条数据锁定
+                with db.auto_commit():
+                    new_data.locks = 1
+                    new_data.operate_user = user
             else:
-                prop_ids = list(tuple_prop_ids)
-            label_detail = LabelTaskDetailCollection()
-            label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type)
+                return json.dumps({'status': '该任务已结束'})
 
+        task_detail_id = new_data.id
+        url = new_data.photo_path
 
-            return json.dumps(label_detail, default=lambda o: o.__dict__)
+        # 此方法是直接返回图片流，暂不使用
+        # url = return_img_stream(url)
+
+        prop_ids = new_data.task.prop_ids
+        tuple_prop_ids = eval(prop_ids)
+        prop_option_value = 0
+        if type(tuple_prop_ids) is int:
+            prop_ids = [tuple_prop_ids]
         else:
-            return json.dumps({'status': '该任务已结束'})
+            prop_ids = list(tuple_prop_ids)
+        label_detail = LabelTaskDetailCollection()
+        label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type)
+
+        return json.dumps(label_detail, default=lambda o: o.__dict__)
 
     elif detail_type == 2 or detail_type == 3:
         task_detail_id = form.get('task_detail_id')
@@ -275,7 +274,7 @@ def modify_data():
 
     # 修改时增加判断，quality_lock==1，并且是标注员，则不可以修改。此处在前端也要进行判断
     if form.get('quality_lock') == 1 and form.get('group_id') == 2:
-        return json.dumps({'msg': '被质检员修改过的数据不可进行修改'})
+        return json.dumps({'msg': '被质检员确认过的数据不可进行修改'})
 
     if form.get('detail_type') == 1:
         return json.dumps({'msg': '请点击新的一张进行保存，新数据不可使用此按钮保存'})

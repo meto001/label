@@ -2,12 +2,13 @@
 import time
 
 from app import db
-from models.check_data_info import Check_data_info
-from models.check_user import Check_user
+from app.models.check_data_info import Check_data_info
+from app.models.check_user import Check_user
 from app.models.task import Task
 
 __author__ = 'meto'
 __date__ = '2019/5/16 10:10'
+
 
 class CheckTaskViewModel:
     def __init__(self, check_task):
@@ -61,6 +62,7 @@ class CheckUserViewModel:
         self.check_user = check_user.user
         self.check_num = check_user.check_num
         self.total_num = check_user.total_num
+        self.check_date = check_user.check_date
         self.error_num = ''
         self.already_num = ''
         self.__parse(check_user.id)

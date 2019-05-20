@@ -38,4 +38,11 @@ class Check_user(Base):
         check_users = Check_user.query.filter_by(check_task_id=check_task_id, task_id=task_id).all()
         return check_users
 
-
+    @classmethod
+    def get_id(cls, check_date, user, task_id):
+        check_user= Check_user.query.filter_by(check_date=check_date, user=user, task_id=task_id).first()
+        if check_user:
+            check_user_id = check_user.id
+        else:
+            check_user_id = None
+        return check_user_id

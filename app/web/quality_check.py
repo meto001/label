@@ -9,10 +9,12 @@ from app import db
 from app import create_app
 from app.models.task import Task
 from app.models.task_details import Task_details
-from models.check_data_info import Check_data_info
-from models.check_task import Check_task
-from models.check_user import Check_user
+from app.models.check_data_info import Check_data_info
+from app.models.check_task import Check_task
+from app.models.check_user import Check_user
+from app.models.task_details_value import Task_details_value
 from view_models.check_task import CheckTaskCollection, CheckUserCollection
+from view_models.labeler_task import LabelTaskDetailCollection
 from .blue_print import web
 from app import scheduler
 __author__ = 'meto'
@@ -110,7 +112,8 @@ def auto_generate_quality_check():
                                 data = {}
                                 data['check_user'] = check_user.name
                                 data['task_details_id'] = one_check_task.id
-
+                                data['task_id'] = task.id
+                                data['is_complate'] = 0
                                 # 将task_details表中该条数据锁定，不允许标注员修改
                                 one_check_task.quality_lock = 1
 
@@ -189,11 +192,107 @@ def check_task_user():
     check_user_collection.fill(check_users)
     return json.dumps(check_user_collection,default=lambda o: o.__dict__)
 
+
 @web.route('/check_task_details',methods=['GET', 'POST'])
 def check_task_details():
+
 
     if request.data:
         form = json.loads(request.data)
 
     else:
-        form = {'nickname':'huahua','group_id':3, }
+        form = {'task_id':8, 'check_date':'2019-05-14','label_user':'paopao','quality_user':'huahua','check_data_info_type':1, 'task_details_id':'9392'}
+
+    # 首先通过check_date、user、task_id查询check_user表得到该表的主键id,通过check_user_id查询check_data_info表，
+    # 获取task_details_id.接下来的流程同标注流程，没有保存功能，可以修改，修改时修改task_details_value中的prop_option_value_final属性
+
+    check_date = form.get('check_date')
+    label_user = form.get('label_user')
+    quality_user = form.get('quality_user')
+    task_id = form.get('task_id')
+    detail_type = form.get('check_data_info_type')
+    check_user_id = Check_user.get_id(check_date, label_user, task_id)
+
+    # 判断是否有锁定数据
+    if detail_type == 1:
+        quality_data = Check_data_info().get_has_locks(check_user_id, quality_user)
+        if quality_data is None:
+            quality_data = Check_data_info().get_new_quality_data(check_user_id)
+            if quality_data:
+
+                # 更新数据，将该数据锁定
+                with db.auto_commit():
+                    quality_data.locks = 1
+                    quality_data.quality_user = quality_user
+
+    elif detail_type == 2:
+        task_details_id = form.get('task_details_id')
+        quality_data = Check_data_info().get_last_quality_data(quality_user,task_details_id,check_user_id)
+
+    elif detail_type == 3:
+        task_details_id = form.get('task_details_id')
+        quality_data = Check_data_info().get_next_quality_data(quality_user, task_details_id,check_user_id)
+    if quality_data is None:
+        return json.dumps({'msg': '没有更多了'})
+    
+    # 根据new_quality_data.task_details获取数据详情
+    task_details = quality_data.task_details
+    task_detail_id = task_details.id
+    url = task_details.photo_path
+
+    prop_ids = task_details.task.prop_ids
+    tuple_prop_ids = eval(prop_ids)
+    prop_option_value = 0
+    if type(tuple_prop_ids) is int:
+        prop_ids = [tuple_prop_ids]
+    else:
+        prop_ids = list(tuple_prop_ids)
+    label_detail = LabelTaskDetailCollection()
+    label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type)
+    return json.dumps(label_detail, default=lambda o: o.__dict__)
+
+
+@web.route('/modify_check_data', methods=['POST'])
+def modify_check_data():
+    if request.data:
+        form = json.loads(request.data)
+    else:
+        form = {
+            "photo_path": "C:/Users/Administrator/Pictures/Saved Pictures/微信图片_20180920160858.jpg",
+            "detail_type": 2,
+            "create_user": "huahua",
+            "group_id":3,
+            "task_detail_id": 6320,
+            "quality_lock":"",
+            "task_id": 4,
+            "props": [
+                {
+                    "prop_id": 11, "prop_name": "衣服", "prop_option_value": 1,"prop_option_value_final": 1, "prop_type": 1,
+                    "property_values": [
+                        {"option_name": "黄皮", "option_value": 1},
+                        {"option_name": "黑皮", "option_value": 2},
+                        {"option_name": "白皮", "option_value": 3}]
+                },
+                {"prop_id": 13, "prop_name": "肤色", "prop_option_value": 1, "prop_type": 1,
+                 "property_values": [
+                     {"option_name": "黑", "option_value": 1},
+                     {"option_name": "黄", "option_value": 2}]
+                 }], }
+
+
+
+    # 判断是否是质检员
+    if form.get('group_id') != 3:
+        return json.dumps({'msg': '用户类型错误'})
+    task_detail_id = form.get('task_detail_id')
+    props = form.get('props')
+    with db.auto_commit():
+        for prop in props:
+            if prop.get('prop_option_value_final')!= prop.get('prop_option_value'):
+                prop_id = prop.get('prop_id')
+                task_detail_id = form.get('task_detail_id')
+                task_details_value = Task_details_value().query.filter_by(prop_id=prop_id,
+                                                                          task_detail_id=task_detail_id).first()
+                task_details_value.prop_option_value_final = prop.get('prop_option_value_final')
+
+    return json.dumps({'status': 'success'})

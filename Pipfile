@@ -16,6 +16,7 @@ flask-cors = "*"
 jsonify = "*"
 apscheduler = "*"
 flask-apscheduler = "*"
+pymysql = "*"
 
 [requires]
 python_version = "3.6"
