@@ -60,6 +60,8 @@ class PropertyValueViewModel:
         if prop.property.prop_type == 1:
             self.prop_type = '单选'
         if prop.property.prop_type == 2:
+            self.prop_type = '文本框'
+        if prop.property.prop_type == 3:
             self.prop_type = '画框'
         # self.prop_type = prop.value_id
         self.property_values = [self.__map_to_property(label_property) for label_property in property_values]
