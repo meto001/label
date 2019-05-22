@@ -21,7 +21,7 @@ class CheckTaskViewModel:
         timeArray = time.localtime(check_task.create_time - 86400)
         self.date = time.strftime('%Y-%m-%d', timeArray)
         # 通过id查询到数据,
-        task_ids = db.session.query(Check_user.task_id).filter(Check_user.check_task_id==check_task.id).group_by(Check_user.task_id).all()
+        task_ids = db.session.query(Check_user.task_id).filter(Check_user.check_task_id==check_task.id, Check_user.status == 0).group_by(Check_user.task_id).all()
         print(task_ids)
         task_id = []
         for id in task_ids:

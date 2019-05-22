@@ -35,7 +35,7 @@ class Check_user(Base):
 
     @classmethod
     def get_check_user(cls,check_task_id, task_id):
-        check_users = Check_user.query.filter_by(check_task_id=check_task_id, task_id=task_id).all()
+        check_users = Check_user.query.filter_by(check_task_id=check_task_id, task_id=task_id, status=0).all()
         return check_users
 
     @classmethod
