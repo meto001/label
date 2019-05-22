@@ -101,7 +101,7 @@ def show_task_detail():
     if request.data:
         form = json.loads(request.data)
     else:
-        form = {'nickname': 'meto','group_id':2, 'task_id': 8, 'detail_type': 1, 'task_detail_id': 6320}
+        form = {'nickname': 'meto', 'group_id': 2, 'task_id': 8, 'detail_type': 1, 'task_detail_id': 6320}
     # 点击开始标注 接收一条已被该用户锁定或未标注的数据
 
     user = form.get('nickname')
@@ -122,6 +122,19 @@ def show_task_detail():
                     new_data.locks = 1
                     new_data.operate_user = user
             else:
+                # 查询是否有锁定数据
+                label_undone_data = Task_details.check_is_complate(task_id)
+                if label_undone_data is None:
+                    # 将task表改为已完成
+                    with db.auto_commit():
+                        task = Task.query.filter_by(id=task_id).first()
+                        task.is_complete = 1
+                    return json.dumps({'msg': '该任务已完成'})
+                else:
+                    lock_user = db.session.query(Task_details.operate_user).filter(Task_details.task_id == task_id,
+                                                                                   Task_details.locks == 1).all()
+                    return json.dumps({'msg': '已没有新数据，请%s尽快将锁定数据完成' % (str(lock_user))})
+
                 return json.dumps({'status': '该任务已结束'})
 
         task_detail_id = new_data.id
@@ -138,7 +151,8 @@ def show_task_detail():
         else:
             prop_ids = list(tuple_prop_ids)
         label_detail = LabelTaskDetailCollection()
-        label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type)
+        check_data_info_id = ''
+        label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id)
 
         return json.dumps(label_detail, default=lambda o: o.__dict__)
 
@@ -172,7 +186,8 @@ def show_task_detail():
         else:
             prop_ids = list(tuple_prop_ids)
         label_detail = LabelTaskDetailCollection()
-        label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type)
+        check_data_info_id = ''
+        label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id)
 
         # select * from task_details WHERE  operate_user = 'meto' AND task_id = 4 and is_complete =1 and
         # operate_create_time >10000 and operate_create_time < 2556709299 and id < 6320 ORDER BY id DESC LIMIT 1
@@ -197,7 +212,7 @@ def save_data():
             "photo_path": "C:/Users/Administrator/Pictures/Saved Pictures/微信图片_20180920160858.jpg",
             "detail_type": 2,
             "create_user": "paopao",
-            "group_id":2,
+            "group_id": 2,
             "quality_lock": "",
             "task_detail_id": 6320,
             "task_id": 4,
@@ -217,8 +232,9 @@ def save_data():
 
     props = form.get('props')
     # 判断是否已经保存，此处有bug，如果点击速度过快，仍会有一定概率重复保存
-    if Task_details_value.query.filter_by(task_detail_id=form.get('task_detail_id'), prop_id=props[0].get('prop_id')).first():
-        print('task_detail_id:',form.get('task_detail_id'),' 已经存过了')
+    if Task_details_value.query.filter_by(task_detail_id=form.get('task_detail_id'),
+                                          prop_id=props[0].get('prop_id')).first():
+        print('task_detail_id:', form.get('task_detail_id'), ' 已经存过了')
         return json.dumps({'mag': '不可重复存入'})
     print('task_detail_id:', form.get('task_detail_id'), ' 还没有存过')
     with db.auto_commit():
@@ -254,9 +270,9 @@ def modify_data():
             "photo_path": "C:/Users/Administrator/Pictures/Saved Pictures/微信图片_20180920160858.jpg",
             "detail_type": 2,
             "create_user": "paopao",
-            "group_id":2,
+            "group_id": 2,
             "task_detail_id": 6320,
-            "quality_lock":"",
+            "quality_lock": "",
             "task_id": 4,
             "props": [
                 {
@@ -285,7 +301,7 @@ def modify_data():
     boolean = Task_details().is_check(task_detail_id)
     user = Task_details().query.filter_by(id=task_detail_id).first().operate_user
     if boolean:
-        return json.dumps({'msg':'该数据已生成质检，无法修改'})
+        return json.dumps({'msg': '该数据已生成质检，无法修改'})
     elif user == form.get('create_user'):
         # 删除task_details_value里面的数据
         with db.auto_commit():
@@ -314,9 +330,3 @@ def modify_data():
         return json.dumps({'status': 'success'})
     else:
         return json.dumps({'msg': '这不是您做的数据，无法进行修改！'})
-
-
-
-
-
-

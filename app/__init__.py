@@ -18,7 +18,10 @@ login_manager = LoginManager()
 scheduler = APScheduler()
 def create_app():
     app = Flask(__name__)
-    CORS(app, resources=r'/*',support_credentials=True )
+    try:
+        CORS(app, resources=r'/*',support_credentials=True )
+    except Exception as e:
+        print(e)
     app.config.from_object('app.secure')
     app.config.from_object(APSchedulerJobConfig)
     register_blueprint(app)

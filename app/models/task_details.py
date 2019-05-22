@@ -36,7 +36,7 @@ class Task_details(Base):
     # 质检，-1为返工, 0为未质检，1为已生成质检，2为质检完成
     quality_inspection= Column(Integer,default=0)
 
-    quality_lock = Column(Integer,comment='质检锁，仅在返工时使用，1为锁定，当锁定时，此数据不允许标注员修改')
+    quality_lock = Column(Integer,default=0,comment='质检锁，仅在返工时使用，1为锁定，当锁定时，此数据不允许标注员修改')
 
     @classmethod
     def get_already_count(cls,task_id):
@@ -104,4 +104,15 @@ class Task_details(Base):
 
     @classmethod
     def is_have_new_data(cls,yesterday_time, today_time):
-        return Task_details.query.filter( Task_details.operate_create_time > yesterday_time,Task_details.operate_create_time <= today_time,Task_details.quality_inspection<=0).all()
+        return Task_details.query.filter(Task_details.operate_create_time > yesterday_time,Task_details.operate_create_time <= today_time,Task_details.quality_inspection<=0).all()
+
+    @classmethod
+    def set_rework(cls, start_time,task_id, user):
+        end_time = start_time+86400
+        all_rework = Task_details.query.filter(Task_details.operate_user == user, Task_details.task_id == task_id,
+                                               Task_details.operate_create_time <=end_time, Task_details.operate_create_time > start_time).all()
+        return all_rework
+
+    @classmethod
+    def check_is_complate(cls,task_id):
+        return Task_details.query.filter_by(task_id=task_id, is_complete=0).first()

@@ -67,4 +67,5 @@ def create_mysql_ORM(app):
 app = create_app()
 db, all_table = create_mysql_ORM(app=app)
 
-aaaaa = db.session.query(all_table["user"]).filter_by(id=1).first()
+pag = db.session.query(all_table["user"]).paginate(page=1,per_page=2)
+print(pag.pages)

@@ -59,7 +59,7 @@ class CheckTaskCollection:
 
 class CheckUserViewModel:
     def __init__(self, check_user):
-        self.check_user = check_user.user
+        self.label_user = check_user.user
         self.check_num = check_user.check_num
         self.total_num = check_user.total_num
         self.check_date = check_user.check_date

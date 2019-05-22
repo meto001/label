@@ -75,7 +75,7 @@ def auto_generate_quality_check():
                     if count:
                         # 抽检率
                         sampling_rate = task.source.label_type.sampling_rate
-                        sampling_rate = 0.1
+                        # sampling_rate = 0.1
                         print('抽检率为：', sampling_rate, end=';')
                         # 抽检张数
 
@@ -91,7 +91,7 @@ def auto_generate_quality_check():
                             data['check_num'] = check_count
                             data['total_num'] = count
                             data['check_task_id'] = check_task.id
-                            data['check_data'] = timeData
+                            data['check_date'] = timeData
                             check_user.set_attrs(data)
                             db.session.add(check_user)
 
@@ -110,7 +110,7 @@ def auto_generate_quality_check():
                             for one_check_task in check_tasks:
                                 check_data_info = Check_data_info()
                                 data = {}
-                                data['check_user'] = check_user.name
+                                data['check_user_id'] = check_user.id
                                 data['task_details_id'] = one_check_task.id
                                 data['task_id'] = task.id
                                 data['is_complate'] = 0
@@ -176,7 +176,7 @@ def check_task_user():
     if request.data:
         form = json.loads(request.data)
     else:
-        form = {'check_task_id': 6, 'task_id':8}
+        form = {'check_task_id': 11, 'task_id':13}
 
     check_task_id =form.get('check_task_id')
     task_id = form.get('task_id')
@@ -196,34 +196,90 @@ def check_task_user():
 @web.route('/check_task_details',methods=['GET', 'POST'])
 def check_task_details():
 
-
     if request.data:
         form = json.loads(request.data)
 
     else:
-        form = {'task_id':8, 'check_date':'2019-05-14','label_user':'paopao','quality_user':'huahua','check_data_info_type':1, 'task_details_id':'9392'}
+        form = {'task_id':13, 'date':'2019-05-21','label_user':'paopao','quality_user':'hu1ahua','check_data_info_type':1, 'task_details_id':'9392'}
 
     # 首先通过check_date、user、task_id查询check_user表得到该表的主键id,通过check_user_id查询check_data_info表，
     # 获取task_details_id.接下来的流程同标注流程，没有保存功能，可以修改，修改时修改task_details_value中的prop_option_value_final属性
 
-    check_date = form.get('check_date')
+    check_date = form.get('date')
     label_user = form.get('label_user')
     quality_user = form.get('quality_user')
     task_id = form.get('task_id')
     detail_type = form.get('check_data_info_type')
     check_user_id = Check_user.get_id(check_date, label_user, task_id)
-
+    quality_data = None
     # 判断是否有锁定数据
     if detail_type == 1:
         quality_data = Check_data_info().get_has_locks(check_user_id, quality_user)
         if quality_data is None:
             quality_data = Check_data_info().get_new_quality_data(check_user_id)
             if quality_data:
-
                 # 更新数据，将该数据锁定
                 with db.auto_commit():
                     quality_data.locks = 1
                     quality_data.quality_user = quality_user
+
+        # 此处要判断任务是否已经完成，如果完成，计算正确率。判断是否返工,最后将任务状态改为已完成
+
+        # 此处逻辑5.22日编写
+            else:
+                # 查询是否有未完成的数据
+                undone = Check_data_info().check_is_complate(check_user_id)
+
+                if undone is None:
+                    # 计算正确率
+                    # 正确的数量
+                    true_count = Check_data_info().true_count(check_user_id)
+                    all_count = Check_data_info().all_count(check_user_id)
+                    # 正确率
+                    correct_rate =true_count/all_count
+
+                    # 得到任务的通过率
+                    pass_rate = Check_data_info().get_pass_rate(check_user_id)
+                    check_user = Check_user().query.filter_by(id=check_user_id).first()
+
+                    with db.auto_commit():
+
+                        # 将正确率写入到check_user表中
+                        check_user.right_rate = correct_rate
+
+                        if correct_rate >= pass_rate:
+                            check_user.status = 1
+                        else:
+                            # 返工
+                            check_user.status = 2
+                            check_user.rework_status = 0
+                            # 将此user此任务当天的所有数据全部返工
+                            # 计算该质检任务的开始和结束时间
+                            date = check_user.check_date
+                            time_array = time.strptime(date, '%Y-%m-%d')
+                            start_time = time.mktime(time_array)
+                            # end_time = start_time+86400
+
+                            all_rework = Task_details.set_rework(start_time,task_id, check_user.user)
+                            with db.auto_commit():
+                                for rework in all_rework:
+                                    rework.quality_inspection = -1
+
+
+
+                    return json.dumps({'msg':'该任务已完成'})
+
+                else:
+                    # 返回锁定数据的用户
+                    # locks = Check_data_info().get_lock_user(check_user_id)
+                    # lock_user = []
+                    # for lock in locks:
+
+                    lock_user = db.session.query(Check_data_info.quality_user).filter(Check_data_info.check_user_id == check_user_id, Check_data_info.locks == 1).all()
+                    pass
+
+                    return json.dumps({'msg':'已没有新数据，请%s尽快将锁定数据完成' %(str(lock_user))})
+
 
     elif detail_type == 2:
         task_details_id = form.get('task_details_id')
@@ -248,7 +304,7 @@ def check_task_details():
     else:
         prop_ids = list(tuple_prop_ids)
     label_detail = LabelTaskDetailCollection()
-    label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type)
+    label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type,quality_data.id)
     return json.dumps(label_detail, default=lambda o: o.__dict__)
 
 
@@ -258,13 +314,17 @@ def modify_check_data():
         form = json.loads(request.data)
     else:
         form = {
-            "photo_path": "C:/Users/Administrator/Pictures/Saved Pictures/微信图片_20180920160858.jpg",
-            "detail_type": 2,
+            "photo_path": "http://192.168.3.211:82/static/明星库/港台/傅颖.jpg",
+            "detail_type": 1,
             "create_user": "huahua",
-            "group_id":3,
-            "task_detail_id": 6320,
-            "quality_lock":"",
-            "task_id": 4,
+            "group_id": 3,
+            "task_detail_id": 10856,
+            "result_status": '0',
+            "error_count": "",
+            "quality_lock": "",
+            "check_data_info_id":"46",
+
+            "task_id": 13,
             "props": [
                 {
                     "prop_id": 11, "prop_name": "衣服", "prop_option_value": 1,"prop_option_value_final": 1, "prop_type": 1,
@@ -288,11 +348,23 @@ def modify_check_data():
     props = form.get('props')
     with db.auto_commit():
         for prop in props:
-            if prop.get('prop_option_value_final')!= prop.get('prop_option_value'):
+            if prop.get('prop_option_value_final') != prop.get('prop_option_value'):
                 prop_id = prop.get('prop_id')
-                task_detail_id = form.get('task_detail_id')
                 task_details_value = Task_details_value().query.filter_by(prop_id=prop_id,
                                                                           task_detail_id=task_detail_id).first()
+
+                # 修改task_details_value表中的final值
                 task_details_value.prop_option_value_final = prop.get('prop_option_value_final')
 
+                # 修改check_data_info表里的锁定状态和质检结果
+                check_data_info_id = form.get('check_data_info_id')
+                check_data_info =Check_data_info().query.filter_by(id=check_data_info_id).first()
+                check_data_info.result_status = form.get('result_status')
+                check_data_info.error_count = form.get('error_count')
+                check_data_info.locks = 0
+                check_data_info.is_complate = 1
+                check_data_info.quality_time = time.time()
+
     return json.dumps({'status': 'success'})
+
+

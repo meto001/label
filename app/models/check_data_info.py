@@ -60,3 +60,29 @@ class Check_data_info(Base):
             return next_quality_data
         else:
             return None
+
+    @classmethod
+    def check_is_complate(cls,check_user_id):
+        is_complate = Check_data_info.query.filter_by(check_user_id=check_user_id, is_complate=0).first()
+        return is_complate
+
+    @classmethod
+    def true_count(cls, check_user_id):
+        true_count = Check_data_info.query.filter_by(check_user_id=check_user_id,result_status=1).count()
+        return true_count
+
+    @classmethod
+    def all_count(cls, check_user_id):
+        all_count = Check_data_info.query.filter_by(check_user_id=check_user_id).count()
+        return all_count
+
+    @classmethod
+    def get_pass_rate(cls, check_user_id):
+        check_data_info = Check_data_info.query.filter_by(check_user_id=check_user_id).first()
+        pass_rate = check_data_info.task_details.task.source.label_type.pass_rate
+        return pass_rate
+
+    @classmethod
+    def get_lock_user(cls, check_user_id):
+        lock_user = Check_data_info.query.filter_by(check_user_id=check_user_id, locks=1).all()
+        return lock_user
