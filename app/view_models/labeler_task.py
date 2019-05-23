@@ -67,6 +67,7 @@ class LabelTaskDetailViewModel:
         if detail_type == 2 or detail_type == 3:
             prop_option_value = Task_details_value().query.filter_by(prop_id=self.prop_id, task_detail_id=task_detail_id).first()
             self.prop_option_value = prop_option_value.prop_option_value
+            self.prop_option_value_final = prop_option_value.prop_option_value_final
 
         options = Property_value.query.filter_by(prop_id=self.prop_id).order_by(Property_value.option_value).all()
         self.property_values = [self.__map_to_option(option) for option in options]
