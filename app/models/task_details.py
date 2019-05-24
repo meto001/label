@@ -52,12 +52,12 @@ class Task_details(Base):
 
     @classmethod
     def get_has_locks(cls,user, task_id):
-        locks = Task_details.query.filter_by(operate_user=user,task_id=task_id, locks=1).first()
+        locks = Task_details.query.filter_by(operate_user=user,task_id=task_id, locks=1, quality_inspection=0).first()
         return locks
 
     @classmethod
     def get_new_data(cls, task_id):
-        new_data =Task_details.query.filter_by(is_complete=0, locks=0, task_id=task_id).first()
+        new_data =Task_details.query.filter_by(is_complete=0, locks=0, task_id=task_id,quality_inspection=0).first()
         return new_data
 
     @classmethod
@@ -90,7 +90,7 @@ class Task_details(Base):
     @classmethod
     def get_uncheck_user_task_details(cls, yesterday_time, today_time, task, user):
         return Task_details.query.filter(Task_details.task_id == task.id, Task_details.operate_create_time > yesterday_time,
-                                  Task_details.operate_create_time <= today_time, Task_details.operate_user == user, Task_details.quality_inspection <= 0).all()
+                                  Task_details.operate_create_time <= today_time, Task_details.operate_user == user, Task_details.quality_inspection == 0, Task_details.is_complete == 1).all()
 
     @classmethod
     def get_users(cls,yesterday_time, today_time, task):
@@ -104,7 +104,7 @@ class Task_details(Base):
 
     @classmethod
     def is_have_new_data(cls,yesterday_time, today_time):
-        return Task_details.query.filter(Task_details.operate_create_time > yesterday_time,Task_details.operate_create_time <= today_time,Task_details.quality_inspection<=0).all()
+        return Task_details.query.filter(Task_details.operate_create_time > yesterday_time,Task_details.operate_create_time <= today_time,Task_details.quality_inspection==0).all()
 
     @classmethod
     def set_rework(cls, start_time,task_id, user):
@@ -116,3 +116,43 @@ class Task_details(Base):
     @classmethod
     def check_is_complate(cls,task_id):
         return Task_details.query.filter_by(task_id=task_id, is_complete=0).first()
+
+    @classmethod
+    def get_rework_data(cls,task_id, start_time, label_user):
+        end_time = start_time + 86400
+        rework_data = Task_details.query.filter(Task_details.operate_user == label_user,Task_details.task_id == task_id,
+                                                Task_details.operate_create_time > start_time,
+                                                Task_details.operate_create_time <= end_time,
+                                                Task_details.is_complete == -1).first()
+        return rework_data
+
+    @classmethod
+    def get_last_rework_data(cls,task_id, start_time, label_user,task_details_id):
+        end_time = start_time + 86400
+        rework_data = Task_details.query.filter(Task_details.operate_user == label_user, Task_details.task_id == task_id,
+                                  Task_details.operate_create_time > start_time,
+                                  Task_details.operate_create_time <= end_time,
+                                  Task_details.id < task_details_id).order_by(
+                                  desc(Task_details.id)).first()
+        return rework_data
+
+    @classmethod
+    def get_next_rework_data(cls,task_id, start_time, label_user,task_details_id):
+        end_time = start_time + 86400
+        rework_data = Task_details.query.filter(Task_details.operate_user == label_user,
+                                                Task_details.task_id == task_id,
+                                                Task_details.operate_create_time > start_time,
+                                                Task_details.operate_create_time <= end_time,
+                                                Task_details.id > task_details_id).order_by(
+                                                asc(Task_details.id)).first()
+        return rework_data
+
+
+    @classmethod
+    def get_rework_check_details(cls,start_time, task_id, label_user):
+        # 获取返未质检的数据详情
+        return Task_details.query.filter(Task_details.task_id == task_id,
+                                         Task_details.operate_create_time > start_time,
+                                         Task_details.operate_create_time <= start_time+86400,
+                                         Task_details.operate_user == label_user, Task_details.quality_inspection == -1).all()
+        pass

@@ -258,6 +258,7 @@ def save_data():
         task_detail.locks = 0
         task_detail.is_complete = 1
         task_detail.operate_create_time = time.time()
+        task_detail.operate_time = time.time()
     return json.dumps({'status': 'success'})
 
 
@@ -315,7 +316,6 @@ def modify_data():
             for prop in props:
                 # print(prop)
                 data = {}
-
                 task_details_value = Task_details_value()
                 data['photo_path'] = form.get('photo_path')
                 data['task_id'] = form.get('task_id')
@@ -327,6 +327,8 @@ def modify_data():
                 data['prop_type'] = prop.get('prop_type')
                 task_details_value.set_attrs(data)
                 db.session.add(task_details_value)
+            task_detail = Task_details.query.filter_by(id=task_detail_id).first()
+            task_detail.operate_time = time.time()
         return json.dumps({'status': 'success'})
     else:
         return json.dumps({'msg': '这不是您做的数据，无法进行修改！'})

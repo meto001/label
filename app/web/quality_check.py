@@ -13,6 +13,7 @@ from app.models.check_data_info import Check_data_info
 from app.models.check_task import Check_task
 from app.models.check_user import Check_user
 from app.models.task_details_value import Task_details_value
+from app.models.rework import Rework
 from view_models.check_task import CheckTaskCollection, CheckUserCollection
 from view_models.labeler_task import LabelTaskDetailCollection
 from .blue_print import web
@@ -41,9 +42,81 @@ def auto_generate_quality_check():
     # 查询所有未完成的任务
     with scheduler.app.app_context():
 
-        # 生成一个质检任务表
-        has_new_data = Task_details().is_have_new_data(yesterday_time, today_time)
+        # 判断是否有返工任务完成，有的话生成质检
+        rerowk_datas = Rework.query.filter_by(status=1, quality_inspection=0).all()
+        if rerowk_datas:
+            for rerowk_data in rerowk_datas:
+                with db.auto_commit():
+                    check_task = Check_task()
+                    data = {}
+                    date = rerowk_data.rework_date
+                    data['check_task_name'] = date + '返工质检任务'
+                    check_task.set_attrs(data)
+                    db.session.add(check_task)
+                    time_array = time.strptime(date, '%Y-%m-%d')
+                    start_time = time.mktime(time_array)
+                task = rerowk_data.task
+                task_id = task.id
+                label_user = rerowk_data.user
+                task_details = Task_details().get_rework_check_details(start_time, task_id, label_user)
+                count = len(task_details)
+                print('完成的总数为：', count, end=';')
+
+                if count:
+                    # 将任务详情改为已生成质检状态  测试时暂时屏蔽
+                    with db.auto_commit():
+                        for task_detail in task_details:
+                            task_detail.quality_inspection = 1
+                    # 抽检率
+                    sampling_rate = task.source.label_type.sampling_rate
+                    # sampling_rate = 0.1
+                    print('抽检率为：', sampling_rate, end=';')
+                    # 抽检张数
+
+                    check_count = math.ceil(count * sampling_rate)
+                    print('抽检数量为：', check_count)
+
+                    # 保存信息到check_user表中
+                    with db.auto_commit():
+                        check_user = Check_user()
+                        data = {}
+                        data['user'] = label_user
+                        data['task_id'] = task.id
+                        data['check_num'] = check_count
+                        data['total_num'] = count
+                        data['check_task_id'] = check_task.id
+                        data['check_date'] = date
+                        check_user.set_attrs(data)
+                        db.session.add(check_user)
+
+                    check_tasks = []
+                    # 随机到抽检的张数
+                    for i in range(check_count):
+                        pass
+                        randint = random.randint(1, count) - 1
+                        # print(len(task_details),'  ',randint)
+                        check_tasks.append(task_details[randint])
+                        task_details.remove(task_details[randint])
+                        count -= 1
+
+                    # 将随机出来的task_details 生成质检,存到check_data_info表中
+                    with db.auto_commit():
+                        for one_check_task in check_tasks:
+                            check_data_info = Check_data_info()
+                            data = {}
+                            data['check_user_id'] = check_user.id
+                            data['task_details_id'] = one_check_task.id
+                            data['task_id'] = task.id
+                            data['is_complate'] = 0
+                            # 将task_details表中该条数据锁定，不允许标注员修改
+                            one_check_task.quality_lock = 1
+
+                            check_data_info.set_attrs(data)
+                            db.session.add(check_data_info)
+
         # 判断是否有新数据
+        has_new_data = Task_details().is_have_new_data(yesterday_time, today_time)
+
         if has_new_data:
             with db.auto_commit():
                 check_task = Check_task()
@@ -67,12 +140,11 @@ def auto_generate_quality_check():
                     count = len(task_details)
                     print('完成的总数为：', count, end=';')
 
-                    # 将昨天的任务改为已生成质检状态  测试时暂时屏蔽
-                    with db.auto_commit():
-                        for task_detail in task_details:
-                            task_detail.quality_inspection = 1
-
                     if count:
+                        # 将昨天的任务改为已生成质检状态  测试时暂时屏蔽
+                        with db.auto_commit():
+                            for task_detail in task_details:
+                                task_detail.quality_inspection = 1
                         # 抽检率
                         sampling_rate = task.source.label_type.sampling_rate
                         # sampling_rate = 0.1
@@ -176,11 +248,10 @@ def check_task_user():
     if request.data:
         form = json.loads(request.data)
     else:
-        form = {'check_task_id': 11, 'task_id':13}
+        form = {'check_task_id': 17, 'task_id':14}
 
     check_task_id =form.get('check_task_id')
     task_id = form.get('task_id')
-
     check_users = Check_user.get_check_user(check_task_id, task_id)
     data = {
         'users':[
@@ -200,7 +271,7 @@ def check_task_details():
         form = json.loads(request.data)
 
     else:
-        form = {'task_id':13, 'date':'2019-05-21','label_user':'paopao','quality_user':'hu1ahua','check_data_info_type':1, 'task_details_id':'9392'}
+        form = {'task_id':14, 'date':'2019-05-22','label_user':'wangwei','quality_user':'huahua','check_data_info_type':1, 'task_details_id':'9392'}
 
     # 首先通过check_date、user、task_id查询check_user表得到该表的主键id,通过check_user_id查询check_data_info表，
     # 获取task_details_id.接下来的流程同标注流程，没有保存功能，可以修改，修改时修改task_details_value中的prop_option_value_final属性
@@ -212,8 +283,9 @@ def check_task_details():
     detail_type = form.get('check_data_info_type')
     check_user_id = Check_user.get_id(check_date, label_user, task_id)
     quality_data = None
-    # 判断是否有锁定数据
+
     if detail_type == 1:
+        # 判断是否有锁定数据
         quality_data = Check_data_info().get_has_locks(check_user_id, quality_user)
         if quality_data is None:
             quality_data = Check_data_info().get_new_quality_data(check_user_id)
@@ -234,9 +306,11 @@ def check_task_details():
                     # 计算正确率
                     # 正确的数量
                     true_count = Check_data_info().true_count(check_user_id)
-                    all_count = Check_data_info().all_count(check_user_id)
+                    all_check_count = Check_data_info().all_count(check_user_id)
                     # 正确率
-                    correct_rate =true_count/all_count
+                    correct_rate =true_count/all_check_count
+
+
 
                     # 得到任务的通过率
                     pass_rate = Check_data_info().get_pass_rate(check_user_id)
@@ -264,8 +338,19 @@ def check_task_details():
                             with db.auto_commit():
                                 for rework in all_rework:
                                     rework.quality_inspection = -1
+                                    rework.is_complete = -1
+                                # 在rework表中写入一条数据
+                                rework_table = Rework()
+                                data1 = {}
+                                data1['task_id'] = task_id
+                                data1['rework_date'] = date
+                                data1['user'] = label_user
+                                data1['operate_time'] = time.time()
+                                data1['all_count'] = check_user.total_num
+                                data1['right_rate'] = correct_rate
 
-
+                                rework_table.set_attrs(data1)
+                                db.session.add(rework_table)
 
                     return json.dumps({'msg':'该任务已完成'})
 
@@ -279,7 +364,6 @@ def check_task_details():
                     pass
 
                     return json.dumps({'msg':'已没有新数据，请%s尽快将锁定数据完成' %(str(lock_user))})
-
 
     elif detail_type == 2:
         task_details_id = form.get('task_details_id')
@@ -298,7 +382,6 @@ def check_task_details():
 
     prop_ids = task_details.task.prop_ids
     tuple_prop_ids = eval(prop_ids)
-    prop_option_value = 0
     if type(tuple_prop_ids) is int:
         prop_ids = [tuple_prop_ids]
     else:
@@ -319,7 +402,7 @@ def modify_check_data():
             "create_user": "huahua",
             "group_id": 3,
             "task_detail_id": 10856,
-            "result_status": '0',
+            "result_status": 0,
             "error_count": "",
             "quality_lock": "",
             "check_data_info_id":"46",
@@ -356,14 +439,14 @@ def modify_check_data():
                 # 修改task_details_value表中的final值
                 task_details_value.prop_option_value_final = prop.get('prop_option_value_final')
 
-                # 修改check_data_info表里的锁定状态和质检结果
-                check_data_info_id = form.get('check_data_info_id')
-                check_data_info =Check_data_info().query.filter_by(id=check_data_info_id).first()
-                check_data_info.result_status = form.get('result_status')
-                check_data_info.error_count = form.get('error_count')
-                check_data_info.locks = 0
-                check_data_info.is_complate = 1
-                check_data_info.quality_time = time.time()
+        # 修改check_data_info表里的锁定状态和质检结果
+        check_data_info_id = form.get('check_data_info_id')
+        check_data_info =Check_data_info().query.filter_by(id=check_data_info_id).first()
+        check_data_info.result_status = form.get('result_status')
+        check_data_info.error_count = form.get('error_count')
+        check_data_info.locks = 0
+        check_data_info.is_complate = 1
+        check_data_info.quality_time = time.time()
 
     return json.dumps({'status': 'success'})
 

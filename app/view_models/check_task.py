@@ -34,10 +34,10 @@ class CheckTaskViewModel:
         date = time.strftime('%Y-%m-%d', timeArray)
         return dict(
             check_task_id = check_task.id,
-            date = date,
+            date=date,
             task_name=task.task_name,
             task_id=id,
-            task_type = task.source.label_type.name
+            task_type=task.source.label_type.name
         )
 
 
