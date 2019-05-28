@@ -60,14 +60,32 @@ def create_mysql_ORM(app):
 
     # 反射数据库中已存在的表，并获取所有存在的表对象。
     db.reflect()
+
+
     all_table = {table_obj.name: table_obj for table_obj in db.get_tables_for_bind()}
 
     return db, all_table
 
-app = create_app()
-db, all_table = create_mysql_ORM(app=app)
-print(all_table['user'].tometadata())
-print(type(all_table['user'].tometadata()))
+# app = create_app()
+# db, all_table = create_mysql_ORM(app=app)
+# print(all_table['user'])
+# print(type(all_table['user'].))
 # print(db.session.query(all_table['user']).filter(all_table['user'].key.id>=1).first())
 # pag = db.session.query(all_table["user"]).paginate(page=1,per_page=2)
 # print(pag.items)
+
+from sqlalchemy import MetaData, create_engine, join
+
+s =  'mysql+cymysql://facesysuser:faceagv10086@localhost:3306/fisher'
+metadata = MetaData()
+engine = create_engine(s)
+from sqlalchemy import Table
+metadata.reflect(bind=engine)
+users = metadata.tables['user']
+from sqlalchemy import select
+a = users.get_children('id') == 1
+print(a)
+s = select([users]).where(users.get_children('id') == 1)
+
+result = engine.execute(s).fetchall()
+print(result)

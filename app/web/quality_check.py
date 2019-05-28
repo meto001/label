@@ -273,7 +273,7 @@ def check_task_details():
         form = json.loads(request.data)
 
     else:
-        form = {'task_id':14, 'date':'2019-05-22','check_task_id': 23, 'label_user':'wangwei','quality_user':'huahua','check_data_info_type':1, 'task_details_id':'9392'}
+        form = {'task_id':14, 'date':'2019-05-22','check_task_id': 23, 'label_user':'wangwei','quality_user':'huahua','check_data_info_type':1, 'task_detail_id':'9392'}
 
     # 首先通过check_date、user、task_id查询check_user表得到该表的主键id,通过check_user_id查询check_data_info表，
     # 获取task_details_id.接下来的流程同标注流程，没有保存功能，可以修改，修改时修改task_details_value中的prop_option_value_final属性
@@ -371,11 +371,11 @@ def check_task_details():
                     return json.dumps({'msg':'已没有新数据，请%s尽快将锁定数据完成' %(str(lock_user))})
 
     elif detail_type == 2:
-        task_details_id = form.get('task_details_id')
+        task_details_id = form.get('task_detail_id')
         quality_data = Check_data_info().get_last_quality_data(quality_user,task_details_id,check_user_id)
 
     elif detail_type == 3:
-        task_details_id = form.get('task_details_id')
+        task_details_id = form.get('task_detail_id')
         quality_data = Check_data_info().get_next_quality_data(quality_user, task_details_id,check_user_id)
     if quality_data is None:
         return json.dumps({'msg': '没有更多了'})
