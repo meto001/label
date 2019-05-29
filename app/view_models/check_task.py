@@ -76,7 +76,9 @@ class CheckUserViewModel:
 
 class CheckUserCollection:
     def __init__(self):
+        self.check_task_id = ''
         self.users = []
 
-    def fill(self,check_users):
+    def fill(self,check_users, check_task_id):
+        self.check_task_id = check_task_id
         self.users = [CheckUserViewModel(check_user) for check_user in check_users]

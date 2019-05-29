@@ -262,7 +262,7 @@ def check_task_user():
         ]
     }
     check_user_collection = CheckUserCollection()
-    check_user_collection.fill(check_users)
+    check_user_collection.fill(check_users, check_task_id)
     return json.dumps(check_user_collection,default=lambda o: o.__dict__)
 
 
