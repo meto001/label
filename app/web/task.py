@@ -13,7 +13,7 @@ from app.models.task_details import Task_details
 from app.models.task_details_value import Task_details_value
 from app.view_models.labeler_task import LabelTaskViewModel, LabelTaskCollection, LabelTaskDetailViewModel, \
     LabelTaskDetailCollection
-from app.view_models.task import TaskCollection, SourcesAndPorps
+from app.view_models.task import TaskCollection, SourcesAndPorps, ExportTaskCollection
 from .blue_print import web
 from app.libs.img_stream import return_img_stream
 
@@ -129,13 +129,14 @@ def show_task_detail():
                     with db.auto_commit():
                         task = Task.query.filter_by(id=task_id).first()
                         task.is_complete = 1
-                    return json.dumps({'msg': '该任务已完成'})
+                        # status=666 页面需要跳出
+                    return json.dumps({'msg': '该任务已完成','status':666})
                 else:
                     lock_user = db.session.query(Task_details.operate_user).filter(Task_details.task_id == task_id,
                                                                                    Task_details.locks == 1).all()
-                    return json.dumps({'msg': '已没有新数据，请%s尽快将锁定数据完成' % (str(lock_user))})
+                    return json.dumps({'msg': '已没有新数据，请%s尽快将锁定数据完成' % (str(lock_user)), 'status':666})
 
-                return json.dumps({'status': '该任务已结束'})
+                return json.dumps({'msg': '该任务已完成','status':666})
 
         task_detail_id = new_data.id
         url = new_data.photo_path
@@ -337,62 +338,65 @@ def modify_data():
 @web.route('/task/export_data', methods=['POST'])
 def export_data():
 
-    print(type(Task_details()))
-    # # 导出数据
-    # if request.data:
-    #     form = json.loads(request.data)
-    # else:
-    #     form = {"task_id": 16}
-    #
-    # # 判断该任务所有数据quality_inspection是否都是质检完成状态
-    # task_id = form.get('task_id')
-    # quality_status = Task_details.get_quality_status(task_id)
-    # if quality_status:
-    #     # 执行导出动作
-    #     data = {"task_id": 16, "task_name": "1号任务",
-    #             "details": [
-    #         {
-    #             "path": "http://192.168.3.211:82/static/1/安志杰.jpg",
-    #             "props":
-    #                 [
-    #                     {
-    #                         "prop_id": 18,
-    #                         "prop_name": "衣服",
-    #                         "prop_value": 0,
-    #                         "prop_value_name": "未知"
-    #                     },
-    #                     {
-    #                         "prop_id": 19,
-    #                         "prop_name": "种族",
-    #                         "prop_value": 1,
-    #                         "prop_value_name": "汉族"
-    #                     }
-    #                 ]
-    #
-    #         },
-    #         {
-    #             "path": "http://192.168.3.211:82/static/1/安志杰2.jpg",
-    #             "props":
-    #                 [
-    #                     {
-    #                         "prop_id": 18,
-    #                         "prop_name": "衣服",
-    #                         "prop_value": 0,
-    #                         "prop_value_name": "未知"
-    #                     },
-    #                     {
-    #                         "prop_id": 19,
-    #                         "prop_name": "种族",
-    #                         "prop_value": 1,
-    #                         "prop_value_name": "汉族"
-    #                     }
-    #                 ]
-    #
-    #         }
-    #     ]}
+    # 导出数据
+    if request.data:
+        form = json.loads(request.data)
+    else:
+        form = {"task_id": 17}
 
+    # 判断该任务所有数据quality_inspection是否都是质检完成状态
+    task_id = form.get('task_id')
+    quality_status = Task_details.get_quality_status(task_id)
+    if quality_status:
+        # 执行导出动作
+        data = {"task_id": 16, "task_name": "1号任务",
+                "details": [
+            {
+                "path": "http://192.168.3.211:82/static/1/安志杰.jpg",
+                "props":
+                    [
+                        {
+                            "prop_id": 18,
+                            "prop_name": "衣服",
+                            "prop_value": 0,
+                            "prop_value_name": "未知"
+                        },
+                        {
+                            "prop_id": 19,
+                            "prop_name": "种族",
+                            "prop_value": 1,
+                            "prop_value_name": "汉族"
+                        }
+                    ]
 
+            },
+            {
+                "path": "http://192.168.3.211:82/static/1/安志杰2.jpg",
+                "props":
+                    [
+                        {
+                            "prop_id": 18,
+                            "prop_name": "衣服",
+                            "prop_value": 0,
+                            "prop_value_name": "未知"
+                        },
+                        {
+                            "prop_id": 19,
+                            "prop_name": "种族",
+                            "prop_value": 1,
+                            "prop_value_name": "汉族"
+                        }
+                    ]
 
-    # else:
-    #     return json.dumps({"msg": "该任务尚未完成所有流程，不可导出"})
-    # pass
+            }
+        ]}
+
+        task_details = Task_details.get_task_all_data(task_id)
+
+        export_task = ExportTaskCollection()
+        export_task.fill(task_details)
+        return json.dumps(export_task, default=lambda o: o.__dict__)
+
+    else:
+        return json.dumps({"msg": "该任务尚未完成所有流程，不可导出"})
+    pass

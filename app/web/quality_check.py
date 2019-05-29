@@ -14,8 +14,8 @@ from app.models.check_task import Check_task
 from app.models.check_user import Check_user
 from app.models.task_details_value import Task_details_value
 from app.models.rework import Rework
-from view_models.check_task import CheckTaskCollection, CheckUserCollection
-from view_models.labeler_task import LabelTaskDetailCollection
+from app.view_models.check_task import CheckTaskCollection, CheckUserCollection
+from app.view_models.labeler_task import LabelTaskDetailCollection
 from .blue_print import web
 from app import scheduler
 __author__ = 'meto'
@@ -314,7 +314,6 @@ def check_task_details():
                     correct_rate =true_count/all_check_count
 
 
-
                     # 得到任务的通过率
                     pass_rate = Check_data_info().get_pass_rate(check_user_id)
                     check_user = Check_user().query.filter_by(id=check_user_id).first()
@@ -357,7 +356,7 @@ def check_task_details():
                                 rework_table.set_attrs(data1)
                                 db.session.add(rework_table)
 
-                    return json.dumps({'msg':'该任务已完成'})
+                    return json.dumps({'msg':'该任务已完成','status': 666})
 
                 else:
                     # 返回锁定数据的用户
@@ -368,17 +367,19 @@ def check_task_details():
                     lock_user = db.session.query(Check_data_info.quality_user).filter(Check_data_info.check_user_id == check_user_id, Check_data_info.locks == 1).all()
                     pass
 
-                    return json.dumps({'msg':'已没有新数据，请%s尽快将锁定数据完成' %(str(lock_user))})
+                    return json.dumps({'msg':'已没有新数据，请%s尽快将锁定数据完成' %(str(lock_user)),'status': 666})
 
     elif detail_type == 2:
-        task_details_id = form.get('task_detail_id')
-        quality_data = Check_data_info().get_last_quality_data(quality_user,task_details_id,check_user_id)
+        task_detail_id = form.get('task_detail_id')
+        quality_data = Check_data_info().get_last_quality_data(quality_user,task_detail_id,check_user_id)
+        if quality_data is None:
+            return json.dumps({'msg': '没有更多了'})
 
     elif detail_type == 3:
-        task_details_id = form.get('task_detail_id')
-        quality_data = Check_data_info().get_next_quality_data(quality_user, task_details_id,check_user_id)
-    if quality_data is None:
-        return json.dumps({'msg': '没有更多了'})
+        task_detail_id = form.get('task_detail_id')
+        quality_data = Check_data_info().get_next_quality_data(quality_user, task_detail_id,check_user_id)
+        if quality_data is None:
+            return json.dumps({'msg': '没有更多了'})
     
     # 根据new_quality_data.task_details获取数据详情
     task_details = quality_data.task_details
@@ -437,10 +438,11 @@ def modify_check_data():
     props = form.get('props')
     with db.auto_commit():
         for prop in props:
-            if prop.get('prop_option_value_final') != prop.get('prop_option_value'):
-                prop_id = prop.get('prop_id')
-                task_details_value = Task_details_value().query.filter_by(prop_id=prop_id,
-                                                                          task_detail_id=task_detail_id).first()
+            prop_id = prop.get('prop_id')
+            task_details_value = Task_details_value().query.filter_by(prop_id=prop_id,
+                                                                      task_detail_id=task_detail_id).first()
+            if prop.get('prop_option_value_final') != int(task_details_value.prop_option_value_final):
+
 
                 # 修改task_details_value表中的final值
                 task_details_value.prop_option_value_final = prop.get('prop_option_value_final')

@@ -165,3 +165,7 @@ class Task_details(Base):
             return True
         else:
             return False
+
+    @classmethod
+    def get_task_all_data(cls, task_id):
+        return Task_details.query.filter_by(task_id=task_id).all()

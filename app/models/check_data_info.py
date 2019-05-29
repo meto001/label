@@ -34,9 +34,9 @@ class Check_data_info(Base):
         return new_quality_data
 
     @classmethod
-    def get_last_quality_data(cls, quality_user,task_details_id, check_user_id):
+    def get_last_quality_data(cls, quality_user,task_detail_id, check_user_id):
 
-        check_data_info = Check_data_info.query.filter_by(task_details_id=task_details_id, check_user_id=check_user_id).first()
+        check_data_info = Check_data_info.query.filter_by(task_details_id=task_detail_id, check_user_id=check_user_id).first()
         if check_data_info:
             check_data_info_id = check_data_info.id
 
@@ -48,9 +48,9 @@ class Check_data_info(Base):
             return None
 
     @classmethod
-    def get_next_quality_data(cls, quality_user,task_details_id, check_user_id):
+    def get_next_quality_data(cls, quality_user,task_detail_id, check_user_id):
 
-        check_data_info = Check_data_info.query.filter_by(task_details_id=task_details_id,
+        check_data_info = Check_data_info.query.filter_by(task_details_id=task_detail_id,
                                                              check_user_id=check_user_id).first()
         if check_data_info:
             check_data_info_id = check_data_info.id

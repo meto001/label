@@ -1,4 +1,7 @@
 # _*_ coding:utf-8 _*_
+from app.models.task_details_value import Task_details_value
+from app.models.property_value import Property_value
+
 __author__ = 'meto'
 __date__ = '2019/4/19 10:18'
 
@@ -59,20 +62,32 @@ class SourcesAndPorps:
 
 
 class ExportTaskViewModel:
-    def __init__(self,prop_values):
+    def __init__(self, task_detail):
         self.path = ''
         self.props = []
-        self.__parse(prop_values)
+        self.__parse(task_detail)
 
-    def __parse(self,prop_values):
-        self.props = [self.__map_to_prop(prop_value) for prop_value in prop_values]
+    def __parse(self,task_detail):
+        # 处理数据
+        self.path = task_detail.photo_path
+        task_detail_id = task_detail.id
+        detail_values = Task_details_value().query.filter_by(task_detail_id=task_detail_id).all()
+        self.props = [self.__map_to_prop(detail_value) for detail_value in detail_values]
 
-    def __map_to_prop(self):
+    def __map_to_prop(self, detail_value):
+        # 属性值名字
+        prop_value = Property_value().query.filter_by(prop_id=detail_value.prop_id, option_value=detail_value.prop_option_value_final).first()
+        if prop_value:
+            prop_value_name = prop_value.option_name
+        else:
+            prop_value_name = None
+
         return dict(
-            prop_id='',
-            prop_name='',
-            prop_value='',
-            prop_value_name=''
+            prop_id=detail_value.prop_id,
+            prop_name=detail_value.prop.prop_name,
+            prop_type=detail_value.prop_type,
+            prop_value=detail_value.prop_option_value_final,
+            prop_value_name =prop_value_name
         )
 
 
@@ -82,5 +97,7 @@ class ExportTaskCollection:
         self.task_name = ''
         self.details = []
 
-    def fill(self,x1):
-        self.details=[ExportTaskViewModel(x) for x in x1]
+    def fill(self,task_details):
+        self.task_id = task_details[0].task_id
+        self.task_name = task_details[0].task.task_name
+        self.details=[ExportTaskViewModel(task_detail) for task_detail in task_details]
