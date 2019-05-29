@@ -7,7 +7,7 @@ from app import db
 from app.models.rework import Rework
 from app.models.task_details import Task_details
 from app.view_models.rework import ReworkCollection
-from view_models.labeler_task import LabelTaskDetailCollection
+from app.view_models.labeler_task import LabelTaskDetailCollection
 from .blue_print import web
 __author__ = 'meto'
 __date__ = '2019/5/23 14:42'
