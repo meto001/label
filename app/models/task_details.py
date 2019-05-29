@@ -156,3 +156,12 @@ class Task_details(Base):
                                          Task_details.operate_create_time <= start_time+86400,
                                          Task_details.operate_user == label_user, Task_details.quality_inspection == -1).all()
         pass
+
+    @classmethod
+    def get_quality_status(cls, task_id):
+        # 如果为空，则所有quality_inspection均等于2，该任务已完成，返回True,否则返回False
+        details = Task_details.query.filter(Task_details.task_id==task_id, Task_details.quality_inspection!=2).first()
+        if details is None:
+            return True
+        else:
+            return False

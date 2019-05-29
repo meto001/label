@@ -19,7 +19,7 @@ class Rework(Base):
     right_rate = Column(String(10))
     status = Column(Integer, default=0,comment='返工数据完成状态：0 未完成，1 已完成')
     # 质检，-1为返工, 0为未质检，1为已生成质检，2为质检完成
-    quality_inspection= Column(Integer,default=0)
+    quality_inspection= Column(Integer, default=0)
 
     @classmethod
     def get_rework_data(cls,nickname):

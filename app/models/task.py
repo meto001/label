@@ -29,7 +29,7 @@ class Task(Base):
     @classmethod
     def get_urls(cls,source_id):
         print("taskid:",Task.source_id)
-        print(str(Source_image_path.query.filter_by(source_id=source_id)))
+        # print(str(Source_image_path.query.filter_by(source_id=source_id)))
         urls = Source_image_path.query.filter_by(source_id=source_id).all()
         return urls
 

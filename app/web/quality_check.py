@@ -55,6 +55,8 @@ def auto_generate_quality_check():
                     db.session.add(check_task)
                     time_array = time.strptime(date, '%Y-%m-%d')
                     start_time = time.mktime(time_array)
+                    # 改为已生成质检
+                    rerowk_data.quality_inspection = 1
                 task = rerowk_data.task
                 task_id = task.id
                 label_user = rerowk_data.user
@@ -271,7 +273,7 @@ def check_task_details():
         form = json.loads(request.data)
 
     else:
-        form = {'task_id':14, 'date':'2019-05-22','label_user':'wangwei','quality_user':'huahua','check_data_info_type':1, 'task_details_id':'9392'}
+        form = {'task_id':14, 'date':'2019-05-22','check_task_id': 23, 'label_user':'wangwei','quality_user':'huahua','check_data_info_type':1, 'task_details_id':'9392'}
 
     # 首先通过check_date、user、task_id查询check_user表得到该表的主键id,通过check_user_id查询check_data_info表，
     # 获取task_details_id.接下来的流程同标注流程，没有保存功能，可以修改，修改时修改task_details_value中的prop_option_value_final属性
@@ -280,8 +282,9 @@ def check_task_details():
     label_user = form.get('label_user')
     quality_user = form.get('quality_user')
     task_id = form.get('task_id')
+    check_task_id = form.get('check_task_id')
     detail_type = form.get('check_data_info_type')
-    check_user_id = Check_user.get_id(check_date, label_user, task_id)
+    check_user_id = Check_user.get_id(check_date, label_user, task_id, check_task_id)
     quality_data = None
 
     if detail_type == 1:
@@ -320,21 +323,23 @@ def check_task_details():
 
                         # 将正确率写入到check_user表中
                         check_user.right_rate = correct_rate
+                        # 计算该质检任务的开始和结束时间
+                        date = check_user.check_date
+                        time_array = time.strptime(date, '%Y-%m-%d')
+                        start_time = time.mktime(time_array)
+                        # end_time = start_time+86400
 
+                        all_rework = Task_details.set_rework(start_time, task_id, check_user.user)
                         if correct_rate >= pass_rate:
                             check_user.status = 1
+                            for rework in all_rework:
+                                rework.quality_inspection = 2
                         else:
                             # 返工
                             check_user.status = 2
                             check_user.rework_status = 0
                             # 将此user此任务当天的所有数据全部返工
-                            # 计算该质检任务的开始和结束时间
-                            date = check_user.check_date
-                            time_array = time.strptime(date, '%Y-%m-%d')
-                            start_time = time.mktime(time_array)
-                            # end_time = start_time+86400
 
-                            all_rework = Task_details.set_rework(start_time,task_id, check_user.user)
                             with db.auto_commit():
                                 for rework in all_rework:
                                     rework.quality_inspection = -1
@@ -401,8 +406,9 @@ def modify_check_data():
             "detail_type": 1,
             "create_user": "huahua",
             "group_id": 3,
-            "task_detail_id": 10856,
             "result_status": 0,
+            "task_detail_id": 10856,
+
             "error_count": "",
             "quality_lock": "",
             "check_data_info_id":"46",

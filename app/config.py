@@ -11,9 +11,9 @@ class APSchedulerJobConfig(object):
         'trigger': {
             'type': 'cron',
             'day_of_week': '0-6',
-            'hour': '17',
-            'minute':'13'
+            'hour': '16',
+            'minute':'23'
         }
     }]
     SCHEDULER_API_ENABLED = True
-    SQLALCHEMY_ECHO = True
+    # SQLALCHEMY_ECHO = True

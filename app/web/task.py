@@ -332,3 +332,67 @@ def modify_data():
         return json.dumps({'status': 'success'})
     else:
         return json.dumps({'msg': '这不是您做的数据，无法进行修改！'})
+
+
+@web.route('/task/export_data', methods=['POST'])
+def export_data():
+
+    print(type(Task_details()))
+    # # 导出数据
+    # if request.data:
+    #     form = json.loads(request.data)
+    # else:
+    #     form = {"task_id": 16}
+    #
+    # # 判断该任务所有数据quality_inspection是否都是质检完成状态
+    # task_id = form.get('task_id')
+    # quality_status = Task_details.get_quality_status(task_id)
+    # if quality_status:
+    #     # 执行导出动作
+    #     data = {"task_id": 16, "task_name": "1号任务",
+    #             "details": [
+    #         {
+    #             "path": "http://192.168.3.211:82/static/1/安志杰.jpg",
+    #             "props":
+    #                 [
+    #                     {
+    #                         "prop_id": 18,
+    #                         "prop_name": "衣服",
+    #                         "prop_value": 0,
+    #                         "prop_value_name": "未知"
+    #                     },
+    #                     {
+    #                         "prop_id": 19,
+    #                         "prop_name": "种族",
+    #                         "prop_value": 1,
+    #                         "prop_value_name": "汉族"
+    #                     }
+    #                 ]
+    #
+    #         },
+    #         {
+    #             "path": "http://192.168.3.211:82/static/1/安志杰2.jpg",
+    #             "props":
+    #                 [
+    #                     {
+    #                         "prop_id": 18,
+    #                         "prop_name": "衣服",
+    #                         "prop_value": 0,
+    #                         "prop_value_name": "未知"
+    #                     },
+    #                     {
+    #                         "prop_id": 19,
+    #                         "prop_name": "种族",
+    #                         "prop_value": 1,
+    #                         "prop_value_name": "汉族"
+    #                     }
+    #                 ]
+    #
+    #         }
+    #     ]}
+
+
+
+    # else:
+    #     return json.dumps({"msg": "该任务尚未完成所有流程，不可导出"})
+    # pass

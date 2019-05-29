@@ -57,3 +57,30 @@ class SourcesAndPorps:
         self.props = [self.__map_to_prop(prop) for prop in props]
 
 
+
+class ExportTaskViewModel:
+    def __init__(self,prop_values):
+        self.path = ''
+        self.props = []
+        self.__parse(prop_values)
+
+    def __parse(self,prop_values):
+        self.props = [self.__map_to_prop(prop_value) for prop_value in prop_values]
+
+    def __map_to_prop(self):
+        return dict(
+            prop_id='',
+            prop_name='',
+            prop_value='',
+            prop_value_name=''
+        )
+
+
+class ExportTaskCollection:
+    def __init__(self):
+        self.task_id = ''
+        self.task_name = ''
+        self.details = []
+
+    def fill(self,x1):
+        self.details=[ExportTaskViewModel(x) for x in x1]

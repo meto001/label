@@ -48,12 +48,15 @@ def rework_details():
         if details_type == 1:
             rework_data = Task_details().get_rework_data(task_id, start_time, label_user)
 
+            # 返工点击新的一张时默认修改为已完成
+            rework_data.is_complete = 1
+
             if rework_data is None:
                 # 将状态改为1
                 with db.auto_commit():
                     rework_info = Rework().query.filter_by(id=rework_id).first()
                     rework_info.status = 1
-                    # 此处需完善
+
 
                 return json.dumps({'msg': '该任务已完成'})
         if details_type == 2:
