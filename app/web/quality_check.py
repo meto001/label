@@ -6,7 +6,6 @@ import random
 from flask import current_app, request
 
 from app import db
-from app import create_app
 from app.models.task import Task
 from app.models.task_details import Task_details
 from app.models.check_data_info import Check_data_info

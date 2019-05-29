@@ -6,7 +6,7 @@ __date__ = '2019/5/15 11:46'
 class APSchedulerJobConfig(object):
     JOBS = [{
         'id': 'make_check_task',
-        'func': 'web.quality_check:auto_generate_quality_check',
+        'func': 'app.web.quality_check:auto_generate_quality_check',
         'args': '',
         'trigger': {
             'type': 'cron',
