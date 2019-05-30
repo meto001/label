@@ -4,7 +4,8 @@ import socket
 from flask import request
 from flask_login import login_required
 from werkzeug.datastructures import MultiDict
-
+import re
+import requests
 from app.models.base import db
 from app.view_models.source import SourceViewModel, SourceCollection, SourceImageViewModel
 from .blue_print import web
@@ -47,7 +48,13 @@ def add_source():
     # form = {'source_name': 'wwtest2', 'label_type_id': 2, 'file_url': 'F:/数据需求/标注系统测试/1'}
     # form = MultiDict(json.loads(request.data))
     try:
-        addr = socket.gethostbyname(socket.getfqdn(socket.gethostname()))
+        # 获取内网ip
+        # addr = socket.gethostbyname(socket.getfqdn(socket.gethostname()))
+        # 获取公网ip
+        url = requests.get("http://txt.go.sohu.com/ip/soip")
+        text = url.text
+        ip = re.findall(r'\d+.\d+.\d+.\d+', text)
+        addr = ip[0]
     except:
         addr = '127.0.0.1'
     form = json.loads(request.data)
