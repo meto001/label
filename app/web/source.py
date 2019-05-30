@@ -55,6 +55,7 @@ def add_source():
         source_image_path = Source_image_path()
         files = source_image_path.select_files_path(form['file_url'], addr)
         count = len(files)
+        print(count)
         with db.auto_commit():
             source = Source()
             form['count'] = count
