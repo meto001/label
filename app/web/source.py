@@ -49,12 +49,12 @@ def add_source():
     # form = MultiDict(json.loads(request.data))
     try:
         # 获取内网ip
-        # addr = socket.gethostbyname(socket.getfqdn(socket.gethostname()))
+        addr = socket.gethostbyname(socket.getfqdn(socket.gethostname()))
         # 获取公网ip
-        url = requests.get("http://txt.go.sohu.com/ip/soip")
-        text = url.text
-        ip = re.findall(r'\d+.\d+.\d+.\d+', text)
-        addr = ip[0]
+        # url = requests.get("http://txt.go.sohu.com/ip/soip")
+        # text = url.text
+        # ip = re.findall(r'\d+.\d+.\d+.\d+', text)
+        # addr = ip[0]
     except:
         addr = '127.0.0.1'
     form = json.loads(request.data)
