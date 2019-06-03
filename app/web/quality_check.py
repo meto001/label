@@ -475,7 +475,7 @@ def modify_check_data():
             prop_id = prop.get('prop_id')
             task_details_value = Task_details_value().query.filter_by(prop_id=prop_id,
                                                                       task_detail_id=task_detail_id).first()
-            if prop.get('prop_option_value_final') != int(task_details_value.prop_option_value_final):
+            if str(prop.get('prop_option_value_final')) != str(task_details_value.prop_option_value_final):
 
 
                 # 修改task_details_value表中的final值
