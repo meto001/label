@@ -30,8 +30,9 @@ class CheckTaskViewModel:
 
     def __map_to_task(self,id,check_task):
         task = Task.query.filter_by(id=id).first()
-        timeArray = time.localtime(check_task.create_time-86400)
-        date = time.strftime('%Y-%m-%d', timeArray)
+        date = Check_user.query.filter_by(check_task_id = check_task.id).first().check_date
+        # timeArray = time.localtime(check_task.create_time-86400)
+        # date = time.strftime('%Y-%m-%d', timeArray)
         return dict(
             check_task_id = check_task.id,
             date=date,

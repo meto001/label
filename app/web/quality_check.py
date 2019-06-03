@@ -23,16 +23,47 @@ __date__ = '2019/5/13 10:46'
 import time
 
 
-# 自动生成昨天的质检
-@web.route('/test3', methods=['GET', 'POST'])
-def auto_generate_quality_check():
-    # 当前时间
-    now_time = int(time.time())
-    # 今天凌晨的时间戳
-    today_time = now_time - now_time % 86400 + time.timezone
+# 手动生成质检
+# @web.route('generate_quality_check', methods=['GET','POST'])
+# def generate_quality_check():
+#     """
+#         前端传过来一个date日期 例如：20190530
+#         得出该日期起始和结束的时间戳
+#         进行两个判断，是否是今天，如果不是今天，正常执行，
 
-    # 昨天凌晨的时间戳
-    yesterday_time = today_time - 86400
+#     :return:
+#     """
+#     pass
+#
+
+# 自动生成昨天的质检
+@web.route('/auto_generate_quality_check', methods=['GET', 'POST'])
+def auto_generate_quality_check():
+    """
+        前端传过来一个date日期 例如：20190530
+        得出该日期起始和结束的时间戳
+        进行两个判断，是否是今天，如果不是今天，正常执行，
+        如果是今天，得到今天做过的所有数据，得到tasks，找到已完成的tasks，进行质检，其他忽略
+
+    :return:
+    """
+
+    if request.data:
+        form = json.loads(request.data)
+        date = form.get('date')
+        time_array = time.strptime(date, '%Y-%m-%d')
+        day_start_time = time.mktime(time_array)
+        day_end_time = day_start_time + 86400
+
+    else:
+
+        # 当前时间
+        now_time = int(time.time())
+        # 今天凌晨的时间戳
+        day_end_time = now_time - now_time % 86400 + time.timezone
+
+        # 昨天凌晨的时间戳
+        day_start_time = day_end_time - 86400
 
     # 假数据
     # today_time = 1557504000
@@ -116,13 +147,17 @@ def auto_generate_quality_check():
                             db.session.add(check_data_info)
 
         # 判断是否有新数据
-        has_new_data = Task_details().is_have_new_data(yesterday_time, today_time)
+        has_new_data = Task_details().is_have_new_data(day_start_time, day_end_time)
 
         if has_new_data:
+
+            # 判断是否是今天，如果不是今天，执行后面的语句，如果是今天,只生成已完成的任务
+            # 此处逻辑6.3日编写
+
             with db.auto_commit():
                 check_task = Check_task()
                 data = {}
-                timeArray = time.localtime(yesterday_time)
+                timeArray = time.localtime(day_start_time)
                 timeData = time.strftime('%Y-%m-%d', timeArray)
 
                 data['check_task_name'] = timeData+'质检任务'
@@ -131,13 +166,13 @@ def auto_generate_quality_check():
 
             tasks = Task().check_get_undone_task()
             for task in tasks:
-                users = Task_details().get_users(yesterday_time, today_time, task)
+                users = Task_details().get_users(day_start_time, day_end_time, task)
                 print('任务名字为：', task.task_name)
 
                 for user_tuple in users:
                     user = user_tuple[0]
                     print('user：', user, end=';')
-                    task_details = Task_details().get_uncheck_user_task_details(yesterday_time, today_time, task, user)
+                    task_details = Task_details().get_uncheck_user_task_details(day_start_time, day_end_time, task, user)
                     count = len(task_details)
                     print('完成的总数为：', count, end=';')
 
@@ -282,7 +317,7 @@ def check_task_details():
     quality_user = form.get('quality_user')
     task_id = form.get('task_id')
     check_task_id = form.get('check_task_id')
-    detail_type = form.get('check_data_info_type')
+    detail_type = form.get('detail_type')
     check_user_id = Check_user.get_id(check_date, label_user, task_id, check_task_id)
     quality_data = None
 
