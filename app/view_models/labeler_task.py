@@ -64,8 +64,9 @@ class LabelTaskDetailViewModel:
     # property_values
     def __parse(self, task_detail_id, detail_type):
         # task_detail_values = Task_details_value()
-        if detail_type == 2 or detail_type == 3:
-            prop_option_value = Task_details_value().query.filter_by(prop_id=self.prop_id, task_detail_id=task_detail_id).first()
+        # if detail_type == 2 or detail_type == 3:
+        prop_option_value = Task_details_value().query.filter_by(prop_id=self.prop_id, task_detail_id=task_detail_id).first()
+        if prop_option_value:
             self.prop_option_value = prop_option_value.prop_option_value
             self.prop_option_value_final = prop_option_value.prop_option_value_final
 
