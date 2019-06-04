@@ -36,8 +36,8 @@ import time
 #     pass
 #
 
-# 自动生成昨天的质检
-@web.route('/auto_generate_quality_check', methods=['GET', 'POST'])
+# 生成质检，可自动可手动
+@web.route('/generate_quality_check', methods=['GET', 'POST'])
 def auto_generate_quality_check():
     """
         前端传过来一个date日期 例如：20190530
