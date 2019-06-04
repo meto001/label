@@ -35,7 +35,7 @@ def rework_details():
 
     else:
         form = {'rework_id': 1, 'task_id': 14, 'date': '2019-05-22', 'label_user': 'wangwei',
-                'detail_type': 1, 'task_details_id': '9392'}
+                'detail_type': 1, 'task_detail_id': '9392'}
 
     task_id = form.get('task_id')
     label_user = form.get('label_user')
@@ -44,7 +44,7 @@ def rework_details():
     date = form.get('date')
     time_array = time.strptime(date, '%Y-%m-%d')
     start_time = time.mktime(time_array)
-    task_details_id = form.get('task_details_id')
+    task_details_id = form.get('task_detail_id')
     # end_time = start_time+86400
     if detail_type == 1:
         rework_data = Task_details().get_rework_data(task_id, start_time, label_user)
