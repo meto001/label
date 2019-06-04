@@ -26,6 +26,9 @@ class Task(Base):
 
     is_complete = Column(Integer)
 
+    # status:0废弃，1,生效，2 已结束
+
+
     @classmethod
     def get_urls(cls,source_id):
         print("taskid:",Task.source_id)
@@ -70,5 +73,5 @@ class Task(Base):
 
     @classmethod
     def check_get_undone_task(cls):
-        return Task.query.filter_by(is_complete=0).all()
+        return Task.query.filter_by(status=1).all()
 

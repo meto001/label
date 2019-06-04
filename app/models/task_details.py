@@ -1,4 +1,6 @@
 # _*_ coding:utf-8 _*_
+from app.models.task import Task
+
 __author__ = 'meto'
 __date__ = '2019/4/17 15:41'
 
@@ -169,3 +171,15 @@ class Task_details(Base):
     @classmethod
     def get_task_all_data(cls, task_id):
         return Task_details.query.filter_by(task_id=task_id).all()
+
+    @classmethod
+    def get_already_task(cls, start_time):
+        task_ids = []
+        tasks_id = db.session.query(Task_details.task_id).filter(Task_details.operate_create_time>= start_time,
+                                  Task_details.operate_create_time < start_time+86400, Task_details.is_complete == 1).group_by(
+            Task_details.task_id).all()
+        for id in tasks_id:
+            task_ids.append(id[0])
+        tasks = Task.query.filter(Task.id.in_(task_ids),Task.is_complete == 1).all()
+        return tasks
+

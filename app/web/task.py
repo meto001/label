@@ -395,6 +395,12 @@ def export_data():
 
         export_task = ExportTaskCollection()
         export_task.fill(task_details)
+
+        # 将任务状态改为已导出，则自动质检时不再查询该任务 status=2 为已结束
+        with db.auto_commit():
+            task = Task().query.filter_by(id=task_id).first()
+            task.status = 2
+
         return json.dumps(export_task, default=lambda o: o.__dict__)
 
     else:

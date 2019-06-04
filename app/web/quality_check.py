@@ -48,12 +48,13 @@ def auto_generate_quality_check():
     :return:
     """
 
-    if request.data:
-        form = json.loads(request.data)
-        date = form.get('date')
-        time_array = time.strptime(date, '%Y-%m-%d')
-        day_start_time = time.mktime(time_array)
-        day_end_time = day_start_time + 86400
+    if request:
+        if request.data:
+            form = json.loads(request.data)
+            date = form.get('date')
+            time_array = time.strptime(date, '%Y-%m-%d')
+            day_start_time = time.mktime(time_array)
+            day_end_time = day_start_time + 86400
 
     else:
 
@@ -153,7 +154,13 @@ def auto_generate_quality_check():
 
             # 判断是否是今天，如果不是今天，执行后面的语句，如果是今天,只生成已完成的任务
             # 此处逻辑6.3日编写
-
+            now_time1 = int(time.time())
+            if day_start_time < now_time1 < day_start_time+86400:
+                # 查找task_details中今天操作已完成的tasks，将其返回
+                tasks = Task_details.get_already_task(day_start_time)
+            else:
+                # 如果不是今天，则查找未完成的
+                tasks = Task().check_get_undone_task()
             with db.auto_commit():
                 check_task = Check_task()
                 data = {}
@@ -164,17 +171,17 @@ def auto_generate_quality_check():
                 check_task.set_attrs(data)
                 db.session.add(check_task)
 
-            tasks = Task().check_get_undone_task()
+
             for task in tasks:
                 users = Task_details().get_users(day_start_time, day_end_time, task)
-                print('任务名字为：', task.task_name)
+                print('任务名字为：', task.task_name, end=';')
 
                 for user_tuple in users:
                     user = user_tuple[0]
                     print('user：', user, end=';')
                     task_details = Task_details().get_uncheck_user_task_details(day_start_time, day_end_time, task, user)
                     count = len(task_details)
-                    print('完成的总数为：', count, end=';')
+                    print('完成的总数为：', count)
 
                     if count:
                         # 将昨天的任务改为已生成质检状态  测试时暂时屏蔽
