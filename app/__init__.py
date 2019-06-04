@@ -31,12 +31,12 @@ def create_app():
     login_manager.login_view = 'web.login'
     login_manager.login_message = '请先登录或注册'
 
-    if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
-        print('scheduler is start')
-        scheduler.init_app(app)
-        scheduler.start()
-    else:
-        print('scheduler is not start')
+    # if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+    print('scheduler is start')
+    scheduler.init_app(app)
+    scheduler.start()
+    # else:
+    #     print('scheduler is not start')
 
     return app
 
