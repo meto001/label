@@ -329,6 +329,7 @@ def modify_data():
                 task_details_value.set_attrs(data)
                 db.session.add(task_details_value)
             task_detail = Task_details.query.filter_by(id=task_detail_id).first()
+            task_detail.is_complete = 1
             task_detail.operate_time = time.time()
         return json.dumps({'status': 'success'})
     else:
