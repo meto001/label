@@ -49,8 +49,7 @@ def rework_details():
     if detail_type == 1:
         rework_data = Task_details().get_rework_data(task_id, start_time, label_user)
 
-        # 返工点击新的一张时默认修改为已完成
-        rework_data.is_complete = 1
+
 
         if rework_data is None:
             # 将状态改为1
@@ -60,6 +59,9 @@ def rework_details():
 
 
             return json.dumps({'msg': '该任务已完成'})
+        else:
+            # 返工点击新的一张时默认修改为已完成
+            rework_data.is_complete = 1
     if detail_type == 2:
         rework_data = Task_details().get_last_rework_data(task_id, start_time, label_user,task_details_id)
         if rework_data is None:
