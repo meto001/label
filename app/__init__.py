@@ -35,7 +35,8 @@ def create_app():
         print('scheduler is start')
         scheduler.init_app(app)
         scheduler.start()
-
+    else:
+        print('scheduler is not start')
 
     return app
 
