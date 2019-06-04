@@ -32,6 +32,7 @@ def create_app():
     login_manager.login_message = '请先登录或注册'
 
     if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+        print('scheduler is start')
         scheduler.init_app(app)
         scheduler.start()
 
