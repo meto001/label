@@ -237,7 +237,8 @@ def auto_generate_quality_check():
 
         else:
             print('今日无新数据生成')
-    return "hello"
+            return json.dumps({'msg': '今日无新数据生成'})
+    return json.dumps({'msg': '生成质检成功'})
 
 
 @web.route('/check_task',methods=['GET','POST'])
