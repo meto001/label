@@ -68,6 +68,10 @@ def rework_details():
 
     # 根据new_quality_data.task_details获取数据详情
     task_detail_id = rework_data.id
+    # 判断是否已经质检过，如果是质检过的数据，则在返回数据之前就将完成状态改为1
+    if rework_data.quality_lock == 1:
+        with db.auto_commit():
+            rework_data.is_complete = 1
     url = rework_data.photo_path
 
     prop_ids = rework_data.task.prop_ids
