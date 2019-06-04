@@ -352,7 +352,7 @@ def check_task_details():
                     true_count = Check_data_info().true_count(check_user_id)
                     all_check_count = Check_data_info().all_count(check_user_id)
                     # 正确率
-                    correct_rate =true_count/all_check_count
+                    correct_rate =round(true_count/all_check_count,2)
 
 
                     # 得到任务的通过率

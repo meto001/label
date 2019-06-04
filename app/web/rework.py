@@ -62,9 +62,13 @@ def rework_details():
             return json.dumps({'msg': '该任务已完成'})
     if detail_type == 2:
         rework_data = Task_details().get_last_rework_data(task_id, start_time, label_user,task_details_id)
+        if rework_data is None:
+            return json.dumps({'msg': '到头了'})
 
     if detail_type == 3:
         rework_data = Task_details().get_next_rework_data(task_id, start_time, label_user,task_details_id)
+        if rework_data is None:
+            return json.dumps({'msg': '到头了'})
 
     # 根据new_quality_data.task_details获取数据详情
     task_detail_id = rework_data.id

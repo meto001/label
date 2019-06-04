@@ -134,6 +134,7 @@ class Task_details(Base):
         rework_data = Task_details.query.filter(Task_details.operate_user == label_user, Task_details.task_id == task_id,
                                   Task_details.operate_create_time > start_time,
                                   Task_details.operate_create_time <= end_time,
+                                  Task_details.is_complete == 1,
                                   Task_details.id < task_details_id).order_by(
                                   desc(Task_details.id)).first()
         return rework_data
@@ -145,6 +146,7 @@ class Task_details(Base):
                                                 Task_details.task_id == task_id,
                                                 Task_details.operate_create_time > start_time,
                                                 Task_details.operate_create_time <= end_time,
+                                                Task_details.is_complete == 1,
                                                 Task_details.id > task_details_id).order_by(
                                                 asc(Task_details.id)).first()
         return rework_data
