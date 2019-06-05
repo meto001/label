@@ -1,4 +1,5 @@
 # _*_ coding:utf-8 _*_
+import os
 import time
 
 from flask import request, json
@@ -403,6 +404,10 @@ def export_data():
             task = Task().query.filter_by(id=task_id).first()
             task.status = 2
         # print(json.dumps(export_task, default=lambda o: o.__dict__))
+
+        if os.path.exists('app/static/json') == 0:
+            os.mkdir('app/static/json')
+
         with open('app/static/json/%s.json'%task.task_name,'w') as f:
             f.write(json.dumps(export_task, default=lambda o: o.__dict__))
         path = 'static/json/%s.json'%task.task_name
