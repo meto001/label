@@ -11,4 +11,12 @@ def show_log():
     with open('app/static/label.log','r',encoding='utf-8',errors='ignore') as f:
         contents = f.read()
         cont = contents.replace('\n','<br/>')
+
+        # 倒叙排列
+        # cont = f.readlines()
+        # cont.reverse()
+        # print(type(cont))
+        # contents = ''.join(cont)
+        # cont = contents.replace('\n', '<br/>')
+
     return cont
