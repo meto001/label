@@ -158,7 +158,8 @@ class Task_details(Base):
         return Task_details.query.filter(Task_details.task_id == task_id,
                                          Task_details.operate_create_time > start_time,
                                          Task_details.operate_create_time <= start_time+86400,
-                                         Task_details.operate_user == label_user, Task_details.quality_inspection == -1).all()
+                                         Task_details.operate_user == label_user, Task_details.quality_inspection == -1,
+                                         Task_details.quality_lock == 0).all()
         pass
 
     @classmethod

@@ -402,8 +402,11 @@ def export_data():
         with db.auto_commit():
             task = Task().query.filter_by(id=task_id).first()
             task.status = 2
-
-        return json.dumps(export_task, default=lambda o: o.__dict__)
-
+        # print(json.dumps(export_task, default=lambda o: o.__dict__))
+        with open('app/static/json/%s.json'%task.task_name,'w') as f:
+            f.write(json.dumps(export_task, default=lambda o: o.__dict__))
+        path = 'static/json/%s.json'%task.task_name
+        # return json.dumps(export_task, default=lambda o: o.__dict__)
+        return json.dumps({'path':path})
     else:
         return json.dumps({"msg": "该任务尚未完成所有流程，不可导出"})
