@@ -355,7 +355,6 @@ def check_task_details():
                     # 正确率
                     correct_rate =round(true_count/all_check_count,2)
 
-
                     # 得到任务的通过率
                     pass_rate = Check_data_info().get_pass_rate(check_user_id)
                     check_user = Check_user().query.filter_by(id=check_user_id).first()

@@ -6,7 +6,7 @@ from flask import request, json
 from flask_login import login_required
 from sqlalchemy import desc
 
-from app import db
+from app import db, dict1
 from app.models.property import Property
 from app.models.source import Source
 from app.models.task import Task
@@ -17,7 +17,7 @@ from app.view_models.labeler_task import LabelTaskViewModel, LabelTaskCollection
 from app.view_models.task import TaskCollection, SourcesAndPorps, ExportTaskCollection
 from .blue_print import web
 from app.libs.img_stream import return_img_stream
-
+from queue import Queue
 __author__ = 'meto'
 __date__ = '2019/3/25 17:50'
 
@@ -115,7 +115,21 @@ def show_task_detail():
         new_data = Task_details().get_has_locks(user, task_id)
         # 如果没有锁定数据
         if new_data is None:
-            new_data = Task_details().get_new_data(task_id)
+            # 如果没有锁定数据，判断字典里是否有该任务的队列，如果有，则获取一个task_detail_id，否则，新建队列，获取task_detail_id
+            if dict1.get(task_id) is None:
+                q = Queue()
+                # 查询该任务下未完成的task_detail_id
+                undone_ids = Task_details().get_undone_ids(task_id)
+                for id in undone_ids:
+                    q.put(id)
+                dict1[task_id]=q
+            if dict1.get(task_id).empty() is False:
+                task_detail_id = dict1.get(task_id).get()
+                print(task_id, ':', task_detail_id)
+            else:
+                # 此处为了少修改逻辑，否则应把下面的代码合并过来
+                task_detail_id = None
+            new_data = Task_details().get_new_data(task_id,task_detail_id)
             if new_data:
 
                 # 更新数据，将该条数据锁定
@@ -408,10 +422,50 @@ def export_data():
         if os.path.exists('app/static/json') == 0:
             os.mkdir('app/static/json')
 
-        with open('app/static/json/%s.json'%task.task_name,'w') as f:
+        with open('app/static/json/%s.exe'%task.task_name,'w') as f:
             f.write(json.dumps(export_task, default=lambda o: o.__dict__))
-        path = '/static/json/%s.json'%task.task_name
+        path = '/static/json/%s.exe'%task.task_name
         # return json.dumps(export_task, default=lambda o: o.__dict__)
         return json.dumps({'path':path})
     else:
         return json.dumps({"msg": "该任务尚未完成所有流程，不可导出"})
+
+
+@web.route('/helloo')
+# @cache.cached(timeout=6,key_prefix='meto')
+def hello():
+    request
+    name = 'hello redis 16'
+    return name
+
+
+@web.route('/queue_test')
+def load():
+    id= json.loads(request.data).get('id')
+    # if q.empty():
+    #     for i in range(10):
+    #         q.put(i)
+    # a = q.get()
+    # print(q)
+    # q = dict1.get('5')
+    # if q.empty():
+    #     print('5null')
+    # else:
+    #     print(q.get())
+    #
+    # q = dict1.get('3')
+    # if q.empty():
+    #     print('3null')
+    # else:
+    #     print(q.get())
+    # return 'a'
+    # id = '65333'
+    if dict1.get(id) is None:
+        q = Queue(10)
+        print('none')
+        for i in range(5):
+            q.put(i)
+        dict1[id]=q
+    if dict1[id].empty() is False:
+        print(id,'--', dict1[id].get())
+    return 'success'

@@ -30,7 +30,7 @@ class Source_image_path(Base):
                 if file.split('.')[-1] in imgType_list:
                     file_path = file_path.replace('\\', '/')
                     file_list.append(file_path)
-        print('file_list Length:', len(file_list))
+        # print('file_list Length:', len(file_list))
         return file_list
 
     def get_source_img_data(self, source_id, source_img_type, source_image_id):

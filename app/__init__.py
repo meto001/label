@@ -13,9 +13,15 @@ from flask_login import LoginManager
 from flask_cors import CORS
 from flask_apscheduler import APScheduler
 from app.config import APSchedulerJobConfig
+from app.config import cache_config
+from flask_cache import Cache
+from queue import Queue
 login_manager = LoginManager()
 # 注册APScheduler
 scheduler = APScheduler()
+# q = Queue(100)
+dict1 ={}
+# cache = Cache(with_jinja2_ext=False)
 def create_app():
     app = Flask(__name__)
     try:
@@ -24,6 +30,11 @@ def create_app():
         print(e)
     app.config.from_object('app.secure')
     app.config.from_object(APSchedulerJobConfig)
+
+    # 配置redis缓存
+    app.config.from_object(cache_config)
+    # cache.init_app(app,cache_config)
+
     register_blueprint(app)
     db.init_app(app)
     db.create_all(app=app)

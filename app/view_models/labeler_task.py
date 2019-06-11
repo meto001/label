@@ -39,7 +39,7 @@ class LabelTaskCollection:
     def fill(self,total, tasks, user):
         self.total = total
         for task in tasks:
-            print(task.id)
+            # print(task.id)
             # 已经完成的数量
             task_detail = Task_details()
             completed_count = task_detail.get_already_count(task.id)

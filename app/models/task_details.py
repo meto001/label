@@ -58,8 +58,8 @@ class Task_details(Base):
         return locks
 
     @classmethod
-    def get_new_data(cls, task_id):
-        new_data =Task_details.query.filter_by(is_complete=0, locks=0, task_id=task_id,quality_inspection=0).first()
+    def get_new_data(cls, task_id, task_detail_id):
+        new_data =Task_details.query.filter_by(is_complete=0, locks=0, task_id=task_id,quality_inspection=0, id = task_detail_id).first()
         return new_data
 
     @classmethod
@@ -186,3 +186,12 @@ class Task_details(Base):
         tasks = Task.query.filter(Task.id.in_(task_ids),Task.is_complete == 1).all()
         return tasks
 
+
+    @classmethod
+    def get_undone_ids(cls, task_id):
+        ids = db.session.query(Task_details.id).filter(Task_details.task_id == task_id, Task_details.is_complete == 0,
+                                                 Task_details.locks == 0).all()
+        undone_id = []
+        for id in ids:
+            undone_id.append(id[0])
+        return undone_id
