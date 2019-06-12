@@ -130,9 +130,12 @@ def show_task_detail():
                 # 此处为了少修改逻辑，否则应把下面的代码合并过来
                 task_detail_id = None
             new_data = Task_details().get_new_data(task_id,task_detail_id)
+
+            # 当队列中获取的值查不到时，循环进行查询，直到队列为空
             while new_data is None:
                 if dict1.get(task_id).empty() is False:
                     task_detail_id = dict1.get(task_id).get()
+                    print('test_task_detail_id:', task_detail_id)
                 else:
                     break
                 new_data = Task_details().get_new_data(task_id, task_detail_id)
@@ -257,7 +260,7 @@ def save_data():
     if Task_details_value.query.filter_by(task_detail_id=form.get('task_detail_id'),
                                           prop_id=props[0].get('prop_id')).first():
         print('task_detail_id:', form.get('task_detail_id'), ' 已经存过了')
-        return json.dumps({'mag': '不可重复存入'})
+        return json.dumps({'msg': '不可重复存入'})
     print('task_detail_id:', form.get('task_detail_id'), ' 还没有存过')
     with db.auto_commit():
         for prop in props:
