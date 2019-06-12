@@ -20,7 +20,6 @@ pymysql = "*"
 flask-cache = "*"
 flask-script = "*"
 redis = "*"
-queue = "*"
 
 [requires]
 python_version = "3.6"

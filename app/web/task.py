@@ -130,6 +130,12 @@ def show_task_detail():
                 # 此处为了少修改逻辑，否则应把下面的代码合并过来
                 task_detail_id = None
             new_data = Task_details().get_new_data(task_id,task_detail_id)
+            while new_data is None:
+                if dict1.get(task_id).empty() is False:
+                    task_detail_id = dict1.get(task_id).get()
+                else:
+                    break
+                new_data = Task_details().get_new_data(task_id, task_detail_id)
             if new_data:
 
                 # 更新数据，将该条数据锁定

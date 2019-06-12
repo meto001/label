@@ -28,5 +28,5 @@ dict1 = {"properties":[{"label_type_name": "人脸质量标注", "property_value
                 {"label_type_name": "行人", "property_value":[{"id": 14,"prop_name":"帽子"},{"id": 15,"prop_name":"鞋子"}]}
               ]}
 
-# print(json.loads(json1))
+# print(json.loads(task.json))
 # print(json.dumps(dict1))
