@@ -9,10 +9,25 @@ from app.models.user import User
 from flask_login import login_user, logout_user
 import json
 
+from models.label_type import Label_type
+
 __author__ = 'meto'
 __date__ = '2019/3/21 11:06'
 
 from .blue_print import web
+
+
+@web.before_app_first_request
+def add_admin():
+    # 判断是否有管理员账户，如没有则添加管理员账户
+    admin = User().query.filter_by(groupid=1).first()
+    if admin is None:
+        data = {"nickname": "meto", "realname": "meto", "password": "123456", "email": "756246975@qq.com",
+                "groupid": 1}
+        with db.auto_commit():
+            user = User()
+            user.set_attrs(data)
+            db.session.add(user)
 
 
 @web.route('/register', methods=['POST'])
@@ -28,10 +43,11 @@ def register():
             db.session.add(user)
         return json.dumps({'status': 'success'})
     msg = ''
-    for k,v in form.errors.items():
+    for k, v in form.errors.items():
         # print(k,v)
-        msg = msg+v[0]+' '
-    return json.dumps({'status':'fail','msg':msg})
+        msg = msg + v[0] + ' '
+    return json.dumps({'status': 'fail', 'msg': msg})
+
 
 @cross_origin
 @web.route('/login', methods=['GET', 'POST'])
@@ -74,7 +90,7 @@ def forget_password_request():
     return 'None'
 
 
-@web.route('/logout',methods=['GET','POST'])
+@web.route('/logout', methods=['GET', 'POST'])
 def logout():
     logout_user()
-    return json.dumps({'status' : 'success'})
+    return json.dumps({'status': 'success'})

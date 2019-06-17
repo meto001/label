@@ -18,6 +18,7 @@ from app.view_models.task import TaskCollection, SourcesAndPorps, ExportTaskColl
 from .blue_print import web
 from app.libs.img_stream import return_img_stream
 from queue import Queue
+
 __author__ = 'meto'
 __date__ = '2019/3/25 17:50'
 
@@ -25,6 +26,11 @@ __date__ = '2019/3/25 17:50'
 @web.route('/add_task', methods=['GET', 'POST'])
 # @login_required
 def add_task():
+    """
+    添加任务接口，get请求为获取对应类型的数据源和属性
+
+    :return:
+    """
     # 判断如果是get方法，则返回对应类型的sources和props
     if request.method == 'GET':
         form = request.args.get('label_type_id')
@@ -62,6 +68,10 @@ def add_task():
 
 @web.route('/task/admin', methods=['GET', 'POST'])
 def admin_task():
+    """
+    管理员任务界面
+    :return:
+    """
     page = request.args.get('page')
     rows = request.args.get('pagerows')
     tasks = Task.get_task(page, rows)
@@ -75,7 +85,7 @@ def admin_task():
 @web.route('/task/labeler', methods=['GET', 'POST'])
 def labeler_task():
     """
-    展示当前用户任务列表
+    标注员任务界面
     :return:
     """
     page = request.args.get('page')
@@ -98,6 +108,11 @@ def labeler_task():
 
 @web.route('/task/show_task_detail', methods=['GET', 'POST'])
 def show_task_detail():
+    """
+    任务详情界面，包括：新的一张，上一张，下一张。使用队列方式进行发放数据。如任务已完成，则修改任务状态。
+    :return:
+    """
+
     # detail_type 1,新的一页;2,上一张;3,下一张
     if request.data:
         form = json.loads(request.data)
@@ -122,20 +137,20 @@ def show_task_detail():
                 undone_ids = Task_details().get_undone_ids(task_id)
                 for id in undone_ids:
                     q.put(id)
-                dict1[task_id]=q
+                dict1[task_id] = q
             if dict1.get(task_id).empty() is False:
                 task_detail_id = dict1.get(task_id).get()
                 print(task_id, ':', task_detail_id)
             else:
                 # 此处为了少修改逻辑，否则应把下面的代码合并过来
                 task_detail_id = None
-            new_data = Task_details().get_new_data(task_id,task_detail_id)
+            new_data = Task_details().get_new_data(task_id, task_detail_id)
 
             # 当队列中获取的值查不到时，循环进行查询，直到队列为空
             while new_data is None:
                 if dict1.get(task_id).empty() is False:
                     task_detail_id = dict1.get(task_id).get()
-                    print('test_task_detail_id:', task_detail_id)
+                    print('已经消失了的记录:', task_detail_id)
                 else:
                     break
                 new_data = Task_details().get_new_data(task_id, task_detail_id)
@@ -154,13 +169,13 @@ def show_task_detail():
                         task = Task.query.filter_by(id=task_id).first()
                         task.is_complete = 1
                         # status=666 页面需要跳出
-                    return json.dumps({'msg': '该任务已完成','status':666})
+                    return json.dumps({'msg': '该任务已完成', 'status': 666})
                 else:
                     lock_user = db.session.query(Task_details.operate_user).filter(Task_details.task_id == task_id,
                                                                                    Task_details.locks == 1).all()
-                    return json.dumps({'msg': '已没有新数据，请%s尽快将锁定数据完成' % (str(lock_user)), 'status':666})
+                    return json.dumps({'msg': '已没有新数据，请%s尽快将锁定数据完成' % (str(lock_user)), 'status': 666})
 
-                return json.dumps({'msg': '该任务已完成','status':666})
+                return json.dumps({'msg': '该任务已完成', 'status': 666})
 
         task_detail_id = new_data.id
         url = new_data.photo_path
@@ -229,6 +244,10 @@ def show_task_detail():
 
 @web.route('/task/save_data', methods=['POST'])
 def save_data():
+    """
+    保存数据
+    :return:
+    """
     # 如果prop_type=2的话，则prop_option_id 值为坐标值
     if request.data:
         form = json.loads(request.data)
@@ -256,7 +275,8 @@ def save_data():
                  }], }
 
     props = form.get('props')
-    # 判断是否已经保存，此处有bug，如果点击速度过快，仍会有一定概率重复保存
+    # 判断是否已经保存，此处有bug，如果点击速度过快，仍会有一定概率重复保存。
+    # 通过前端增加loading解决了此问题
     if Task_details_value.query.filter_by(task_detail_id=form.get('task_detail_id'),
                                           prop_id=props[0].get('prop_id')).first():
         print('task_detail_id:', form.get('task_detail_id'), ' 已经存过了')
@@ -289,6 +309,10 @@ def save_data():
 
 @web.route('/task/modify_data', methods=['POST'])
 def modify_data():
+    """
+    修改数据，
+    :return:
+    """
     if request.data:
         form = json.loads(request.data)
     else:
@@ -363,7 +387,6 @@ def modify_data():
 
 @web.route('/task/export_data', methods=['POST'])
 def export_data():
-
     # 导出数据
     if request.data:
         form = json.loads(request.data)
@@ -377,45 +400,45 @@ def export_data():
         # 执行导出动作
         data = {"task_id": 16, "task_name": "1号任务",
                 "details": [
-            {
-                "path": "http://192.168.3.211:82/static/1/安志杰.jpg",
-                "props":
-                    [
-                        {
-                            "prop_id": 18,
-                            "prop_name": "衣服",
-                            "prop_value": 0,
-                            "prop_value_name": "未知"
-                        },
-                        {
-                            "prop_id": 19,
-                            "prop_name": "种族",
-                            "prop_value": 1,
-                            "prop_value_name": "汉族"
-                        }
-                    ]
+                    {
+                        "path": "http://192.168.3.211:82/static/1/安志杰.jpg",
+                        "props":
+                            [
+                                {
+                                    "prop_id": 18,
+                                    "prop_name": "衣服",
+                                    "prop_value": 0,
+                                    "prop_value_name": "未知"
+                                },
+                                {
+                                    "prop_id": 19,
+                                    "prop_name": "种族",
+                                    "prop_value": 1,
+                                    "prop_value_name": "汉族"
+                                }
+                            ]
 
-            },
-            {
-                "path": "http://192.168.3.211:82/static/1/安志杰2.jpg",
-                "props":
-                    [
-                        {
-                            "prop_id": 18,
-                            "prop_name": "衣服",
-                            "prop_value": 0,
-                            "prop_value_name": "未知"
-                        },
-                        {
-                            "prop_id": 19,
-                            "prop_name": "种族",
-                            "prop_value": 1,
-                            "prop_value_name": "汉族"
-                        }
-                    ]
+                    },
+                    {
+                        "path": "http://192.168.3.211:82/static/1/安志杰2.jpg",
+                        "props":
+                            [
+                                {
+                                    "prop_id": 18,
+                                    "prop_name": "衣服",
+                                    "prop_value": 0,
+                                    "prop_value_name": "未知"
+                                },
+                                {
+                                    "prop_id": 19,
+                                    "prop_name": "种族",
+                                    "prop_value": 1,
+                                    "prop_value_name": "汉族"
+                                }
+                            ]
 
-            }
-        ]}
+                    }
+                ]}
 
         task_details = Task_details.get_task_all_data(task_id)
 
@@ -431,11 +454,11 @@ def export_data():
         if os.path.exists('app/static/json') == 0:
             os.mkdir('app/static/json')
 
-        with open('app/static/json/%s.exe'%task.task_name,'w') as f:
+        with open('app/static/json/%s.exe' % task.task_name, 'w') as f:
             f.write(json.dumps(export_task, default=lambda o: o.__dict__))
-        path = '/static/json/%s.exe'%task.task_name
+        path = '/static/json/%s.exe' % task.task_name
         # return json.dumps(export_task, default=lambda o: o.__dict__)
-        return json.dumps({'path':path})
+        return json.dumps({'path': path})
     else:
         return json.dumps({"msg": "该任务尚未完成所有流程，不可导出"})
 
@@ -450,7 +473,7 @@ def hello():
 
 @web.route('/queue_test')
 def load():
-    id= json.loads(request.data).get('id')
+    id = json.loads(request.data).get('id')
     # if q.empty():
     #     for i in range(10):
     #         q.put(i)
@@ -474,7 +497,7 @@ def load():
         print('none')
         for i in range(5):
             q.put(i)
-        dict1[id]=q
+        dict1[id] = q
     if dict1[id].empty() is False:
-        print(id,'--', dict1[id].get())
+        print(id, '--', dict1[id].get())
     return 'success'

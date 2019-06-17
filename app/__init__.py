@@ -13,7 +13,7 @@ from flask_login import LoginManager
 from flask_cors import CORS
 from flask_apscheduler import APScheduler
 from app.config import APSchedulerJobConfig
-from app.config import cache_config
+# from app.config import cache_config
 from flask_cache import Cache
 from queue import Queue
 login_manager = LoginManager()
@@ -32,7 +32,7 @@ def create_app():
     app.config.from_object(APSchedulerJobConfig)
 
     # 配置redis缓存
-    app.config.from_object(cache_config)
+    # app.config.from_object(cache_config)
     # cache.init_app(app,cache_config)
 
     register_blueprint(app)
