@@ -9,27 +9,27 @@ from app.models.task_details import Task_details
 from app.view_models.rework import ReworkCollection
 from app.view_models.labeler_task import LabelTaskDetailCollection
 from .blue_print import web
+
 __author__ = 'meto'
 __date__ = '2019/5/23 14:42'
 
 
-@web.route('/rework_list',methods=['GET','POST'])
+@web.route('/rework_list', methods=['GET', 'POST'])
 def rework_list():
     if request.data:
         form = json.loads(request.data)
     else:
         form = {'nickname': 'wangwei', 'group_id': 2}
     user = form.get('nickname')
-    rework_datas =Rework().get_rework_data(user)
+    rework_datas = Rework().get_rework_data(user)
 
     rework = ReworkCollection()
     rework.fill(rework_datas)
-    return json.dumps(rework,default=lambda o: o.__dict__)
+    return json.dumps(rework, default=lambda o: o.__dict__)
 
 
-@web.route('/rework_details',methods=['POST'])
+@web.route('/rework_details', methods=['POST'])
 def rework_details():
-
     if request.data:
         form = json.loads(request.data)
 
@@ -55,18 +55,17 @@ def rework_details():
                 rework_info = Rework().query.filter_by(id=rework_id).first()
                 rework_info.status = 1
 
-
-            return json.dumps({'msg': '该任务已完成','status':666})
+            return json.dumps({'msg': '该任务已完成', 'status': 666})
         else:
             # 返工点击新的一张时默认修改为已完成
             rework_data.is_complete = 1
     if detail_type == 2:
-        rework_data = Task_details().get_last_rework_data(task_id, start_time, label_user,task_details_id)
+        rework_data = Task_details().get_last_rework_data(task_id, start_time, label_user, task_details_id)
         if rework_data is None:
             return json.dumps({'msg': '到头了'})
 
     if detail_type == 3:
-        rework_data = Task_details().get_next_rework_data(task_id, start_time, label_user,task_details_id)
+        rework_data = Task_details().get_next_rework_data(task_id, start_time, label_user, task_details_id)
         if rework_data is None:
             return json.dumps({'msg': '到头了'})
 

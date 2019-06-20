@@ -9,8 +9,6 @@ from app.models.user import User
 from flask_login import login_user, logout_user
 import json
 
-from models.label_type import Label_type
-
 __author__ = 'meto'
 __date__ = '2019/3/21 11:06'
 
@@ -27,6 +25,7 @@ def add_admin():
         with db.auto_commit():
             user = User()
             user.set_attrs(data)
+            print("正在创建管理员账户，请稍等......")
             db.session.add(user)
 
 
