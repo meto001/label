@@ -17,7 +17,7 @@ class Check_data_info(Base):
     task_details_id = Column(Integer, ForeignKey('task_details.id'))
 
     result_status = Column(Integer,comment='质检结果：0 错误，1 正确')
-    is_complate = Column(Integer)
+    is_complete = Column(Integer)
     locks = Column(Integer, default=0)
     quality_user = Column(String(50))
     quality_time = Column(Integer)
@@ -30,7 +30,7 @@ class Check_data_info(Base):
 
     @classmethod
     def get_new_quality_data(cls, check_user_id):
-        new_quality_data = Check_data_info.query.filter_by(check_user_id=check_user_id,is_complate=0, locks=0).first()
+        new_quality_data = Check_data_info.query.filter_by(check_user_id=check_user_id,is_complete=0, locks=0).first()
         return new_quality_data
 
     @classmethod
@@ -41,7 +41,7 @@ class Check_data_info(Base):
             check_data_info_id = check_data_info.id
 
             last_quality_data = Check_data_info.query.filter(Check_data_info.quality_user==quality_user,Check_data_info.check_user_id==check_user_id,
-                                                             Check_data_info.is_complate == 1, Check_data_info.id<check_data_info_id
+                                                             Check_data_info.is_complete == 1, Check_data_info.id<check_data_info_id
                                                              ).order_by(desc(Check_data_info.id)).first()
             return last_quality_data
         else:
@@ -56,15 +56,15 @@ class Check_data_info(Base):
             check_data_info_id = check_data_info.id
 
             next_quality_data = Check_data_info.query.filter(Check_data_info.quality_user==quality_user,Check_data_info.check_user_id==check_user_id,
-                                                             Check_data_info.is_complate == 1, Check_data_info.id>check_data_info_id).order_by(asc(Check_data_info.id)).first()
+                                                             Check_data_info.is_complete == 1, Check_data_info.id>check_data_info_id).order_by(asc(Check_data_info.id)).first()
             return next_quality_data
         else:
             return None
 
     @classmethod
-    def check_is_complate(cls,check_user_id):
-        is_complate = Check_data_info.query.filter_by(check_user_id=check_user_id, is_complate=0).first()
-        return is_complate
+    def check_is_complete(cls,check_user_id):
+        is_complete = Check_data_info.query.filter_by(check_user_id=check_user_id, is_complete=0).first()
+        return is_complete
 
     @classmethod
     def true_count(cls, check_user_id):

@@ -1,6 +1,7 @@
 # _*_ coding:utf-8 _*_
 from app.models.task_details_value import Task_details_value
 from app.models.property_value import Property_value
+from models.task_details_cut import Task_details_cut
 
 __author__ = 'meto'
 __date__ = '2019/4/19 10:18'
@@ -71,8 +72,15 @@ class ExportTaskViewModel:
         # 处理数据
         self.path = task_detail.photo_path
         task_detail_id = task_detail.id
-        detail_values = Task_details_value().query.filter_by(task_detail_id=task_detail_id).all()
-        self.props = [self.__map_to_prop(detail_value) for detail_value in detail_values]
+
+        if task_detail.task.source.label_type == 2:
+            detail_frames = Task_details_cut().query.filter(Task_details_cut.task_detail_id==task_detail_id,
+                                                            Task_details_cut.final_coordinate!=None).all()
+            self.props = [self.__map_to_frame(detail_frame) for detail_frame in detail_frames]
+
+        else:
+            detail_values = Task_details_value().query.filter_by(task_detail_id=task_detail_id).all()
+            self.props = [self.__map_to_prop(detail_value) for detail_value in detail_values]
 
     def __map_to_prop(self, detail_value):
         # 属性值名字
@@ -90,6 +98,15 @@ class ExportTaskViewModel:
             prop_value_name =prop_value_name
         )
 
+    def __map_to_frame(detail_frame):
+        return dict(
+            graph_index=detail_frame.graph_index,
+            split_type=detail_frame.split_type,
+            final_coordinate=detail_frame.final_coordinate,
+            pic_type=detail_frame.pic_type
+        )
+
+        pass
 
 class ExportTaskCollection:
     def __init__(self):

@@ -12,7 +12,6 @@ __date__ = '2019/4/25 17:09'
 
 class LabelTaskViewModel:
 
-
     def __init__(self, task, completed_count, my_label_count):
         self.task_id = task.id
         self.task_name = task.task_name
@@ -36,7 +35,7 @@ class LabelTaskCollection:
         self.total = 0
         self.tasks = []
 
-    def fill(self,total, tasks, user):
+    def fill(self, total, tasks, user):
         self.total = total
         for task in tasks:
             # print(task.id)
@@ -45,12 +44,12 @@ class LabelTaskCollection:
             completed_count = task_detail.get_already_count(task.id)
             my_label_count = task_detail.get_user_already_count(task.id, user)
 
-            self.tasks.append(LabelTaskViewModel(task,completed_count,my_label_count))
+            self.tasks.append(LabelTaskViewModel(task, completed_count, my_label_count))
 
 
 class LabelTaskDetailViewModel:
 
-    def __init__(self,prop, task_detail_id, detail_type):
+    def __init__(self, prop, task_detail_id, detail_type):
         self.prop_type = prop.prop_type
         self.prop_id = prop.id
         self.prop_name = prop.prop_name
@@ -65,15 +64,20 @@ class LabelTaskDetailViewModel:
     def __parse(self, task_detail_id, detail_type):
         # task_detail_values = Task_details_value()
         # if detail_type == 2 or detail_type == 3:
-        prop_option_value = Task_details_value().query.filter_by(prop_id=self.prop_id, task_detail_id=task_detail_id).first()
+        prop_option_value = Task_details_value().query.filter_by(prop_id=self.prop_id,
+                                                                 task_detail_id=task_detail_id).first()
         if prop_option_value:
+            # if self.prop_type == 4:
+            #     self.prop_option_value = list(prop_option_value.prop_option_value)
+            #     self.prop_option_value_final = list(prop_option_value.prop_option_value_final)
+            # else:
             self.prop_option_value = prop_option_value.prop_option_value
             self.prop_option_value_final = prop_option_value.prop_option_value_final
 
         options = Property_value.query.filter_by(prop_id=self.prop_id).order_by(Property_value.option_value).all()
         self.property_values = [self.__map_to_option(option) for option in options]
 
-    def __map_to_option(self,option):
+    def __map_to_option(self, option):
         return dict(
             option_value=option.option_value,
             option_name=option.option_name
@@ -91,9 +95,9 @@ class LabelTaskDetailCollection:
         self.check_data_info_id = ''
         self.props = []
 
-    def fill(self,task_id, task_detail_id, url, prop_ids, detail_type,check_data_info_id):
+    def fill(self, task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id):
         self.photo_path = url
-        self.task_id=task_id
+        self.task_id = task_id
         self.task_detail_id = task_detail_id
 
         self.detail_type = detail_type
@@ -106,3 +110,37 @@ class LabelTaskDetailCollection:
         self.quality_inspection = task_details.quality_inspection
         self.check_data_info_id = check_data_info_id
         self.props = [LabelTaskDetailViewModel(prop, task_detail_id, detail_type) for prop in prop_ids]
+
+
+class FramesViewModel:
+    def __init__(self, frame):
+        pass
+        self.graph_index = frame.graph_index
+        self.split_type = frame.split_type
+        self.pic_type = frame.pic_type
+        self.coordinate = frame.coordinate
+        self.final_coordinate = frame.final_coordinate
+
+
+
+class FramesCollection:
+
+    def __init__(self):
+        self.task_id = ''
+        self.task_detail_id = ''
+        self.photo_path = ''
+        self.quality_lock = ''
+        self.quality_inspection = ''
+        self.check_data_info_id = ''
+        self.frames = []
+
+    def fill(self, task_id, task_detail_id, url, detail_type, check_data_info_id, frames):
+        self.photo_path = url
+        self.task_id = task_id
+        self.task_detail_id = task_detail_id
+        self.detail_type = detail_type
+        task_details = Task_details().query.filter_by(id=task_detail_id).first()
+        self.quality_lock = task_details.quality_lock
+        self.quality_inspection = task_details.quality_inspection
+        self.check_data_info_id = check_data_info_id
+        self.frames = [FramesViewModel(frame) for frame in frames]

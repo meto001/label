@@ -7,7 +7,8 @@ from app import db
 from app.models.rework import Rework
 from app.models.task_details import Task_details
 from app.view_models.rework import ReworkCollection
-from app.view_models.labeler_task import LabelTaskDetailCollection
+from app.view_models.labeler_task import LabelTaskDetailCollection, FramesCollection
+from models.task_details_cut import Task_details_cut
 from .blue_print import web
 
 __author__ = 'meto'
@@ -77,12 +78,20 @@ def rework_details():
             rework_data.is_complete = 1
     url = rework_data.photo_path
 
-    prop_ids = rework_data.task.prop_ids
-    tuple_prop_ids = eval(prop_ids)
-    if type(tuple_prop_ids) is int:
-        prop_ids = [tuple_prop_ids]
+    if form.get('label_type') == 2:
+        frames = Task_details_cut().get_frames(task_detail_id)
+        frames_collection = FramesCollection()
+        check_data_info_id = ''
+        frames_collection.fill(task_id, task_detail_id, url, detail_type, check_data_info_id, frames)
+        return json.dumps(frames_collection, default=lambda o: o.__dict__)
     else:
-        prop_ids = list(tuple_prop_ids)
-    label_detail = LabelTaskDetailCollection()
-    label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, rework_data.id)
-    return json.dumps(label_detail, default=lambda o: o.__dict__)
+
+        prop_ids = rework_data.task.prop_ids
+        tuple_prop_ids = eval(prop_ids)
+        if type(tuple_prop_ids) is int:
+            prop_ids = [tuple_prop_ids]
+        else:
+            prop_ids = list(tuple_prop_ids)
+        label_detail = LabelTaskDetailCollection()
+        label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, rework_data.id)
+        return json.dumps(label_detail, default=lambda o: o.__dict__)

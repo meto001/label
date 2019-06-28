@@ -13,8 +13,9 @@ from app.models.task import Task
 from app.models.task_details import Task_details
 from app.models.task_details_value import Task_details_value
 from app.view_models.labeler_task import LabelTaskViewModel, LabelTaskCollection, LabelTaskDetailViewModel, \
-    LabelTaskDetailCollection
+    LabelTaskDetailCollection, FramesCollection
 from app.view_models.task import TaskCollection, SourcesAndPorps, ExportTaskCollection
+from models.task_details_cut import Task_details_cut
 from .blue_print import web
 from app.libs.img_stream import return_img_stream
 from queue import Queue
@@ -114,10 +115,12 @@ def show_task_detail():
     """
 
     # detail_type 1,新的一页;2,上一张;3,下一张
+
     if request.data:
         form = json.loads(request.data)
     else:
-        form = {'nickname': 'meto', 'group_id': 2, 'task_id': 8, 'detail_type': 1, 'task_detail_id': 6320}
+        form = {'nickname': 'paopao', 'group_id': 2, 'task_id': 15, 'label_type': 2, 'detail_type': 2,
+                'task_detail_id': 4773}
     # 点击开始标注 接收一条已被该用户锁定或未标注的数据
 
     user = form.get('nickname')
@@ -126,6 +129,7 @@ def show_task_detail():
 
     # 新的一页
     if detail_type == 1:
+
         # 查询是否有锁定数据
         new_data = Task_details().get_has_locks(user, task_id)
         # 如果没有锁定数据
@@ -162,7 +166,7 @@ def show_task_detail():
                     new_data.operate_user = user
             else:
                 # 查询是否有锁定数据
-                label_undone_data = Task_details.check_is_complate(task_id)
+                label_undone_data = Task_details.check_is_complete(task_id)
                 if label_undone_data is None:
                     # 将task表改为已完成
                     with db.auto_commit():
@@ -180,21 +184,32 @@ def show_task_detail():
         task_detail_id = new_data.id
         url = new_data.photo_path
 
-        # 此方法是直接返回图片流，暂不使用
-        # url = return_img_stream(url)
+        if form.get('label_type') == 2:
+            frames = Task_details_cut().get_frames(task_detail_id)
+            frames_collection = FramesCollection()
+            check_data_info_id = ''
+            frames_collection.fill(task_id, task_detail_id, url, detail_type, check_data_info_id, frames)
+            return json.dumps(frames_collection, default=lambda o: o.__dict__)
 
-        prop_ids = new_data.task.prop_ids
-        tuple_prop_ids = eval(prop_ids)
-        prop_option_value = 0
-        if type(tuple_prop_ids) is int:
-            prop_ids = [tuple_prop_ids]
         else:
-            prop_ids = list(tuple_prop_ids)
-        label_detail = LabelTaskDetailCollection()
-        check_data_info_id = ''
-        label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id)
 
-        return json.dumps(label_detail, default=lambda o: o.__dict__)
+            # 查询task_details_value表中的值
+
+            # 此方法是直接返回图片流，暂不使用
+            # url = return_img_stream(url)
+
+            prop_ids = new_data.task.prop_ids
+            tuple_prop_ids = eval(prop_ids)
+            prop_option_value = 0
+            if type(tuple_prop_ids) is int:
+                prop_ids = [tuple_prop_ids]
+            else:
+                prop_ids = list(tuple_prop_ids)
+            label_detail = LabelTaskDetailCollection()
+            check_data_info_id = ''
+            label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id)
+
+            return json.dumps(label_detail, default=lambda o: o.__dict__)
 
     elif detail_type == 2 or detail_type == 3:
         task_detail_id = form.get('task_detail_id')
@@ -215,23 +230,32 @@ def show_task_detail():
         task_detail_id = history_data.id
         url = history_data.photo_path
 
-        # 此方法是直接返回图片流，暂不使用
-        # url = return_img_stream(url)
+        if form.get('label_type') == 2:
+            frames = Task_details_cut().get_frames(task_detail_id)
+            frames_collection = FramesCollection()
+            check_data_info_id = ''
+            frames_collection.fill(task_id, task_detail_id, url, detail_type, check_data_info_id, frames)
+            return json.dumps(frames_collection, default=lambda o: o.__dict__)
 
-        prop_ids = history_data.task.prop_ids
-        tuple_prop_ids = eval(prop_ids)
-        prop_option_value = 0
-        if type(tuple_prop_ids) is int:
-            prop_ids = [tuple_prop_ids]
         else:
-            prop_ids = list(tuple_prop_ids)
-        label_detail = LabelTaskDetailCollection()
-        check_data_info_id = ''
-        label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id)
 
-        # select * from task_details WHERE  operate_user = 'meto' AND task_id = 4 and is_complete =1 and
-        # operate_create_time >10000 and operate_create_time < 2556709299 and id < 6320 ORDER BY id DESC LIMIT 1
-        return json.dumps(label_detail, default=lambda o: o.__dict__)
+            # 此方法是直接返回图片流，暂不使用
+            # url = return_img_stream(url)
+
+            prop_ids = history_data.task.prop_ids
+            tuple_prop_ids = eval(prop_ids)
+            prop_option_value = 0
+            if type(tuple_prop_ids) is int:
+                prop_ids = [tuple_prop_ids]
+            else:
+                prop_ids = list(tuple_prop_ids)
+            label_detail = LabelTaskDetailCollection()
+            check_data_info_id = ''
+            label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id)
+
+            # select * from task_details WHERE  operate_user = 'meto' AND task_id = 4 and is_complete =1 and
+            # operate_create_time >10000 and operate_create_time < 2556709299 and id < 6320 ORDER BY id DESC LIMIT 1
+            return json.dumps(label_detail, default=lambda o: o.__dict__)
 
     else:
         return json.dumps({'msg': '传入的参数不正确，请重新输入'})
@@ -252,51 +276,104 @@ def save_data():
     if request.data:
         form = json.loads(request.data)
     else:
+        # 标注json
+        # form = {
+        #     "photo_path": "C:/Users/Administrator/Pictures/Saved Pictures/微信图片_20180920160858.jpg",
+        #     "detail_type": 2,
+        #     "create_user": "paopao",
+        #     "group_id": 2,
+        #     "quality_lock": "",
+        #     "task_detail_id": 6320,
+        #     "task_id": 4,
+        #     "props": [
+        #         {
+        #             "prop_id": 11, "prop_name": "衣服", "prop_option_value": 1, "prop_type": 1,
+        #             "property_values": [
+        #                 {"option_name": "黄皮", "option_value": 1},
+        #                 {"option_name": "黑皮", "option_value": 2},
+        #                 {"option_name": "白皮", "option_value": 3}]
+        #         },
+        #         {"prop_id": 13, "prop_name": "肤色", "prop_option_value": 1, "prop_type": 1,
+        #          "property_values": [
+        #              {"option_name": "黑", "option_value": 1},
+        #              {"option_name": "黄", "option_value": 2}, ]
+        #          }], }
+
+        # 裁剪json
         form = {
             "photo_path": "C:/Users/Administrator/Pictures/Saved Pictures/微信图片_20180920160858.jpg",
-            "detail_type": 2,
+            # 新增类型，判断类型为2
+            "label_type": 2,
+            "detail_type": 1,
             "create_user": "paopao",
             "group_id": 2,
             "quality_lock": "",
-            "task_detail_id": 6320,
-            "task_id": 4,
-            "props": [
+            "task_detail_id": 4773,
+            "task_id": 15,
+            "frames": [
                 {
-                    "prop_id": 11, "prop_name": "衣服", "prop_option_value": 1, "prop_type": 1,
-                    "property_values": [
-                        {"option_name": "黄皮", "option_value": 1},
-                        {"option_name": "黑皮", "option_value": 2},
-                        {"option_name": "白皮", "option_value": 3}]
-                },
-                {"prop_id": 13, "prop_name": "肤色", "prop_option_value": 1, "prop_type": 1,
-                 "property_values": [
-                     {"option_name": "黑", "option_value": 1},
-                     {"option_name": "黄", "option_value": 2}, ]
-                 }], }
+                    "graph_index": 0,
+                    "split_type": 1,
+                    "coordinate": "坐标值",
+                    "final_coordinate": "坐标值",
+                    "pic_type": 1
 
-    props = form.get('props')
-    # 判断是否已经保存，此处有bug，如果点击速度过快，仍会有一定概率重复保存。
-    # 通过前端增加loading解决了此问题
-    if Task_details_value.query.filter_by(task_detail_id=form.get('task_detail_id'),
-                                          prop_id=props[0].get('prop_id')).first():
-        print('task_detail_id:', form.get('task_detail_id'), ' 已经存过了')
-        return json.dumps({'msg': '不可重复存入'})
-    print('task_detail_id:', form.get('task_detail_id'), ' 还没有存过')
-    with db.auto_commit():
-        for prop in props:
-            # print(prop)
-            data = {}
-            task_details_value = Task_details_value()
-            data['photo_path'] = form.get('photo_path')
-            data['task_id'] = form.get('task_id')
-            data['task_detail_id'] = form.get('task_detail_id')
-            data['create_user'] = form.get('create_user')
-            data['prop_id'] = prop.get('prop_id')
-            data['prop_option_value'] = str(prop.get('prop_option_value'))
-            data['prop_option_value_final'] = str(prop.get('prop_option_value'))
-            data['prop_type'] = prop.get('prop_type')
-            task_details_value.set_attrs(data)
-            db.session.add(task_details_value)
+                }, {
+                    "graph_index": 1,
+                    "split_type": 1,
+                    "coordinate": "坐标值",
+                    "final_coordinate": "坐标值",
+                    "pic_type": 1
+                }
+            ]
+        }
+    # 裁剪任务保存逻辑
+    if form.get('label_type') == 2:
+        frames = form.get('frames')
+        if Task_details_cut.query.filter_by(task_detail_id=form.get('task_detail_id')).first():
+            print('task_detail_id:', form.get('task_detail_id'), ' 已经存过了')
+            return json.dumps({'msg': '不可重复存入'})
+        print('task_detail_id:', form.get('task_detail_id'), ' 还没有存过')
+        with db.auto_commit():
+            for frame in frames:
+                data = {}
+                task_details_cut = Task_details_cut()
+                data['photo_path'] = form.get('photo_path')
+                data['task_id'] = form.get('task_id')
+                data['task_detail_id'] = form.get('task_detail_id')
+                data['split_type'] = frame.get('split_type')
+                data['coordinate'] = frame.get('coordinate')
+                data['final_coordinate'] = frame.get('final_coordinate')
+                data['graph_index'] = frame.get('graph_index')
+                data['pic_type'] = frame.get('pic_type')
+                data['operate_user'] = form.get('create_user')
+                task_details_cut.set_attrs(data)
+                db.session.add(task_details_cut)
+    else:
+        # 暂时等于1，前端还没有修改，当前端修改后将此处判断为1
+        props = form.get('props')
+        # 判断是否已经保存，此处有bug，如果点击速度过快，仍会有一定概率重复保存。
+        # 通过前端增加loading解决了此问题
+        if Task_details_value.query.filter_by(task_detail_id=form.get('task_detail_id'),
+                                              prop_id=props[0].get('prop_id')).first():
+            print('task_detail_id:', form.get('task_detail_id'), ' 已经存过了')
+            return json.dumps({'msg': '不可重复存入'})
+        print('task_detail_id:', form.get('task_detail_id'), ' 还没有存过')
+        with db.auto_commit():
+            for prop in props:
+                # print(prop)
+                data = {}
+                task_details_value = Task_details_value()
+                data['photo_path'] = form.get('photo_path')
+                data['task_id'] = form.get('task_id')
+                data['task_detail_id'] = form.get('task_detail_id')
+                data['create_user'] = form.get('create_user')
+                data['prop_id'] = prop.get('prop_id')
+                data['prop_option_value'] = str(prop.get('prop_option_value'))
+                data['prop_option_value_final'] = str(prop.get('prop_option_value'))
+                data['prop_type'] = prop.get('prop_type')
+                task_details_value.set_attrs(data)
+                db.session.add(task_details_value)
 
     with db.auto_commit():
         task_detail = Task_details().query.filter_by(id=form.get('task_detail_id')).first()
@@ -353,33 +430,59 @@ def modify_data():
     if boolean:
         return json.dumps({'msg': '该数据已生成质检，无法修改'})
     elif user == form.get('create_user'):
-        # 删除task_details_value里面的数据
-        with db.auto_commit():
-            task_details_value = Task_details_value()
-            values = task_details_value.query.filter_by(task_detail_id=task_detail_id).all()
-            for value in values:
-                db.session.delete(value)
-        # 新增数据
-        props = form.get('props')
-        with db.auto_commit():
-            for prop in props:
-                # print(prop)
-                data = {}
+
+        if form.get('label_type') == 2:
+            with db.auto_commit():
+                task_detail_cut = Task_details_cut()
+                frames = task_detail_cut.query.filter_by(task_detail_id=task_detail_id)
+                for frame in frames:
+                    db.session.delete(frame)
+            with db.auto_commit():
+                for frame in frames:
+                    data = {}
+                    task_details_cut = Task_details_cut()
+                    data['photo_path'] = form.get('photo_path')
+                    data['task_id'] = form.get('task_id')
+                    data['task_detail_id'] = form.get('task_detail_id')
+                    data['split_type'] = frame.get('split_type')
+                    data['coordinate'] = frame.get('coordinate')
+                    data['final_coordinate'] = frame.get('final_coordinate')
+                    data['graph_index'] = frame.get('graph_index')
+                    data['pic_type'] = frame.get('pic_type')
+                    data['operate_user'] = form.get('create_user')
+                    task_details_cut.set_attrs(data)
+                    db.session.add(task_details_cut)
+
+
+        else:
+            # 暂时等于1，前端还没有修改，当前端修改后将此处判断为1
+            # 删除task_details_value里面的数据
+            with db.auto_commit():
                 task_details_value = Task_details_value()
-                data['photo_path'] = form.get('photo_path')
-                data['task_id'] = form.get('task_id')
-                data['task_detail_id'] = form.get('task_detail_id')
-                data['create_user'] = form.get('create_user')
-                data['prop_id'] = prop.get('prop_id')
-                data['prop_option_value'] = prop.get('prop_option_value')
-                data['prop_option_value_final'] = prop.get('prop_option_value')
-                data['prop_type'] = prop.get('prop_type')
-                task_details_value.set_attrs(data)
-                db.session.add(task_details_value)
-            task_detail = Task_details.query.filter_by(id=task_detail_id).first()
-            # 新增修改时将状态改为1，返工时使用
-            task_detail.is_complete = 1
-            task_detail.operate_time = time.time()
+                values = task_details_value.query.filter_by(task_detail_id=task_detail_id).all()
+                for value in values:
+                    db.session.delete(value)
+            # 新增数据
+            props = form.get('props')
+            with db.auto_commit():
+                for prop in props:
+                    # print(prop)
+                    data = {}
+                    task_details_value = Task_details_value()
+                    data['photo_path'] = form.get('photo_path')
+                    data['task_id'] = form.get('task_id')
+                    data['task_detail_id'] = form.get('task_detail_id')
+                    data['create_user'] = form.get('create_user')
+                    data['prop_id'] = prop.get('prop_id')
+                    data['prop_option_value'] = prop.get('prop_option_value')
+                    data['prop_option_value_final'] = prop.get('prop_option_value')
+                    data['prop_type'] = prop.get('prop_type')
+                    task_details_value.set_attrs(data)
+                    db.session.add(task_details_value)
+        task_detail = Task_details.query.filter_by(id=task_detail_id).first()
+        # 新增修改时将状态改为1，返工时使用
+        task_detail.is_complete = 1
+        task_detail.operate_time = time.time()
         return json.dumps({'status': 'success'})
     else:
         return json.dumps({'msg': '这不是您做的数据，无法进行修改！'})

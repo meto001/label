@@ -1,9 +1,9 @@
 # _*_ coding:utf-8 _*_
-from app.models.task import Task
+
 
 __author__ = 'meto'
 __date__ = '2019/4/17 15:41'
-
+from app.models.task import Task
 from sqlalchemy.orm import relationship
 
 from app.models.base import Base, db
@@ -116,7 +116,7 @@ class Task_details(Base):
         return all_rework
 
     @classmethod
-    def check_is_complate(cls,task_id):
+    def check_is_complete(cls,task_id):
         return Task_details.query.filter_by(task_id=task_id, is_complete=0).first()
 
     @classmethod
@@ -159,7 +159,8 @@ class Task_details(Base):
                                          Task_details.operate_create_time > start_time,
                                          Task_details.operate_create_time <= start_time+86400,
                                          Task_details.operate_user == label_user, Task_details.quality_inspection == -1,
-                                         Task_details.quality_lock == 0).all()
+                                         Task_details.quality_lock == 0
+                                         ).all()
         pass
 
     @classmethod
