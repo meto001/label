@@ -15,7 +15,7 @@ from app.models.task_details_value import Task_details_value
 from app.models.rework import Rework
 from app.view_models.check_task import CheckTaskCollection, CheckUserCollection
 from app.view_models.labeler_task import LabelTaskDetailCollection, FramesCollection
-from models.task_details_cut import Task_details_cut
+from app.models.task_details_cut import Task_details_cut
 from .blue_print import web
 from app import scheduler
 

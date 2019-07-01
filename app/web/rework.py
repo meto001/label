@@ -8,7 +8,7 @@ from app.models.rework import Rework
 from app.models.task_details import Task_details
 from app.view_models.rework import ReworkCollection
 from app.view_models.labeler_task import LabelTaskDetailCollection, FramesCollection
-from models.task_details_cut import Task_details_cut
+from app.models.task_details_cut import Task_details_cut
 from .blue_print import web
 
 __author__ = 'meto'

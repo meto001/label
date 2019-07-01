@@ -1,7 +1,7 @@
 # _*_ coding:utf-8 _*_
 from app.models.task_details_value import Task_details_value
 from app.models.property_value import Property_value
-from models.task_details_cut import Task_details_cut
+from app.models.task_details_cut import Task_details_cut
 
 __author__ = 'meto'
 __date__ = '2019/4/19 10:18'

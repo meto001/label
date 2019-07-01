@@ -15,7 +15,7 @@ from app.models.task_details_value import Task_details_value
 from app.view_models.labeler_task import LabelTaskViewModel, LabelTaskCollection, LabelTaskDetailViewModel, \
     LabelTaskDetailCollection, FramesCollection
 from app.view_models.task import TaskCollection, SourcesAndPorps, ExportTaskCollection
-from models.task_details_cut import Task_details_cut
+from app.models.task_details_cut import Task_details_cut
 from .blue_print import web
 from app.libs.img_stream import return_img_stream
 from queue import Queue
