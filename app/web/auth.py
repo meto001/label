@@ -33,9 +33,9 @@ def add_admin():
 
 @web.route('/register', methods=['POST'])
 def register():
-    form = {"nickname": "paopa1o", "realname": "(宝1ᴗ宝)", "password": "123456", "email": "18301318212@qq.com",
-            "groupid": 2}
-    # form = json.loads(request.data)
+    # form = {"nickname": "paopa1o", "realname": "(宝1ᴗ宝)", "password": "123456", "email": "18301318212@qq.com",
+    #         "groupid": 2}
+    form = json.loads(request.data)
     form = RegisterForm(MultiDict(form))
     if request.method == 'POST' and form.validate() and form.data.get("groupid") != 1:
         with db.auto_commit():

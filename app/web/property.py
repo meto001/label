@@ -4,10 +4,12 @@ import json
 from flask import request
 
 from app import db
+from app.libs.error_code import Success
+# 这里的Label_type不用但是也不能删。因为要使用这个初始化Label_type表
+from app.models.label_type import Label_type
 from app.models.property import Property
 from app.models.property_value import Property_value
 from app.view_models.property import PropertyCollection, PropertyValueViewModel
-from app.libs.error_code import Success
 
 __author__ = 'meto'
 __date__ = '2019/4/12 16:05'
@@ -17,6 +19,8 @@ from .blue_print import web
 @web.route('/show_property', methods=['GET', 'POST'])
 # @login_required
 def show_property():
+    # 这里的Label_type不用但是也不能删。因为要使用这个初始化Label_type表
+    Label_type()
     # 展示属性
     label_properties = Property.get_property()
     property_values = PropertyCollection()
