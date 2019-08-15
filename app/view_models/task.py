@@ -73,6 +73,7 @@ class ExportTaskViewModel:
         self.path = task_detail.photo_path
         task_detail_id = task_detail.id
 
+        # 裁剪
         if task_detail.task.source.label_type == 2:
             detail_frames = Task_details_cut().query.filter(Task_details_cut.task_detail_id==task_detail_id,
                                                             Task_details_cut.final_coordinate!=None).all()

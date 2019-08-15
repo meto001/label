@@ -3,21 +3,23 @@ import json
 import math
 import random
 
-from flask import current_app, request
+from flask import request
 
 from app import db
-from app.models.task import Task
-from app.models.task_details import Task_details
+from app import scheduler
 from app.models.check_data_info import Check_data_info
 from app.models.check_task import Check_task
 from app.models.check_user import Check_user
-from app.models.task_details_value import Task_details_value
 from app.models.rework import Rework
+from app.models.task import Task
+from app.models.task_details import Task_details
+from app.models.task_details_cut import Task_details_cut
+from app.models.task_details_value import Task_details_value
 from app.view_models.check_task import CheckTaskCollection, CheckUserCollection
 from app.view_models.labeler_task import LabelTaskDetailCollection, FramesCollection
-from app.models.task_details_cut import Task_details_cut
+from app.libs.error_code import Success
+from app.libs.make_data import check_modify_data
 from .blue_print import web
-from app import scheduler
 
 __author__ = 'meto'
 __date__ = '2019/5/13 10:46'
@@ -239,8 +241,8 @@ def auto_generate_quality_check():
 
         else:
             print('今日无新数据生成')
-            return json.dumps({'msg': '今日无新数据生成'})
-    return json.dumps({'msg': '生成质检成功'})
+            return Success(msg='今日无新数据生成')
+    return Success(msg='生成新质检成功')
 
 
 @web.route('/check_task', methods=['GET', 'POST'])
@@ -401,6 +403,7 @@ def check_task_details():
                                 db.session.add(rework_table)
 
                     return json.dumps({'msg': '该任务已完成', 'status': 666})
+                    # return Completed()
 
                 else:
                     # 返回锁定数据的用户
@@ -498,21 +501,12 @@ def modify_check_data():
                 # 如果是新增的，则task_details_cut为空
                 if task_details_cut is None:
                     # 将该条数据插入
-                    data = {}
                     task_details_cut = Task_details_cut()
-                    data['photo_path'] = form.get('photo_path')
-                    data['task_id'] = form.get('task_id')
-                    data['task_detail_id'] = form.get('task_detail_id')
-                    data['split_type'] = frame.get('split_type')
-                    data['coordinate'] = frame.get('coordinate')
-                    data['final_coordinate'] = frame.get('final_coordinate')
-                    data['graph_index'] = frame.get('graph_index')
-                    data['pic_type'] = frame.get('pic_type')
-                    data['operate_user'] = form.get('create_user')
+                    data = check_modify_data(form, frame)
                     task_details_cut.set_attrs(data)
                     db.session.add(task_details_cut)
                 else:
-                    if str(frame.get('final_coordinate'))!= str(task_details_cut.final_coordinate):
+                    if str(frame.get('final_coordinate')) != str(task_details_cut.final_coordinate):
                         task_details_cut.final_coordinate = frame.get('final_coordinate')
 
         else:

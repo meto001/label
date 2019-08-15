@@ -1,9 +1,9 @@
 # _*_ coding:utf-8 _*_
 import os
 import time
+from queue import Queue
 
 from flask import request, json
-from flask_login import login_required
 from sqlalchemy import desc
 
 from app import db, dict1
@@ -11,14 +11,12 @@ from app.models.property import Property
 from app.models.source import Source
 from app.models.task import Task
 from app.models.task_details import Task_details
-from app.models.task_details_value import Task_details_value
-from app.view_models.labeler_task import LabelTaskViewModel, LabelTaskCollection, LabelTaskDetailViewModel, \
-    LabelTaskDetailCollection, FramesCollection
-from app.view_models.task import TaskCollection, SourcesAndPorps, ExportTaskCollection
 from app.models.task_details_cut import Task_details_cut
+from app.models.task_details_value import Task_details_value
+from app.view_models.labeler_task import LabelTaskCollection, LabelTaskDetailCollection, FramesCollection
+from app.view_models.task import TaskCollection, SourcesAndPorps, ExportTaskCollection
+from app.libs.make_data import caijian_save_data, label_save_data, caijian_modify_data, label_modify_data
 from .blue_print import web
-from app.libs.img_stream import return_img_stream
-from queue import Queue
 
 __author__ = 'meto'
 __date__ = '2019/3/25 17:50'
@@ -119,8 +117,8 @@ def show_task_detail():
     if request.data:
         form = json.loads(request.data)
     else:
-        form = {'nickname': 'paopao', 'group_id': 2, 'task_id': 15, 'label_type': 2, 'detail_type': 2,
-                'task_detail_id': 4773}
+        form = {"nickname": "paopao", "group_id": 2, "task_id": 15, "label_type": 2, "detail_type": 1,
+                "task_detail_id": 4773}
     # 点击开始标注 接收一条已被该用户锁定或未标注的数据
 
     user = form.get('nickname')
@@ -184,6 +182,7 @@ def show_task_detail():
         task_detail_id = new_data.id
         url = new_data.photo_path
 
+        # 判断是裁剪类型
         if form.get('label_type') == 2:
             frames = Task_details_cut().get_frames(task_detail_id)
             frames_collection = FramesCollection()
@@ -336,17 +335,9 @@ def save_data():
         print('task_detail_id:', form.get('task_detail_id'), ' 还没有存过')
         with db.auto_commit():
             for frame in frames:
-                data = {}
                 task_details_cut = Task_details_cut()
-                data['photo_path'] = form.get('photo_path')
-                data['task_id'] = form.get('task_id')
-                data['task_detail_id'] = form.get('task_detail_id')
-                data['split_type'] = frame.get('split_type')
-                data['coordinate'] = frame.get('coordinate')
-                data['final_coordinate'] = frame.get('final_coordinate')
-                data['graph_index'] = frame.get('graph_index')
-                data['pic_type'] = frame.get('pic_type')
-                data['operate_user'] = form.get('create_user')
+                data = caijian_save_data(form, frame)
+
                 task_details_cut.set_attrs(data)
                 db.session.add(task_details_cut)
     else:
@@ -361,17 +352,8 @@ def save_data():
         print('task_detail_id:', form.get('task_detail_id'), ' 还没有存过')
         with db.auto_commit():
             for prop in props:
-                # print(prop)
-                data = {}
                 task_details_value = Task_details_value()
-                data['photo_path'] = form.get('photo_path')
-                data['task_id'] = form.get('task_id')
-                data['task_detail_id'] = form.get('task_detail_id')
-                data['create_user'] = form.get('create_user')
-                data['prop_id'] = prop.get('prop_id')
-                data['prop_option_value'] = str(prop.get('prop_option_value'))
-                data['prop_option_value_final'] = str(prop.get('prop_option_value'))
-                data['prop_type'] = prop.get('prop_type')
+                data = label_save_data(form, prop)
                 task_details_value.set_attrs(data)
                 db.session.add(task_details_value)
 
@@ -439,17 +421,8 @@ def modify_data():
                     db.session.delete(frame)
             with db.auto_commit():
                 for frame in frames:
-                    data = {}
                     task_details_cut = Task_details_cut()
-                    data['photo_path'] = form.get('photo_path')
-                    data['task_id'] = form.get('task_id')
-                    data['task_detail_id'] = form.get('task_detail_id')
-                    data['split_type'] = frame.get('split_type')
-                    data['coordinate'] = frame.get('coordinate')
-                    data['final_coordinate'] = frame.get('final_coordinate')
-                    data['graph_index'] = frame.get('graph_index')
-                    data['pic_type'] = frame.get('pic_type')
-                    data['operate_user'] = form.get('create_user')
+                    data = caijian_modify_data(form, frame)
                     task_details_cut.set_attrs(data)
                     db.session.add(task_details_cut)
 
@@ -467,16 +440,8 @@ def modify_data():
             with db.auto_commit():
                 for prop in props:
                     # print(prop)
-                    data = {}
                     task_details_value = Task_details_value()
-                    data['photo_path'] = form.get('photo_path')
-                    data['task_id'] = form.get('task_id')
-                    data['task_detail_id'] = form.get('task_detail_id')
-                    data['create_user'] = form.get('create_user')
-                    data['prop_id'] = prop.get('prop_id')
-                    data['prop_option_value'] = prop.get('prop_option_value')
-                    data['prop_option_value_final'] = prop.get('prop_option_value')
-                    data['prop_type'] = prop.get('prop_type')
+                    data = label_modify_data(form, prop)
                     task_details_value.set_attrs(data)
                     db.session.add(task_details_value)
         task_detail = Task_details.query.filter_by(id=task_detail_id).first()

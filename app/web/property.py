@@ -1,14 +1,13 @@
 # _*_ coding:utf-8 _*_
 import json
-import time
 
 from flask import request
-from flask_login import login_required
+
 from app import db
-from app.models.label_type import Label_type
 from app.models.property import Property
 from app.models.property_value import Property_value
 from app.view_models.property import PropertyCollection, PropertyValueViewModel
+from app.libs.error_code import Success
 
 __author__ = 'meto'
 __date__ = '2019/4/12 16:05'
@@ -18,13 +17,12 @@ from .blue_print import web
 @web.route('/show_property', methods=['GET', 'POST'])
 # @login_required
 def show_property():
-
     # 展示属性
     label_properties = Property.get_property()
     property_values = PropertyCollection()
     property_values.fill(label_properties)
     # dict1 = json.loads(json.dumps(property_values, default=lambda o:o.__dict__))
-    return json.dumps(property_values, default=lambda o:o.__dict__)
+    return json.dumps(property_values, default=lambda o: o.__dict__)
 
 
 @web.route('/show_property_value', methods=['GET', 'POST'])
@@ -38,13 +36,12 @@ def show_property_value():
     property_values = property_value_tb.get_property_value(form['prop_id'])
 
     properties = PropertyValueViewModel(property_values)
-    return json.dumps(properties, default=lambda o:o.__dict__)
+    return json.dumps(properties, default=lambda o: o.__dict__)
 
 
 @web.route('/add_property', methods=['POST'])
 # @login_required
 def add_property():
-
     # # 新增传进来的form
     # form = {'prop_name': '肤色', 'label_type_id': 1, 'prop_type': 1, 'property_value':
     #     [{'option_value': 2, 'option_name': '黄'},
@@ -98,4 +95,4 @@ def add_property():
 
     print('继续执行')
     # return json.dumps(form)
-    return json.dumps({'status' : 'success'})
+    return Success()

@@ -3,12 +3,13 @@ import json
 import time
 
 from flask import request
+
 from app import db
 from app.models.rework import Rework
 from app.models.task_details import Task_details
-from app.view_models.rework import ReworkCollection
-from app.view_models.labeler_task import LabelTaskDetailCollection, FramesCollection
 from app.models.task_details_cut import Task_details_cut
+from app.view_models.labeler_task import LabelTaskDetailCollection, FramesCollection
+from app.view_models.rework import ReworkCollection
 from .blue_print import web
 
 __author__ = 'meto'

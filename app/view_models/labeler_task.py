@@ -1,5 +1,4 @@
 # _*_ coding:utf-8 _*_
-from sqlalchemy import desc
 
 from app.models.property import Property
 from app.models.property_value import Property_value
@@ -120,7 +119,6 @@ class FramesViewModel:
         self.pic_type = frame.pic_type
         self.coordinate = frame.coordinate
         self.final_coordinate = frame.final_coordinate
-
 
 
 class FramesCollection:

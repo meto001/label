@@ -9,6 +9,8 @@ from app.models.user import User
 from flask_login import login_user, logout_user
 import json
 
+from app.libs.error_code import Success, RegisterFailed, LoginFailed
+
 __author__ = 'meto'
 __date__ = '2019/3/21 11:06'
 
@@ -31,22 +33,23 @@ def add_admin():
 
 @web.route('/register', methods=['POST'])
 def register():
-    # form = {"nickname": "paopa1o", "realname": "(宝1ᴗ宝)", "password": "123456", "email": "18301318212@qq.com",
-    #         "groupid": 2}
-    form = json.loads(request.data)
+    form = {"nickname": "paopa1o", "realname": "(宝1ᴗ宝)", "password": "123456", "email": "18301318212@qq.com",
+            "groupid": 2}
+    # form = json.loads(request.data)
     form = RegisterForm(MultiDict(form))
     if request.method == 'POST' and form.validate() and form.data.get("groupid") != 1:
         with db.auto_commit():
             user = User()
             user.set_attrs(form.data)
             db.session.add(user)
-        return json.dumps({'status': 'success'})
+        # return json.dumps({'status': 'success'})
+        return Success()
     msg = ''
     for k, v in form.errors.items():
         # print(k,v)
         msg = msg + v[0] + ' '
-    return json.dumps({'status': 'fail', 'msg': msg})
-
+    # return json.dumps({'status': 'fail', 'msg': msg})
+    return RegisterFailed(msg=msg)
 
 @cross_origin
 @web.route('/login', methods=['GET', 'POST'])
@@ -70,8 +73,10 @@ def login():
             # 把用户信息写入到cookie中
             login_user(user, remember=True)
             result = {'code': 200, 'user_id': user.id, 'nickname': user.nickname, 'groupid': user.groupid}
+            return json.dumps(result)
         else:
-            result = {'code': 250, 'msg': '用户名或密码错误'}
+            # result = {'code': 250, 'msg': '用户名或密码错误'}
+            return LoginFailed(msg='用户名或密码错误')
             # flash('用户不存在或密码错误')
     # return render_template('auth/login.html', form=form)
     else:
@@ -80,7 +85,8 @@ def login():
             # print(k,v)
             msg = msg + v[0] + ' '
         result = {'status': 300, 'msg': msg}
-    return json.dumps(result)
+    return LoginFailed(msg=msg)
+    # return json.dumps(result)
     # return render_template('auth/login.html',form=form)
 
 
@@ -92,4 +98,4 @@ def forget_password_request():
 @web.route('/logout', methods=['GET', 'POST'])
 def logout():
     logout_user()
-    return json.dumps({'status': 'success'})
+    return Success()
