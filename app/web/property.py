@@ -100,5 +100,5 @@ def add_property():
                     db.session.add(property_value)
 
     print('继续执行')
-    return json.dumps(form)
+    return json.dumps({'status' : 'success'})
     # return Success()
