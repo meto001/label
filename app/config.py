@@ -18,10 +18,3 @@ class APSchedulerJobConfig(object):
     SCHEDULER_API_ENABLED = True
     SQLALCHEMY_ECHO = True
 
-cache_config = {
-    'CACHE_TYPE': 'redis',
-    'CACHE_REDIS_HOST': '182.61.51.47',
-    'CACHE_REDIS_PORT': 6379,
-    'CACHE_REDIS_DB': '',
-    'CACHE_REDIS_PASSWORD': 'meto001'
-}

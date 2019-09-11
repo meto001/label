@@ -13,7 +13,7 @@ from flask_login import LoginManager
 from flask_cors import CORS
 from flask_apscheduler import APScheduler
 from app.config import APSchedulerJobConfig
-from app.config import cache_config
+from app.secure import cache_config
 from flask_cache import Cache
 from queue import Queue
 login_manager = LoginManager()
