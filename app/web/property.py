@@ -2,7 +2,7 @@
 import json
 
 from flask import request
-
+from app import cache
 from app import db
 from app.libs.error_code import Success
 # 这里的Label_type不用但是也不能删。因为要使用这个初始化Label_type表
@@ -17,6 +17,7 @@ from .blue_print import web
 
 
 @web.route('/show_property', methods=['GET', 'POST'])
+@cache.cached(timeout=86400,key_prefix='property')
 # @login_required
 def show_property():
     # 这里的Label_type不用但是也不能删。因为要使用这个初始化Label_type表
@@ -46,6 +47,7 @@ def show_property_value():
 @web.route('/add_property', methods=['POST'])
 # @login_required
 def add_property():
+    cache.delete('property')
     # # 新增传进来的form
     # form = {'prop_name': '肤色', 'label_type_id': 1, 'prop_type': 1, 'property_value':
     #     [{'option_value': 2, 'option_name': '黄'},

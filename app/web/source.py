@@ -6,6 +6,8 @@ from flask_login import login_required
 from werkzeug.datastructures import MultiDict
 import re
 import requests
+
+from app import cache
 from app.models.base import db
 from app.view_models.source import SourceViewModel, SourceCollection, SourceImageViewModel
 from .blue_print import web
@@ -16,13 +18,17 @@ import json
 from app.models.source import Source
 from app.models.source_image_path import Source_image_path
 from app.models.user import User
-
+import redis
 
 @web.route('/source', methods=['GET', 'POST'])
 # @login_required
+
+@cache.cached(timeout=86400,key_prefix='source')#设置一个key_prefix来作为标记，然后，在内容更新的函数里面调用cache.delete('source')来删除缓存来保证用户访问到的内容是最新的
 def source():
     """
         此处要使用view_models ,将testuser转化为对象。然后再进行__dict__操作
+        2019.9.10:增加缓存功能
+
     :return:
     """
     print(request.remote_addr)
@@ -43,7 +49,8 @@ def source():
 @web.route('/add_source', methods=['POST'])
 # @login_required
 def add_source():
-
+    # 删除缓存
+    cache.delete('source')
     # 假数据
     # form = {'source_name': 'wwtest2', 'label_type_id': 2, 'file_url': 'F:/数据需求/标注系统测试/1'}
     # form = MultiDict(json.loads(request.data))
