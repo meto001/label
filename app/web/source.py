@@ -1,4 +1,5 @@
 # _*_ coding:utf-8 _*_
+import os
 import socket
 
 from flask import request
@@ -22,7 +23,6 @@ import redis
 
 @web.route('/source', methods=['GET', 'POST'])
 # @login_required
-
 @cache.cached(timeout=86400,key_prefix='source')#设置一个key_prefix来作为标记，然后，在内容更新的函数里面调用cache.delete('source')来删除缓存来保证用户访问到的内容是最新的
 def source():
     """
@@ -107,3 +107,34 @@ def view_source_image():
     source_image.fill(source_id, new_source_image_id, image_url)
 
     return json.dumps(source_image,default=lambda o: o.__dict__)
+
+from pathlib import Path
+import zipfile
+@web.route('/add_source_by_upload',methods=['POST'])
+def add_source_by_upload():
+    file = request.files.get('file')
+    with zipfile.ZipFile(file) as zf:
+        for fn in zf.namelist():
+            extracted_path = Path(zf.extract(fn,path='app/static'))
+            try:
+                extracted_path.replace('app/static/'+fn.encode('cp437').decode('gbk'))
+            except Exception as e:
+                print("异常对象的类型是:%s" % type(e))
+                print("异常对象的内容是:%s" % e)
+
+        # try:
+        #     azip = zf.extractall(path='app/static')
+        #     azip.namelist()
+        # except RuntimeError as e:
+        #     print(e)
+    return 'success'
+
+import base64
+@web.route('/test2', methods=['PUT'])
+def test2():
+    print(request.data)
+    imgdata = base64.b64decode(request.data)
+    with open('1.png','wb') as f:
+        f.write(imgdata)
+
+    return 'yes'

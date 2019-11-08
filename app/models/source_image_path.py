@@ -39,8 +39,8 @@ class Source_image_path(Base):
             source_img_data = Source_image_path.query.filter_by(source_id=source_id).order_by(asc(Source_image_path.id)).first()
         elif source_img_type == 2:
             source_img_data = Source_image_path.query.filter(Source_image_path.source_id == source_id,
-                                                             Source_image_path.id < source_image_id).order_by(
-                desc(Source_image_path.id)).first()
+                              Source_image_path.id < source_image_id).order_by(desc(Source_image_path.id)).first()
+
         elif source_img_type == 3:
             source_img_data = Source_image_path.query.filter(Source_image_path.source_id == source_id,
                                                              Source_image_path.id > source_image_id).order_by(
