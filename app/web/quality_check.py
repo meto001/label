@@ -64,8 +64,8 @@ def auto_generate_quality_check():
 
         # 当前时间
         # now_time = int(time.time())
-        # 今天凌晨的时间戳
-        # day_end_time = now_time - now_time % 86400 + time.timezone
+        # 今天凌晨的时间戳,以下两种方式均可获得
+        # day_end_time = now_time - (now_time- time.timezone)%86400
         day_end_time = int(datetime.timestamp(datetime.strptime(datetime.now().strftime('%Y%m%d'), '%Y%m%d')))
         print('今天凌晨的时间戳为%s'%str(day_end_time))
         # 昨天凌晨的时间戳

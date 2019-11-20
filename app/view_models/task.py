@@ -2,6 +2,7 @@
 from app.models.task_details_value import Task_details_value
 from app.models.property_value import Property_value
 from app.models.task_details_cut import Task_details_cut
+from app.models.property import Property
 
 __author__ = 'meto'
 __date__ = '2019/4/19 10:18'
@@ -109,13 +110,36 @@ class ExportTaskViewModel:
 
         pass
 
+
+class ExportProps:
+    def __init__(self,prop):
+        self.prop_type = prop.prop_type
+        self.prop_id = prop.id
+        self.prop_name = prop.prop_name
+        self.property_values = []
+        self.__parse()
+    def __parse(self):
+        options = Property_value.query.filter_by(prop_id=self.prop_id).order_by(Property_value.option_value).all()
+        self.property_values = [self.__map_to_option(option) for option in options]
+
+    def __map_to_option(self, option):
+        return dict(
+            option_value=option.option_value,
+            option_name=option.option_name
+        )
 class ExportTaskCollection:
     def __init__(self):
         self.task_id = ''
         self.task_name = ''
+        self.props = []
         self.details = []
 
-    def fill(self,task_details):
+    def fill(self,task_details,prop_ids):
         self.task_id = task_details[0].task_id
         self.task_name = task_details[0].task.task_name
         self.details=[ExportTaskViewModel(task_detail) for task_detail in task_details]
+
+        # 查询出所有的属性
+        prop_ids = Property.query.filter(Property.id.in_(prop_ids)).all()
+        self.props = [ExportProps(prop) for prop in prop_ids]
+

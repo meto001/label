@@ -511,8 +511,17 @@ def export_data():
 
         task_details = Task_details.get_task_all_data(task_id)
 
+        # 2019.11.20新增获取属性列表
+        prop_ids = task_details[0].task.prop_ids
+        tuple_prop_ids = eval(prop_ids)
+        prop_option_value = 0
+        if type(tuple_prop_ids) is int:
+            prop_ids = [tuple_prop_ids]
+        else:
+            prop_ids = list(tuple_prop_ids)
+
         export_task = ExportTaskCollection()
-        export_task.fill(task_details)
+        export_task.fill(task_details,prop_ids)
 
         # 将任务状态改为已导出，则自动质检时不再查询该任务 status=2 为已结束
         with db.auto_commit():
