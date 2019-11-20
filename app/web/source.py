@@ -113,6 +113,9 @@ import zipfile
 @web.route('/add_source_by_upload',methods=['POST'])
 def add_source_by_upload():
     file = request.files.get('file')
+    # ff = file.read()
+    # with open('s.jpg','wb') as f:
+    #     f.write(ff)
     with zipfile.ZipFile(file) as zf:
         for fn in zf.namelist():
             extracted_path = Path(zf.extract(fn,path='app/static'))
@@ -122,11 +125,11 @@ def add_source_by_upload():
                 print("异常对象的类型是:%s" % type(e))
                 print("异常对象的内容是:%s" % e)
 
-        # try:
-        #     azip = zf.extractall(path='app/static')
-        #     azip.namelist()
-        # except RuntimeError as e:
-        #     print(e)
+        try:
+            azip = zf.extractall(path='app/static')
+            azip.namelist()
+        except RuntimeError as e:
+            print(e)
     return 'success'
 
 import base64
@@ -136,5 +139,11 @@ def test2():
     imgdata = base64.b64decode(request.data)
     with open('1.png','wb') as f:
         f.write(imgdata)
+
+    # 保存文件的第二种方法
+    # file = request.files.get('file')
+    # ff = file.read()
+    # with open('s.jpg','wb') as f:
+    #     f.write(ff)
 
     return 'yes'

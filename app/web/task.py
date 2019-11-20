@@ -446,8 +446,9 @@ def modify_data():
                     db.session.add(task_details_value)
         task_detail = Task_details.query.filter_by(id=task_detail_id).first()
         # 新增修改时将状态改为1，返工时使用
-        task_detail.is_complete = 1
-        task_detail.operate_time = time.time()
+        with db.auto_commit():
+            task_detail.is_complete = 1
+            task_detail.operate_time = time.time()
         return json.dumps({'status': 'success'})
     else:
         return json.dumps({'msg': '这不是您做的数据，无法进行修改！'})

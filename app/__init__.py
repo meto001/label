@@ -24,8 +24,10 @@ dict1 ={}
 cache = Cache()
 def create_app():
     app = Flask(__name__)
+
+    # 如果是在服务器端部署，在nginx1.12环境下 CORS如下配置可以正常运行，但如果是1.16版本，需要把CORS跨域代码屏蔽掉
     try:
-        CORS(app, resources=r'/*',support_credentials=True )
+        CORS(app, resources=r'/*',support_credentials=True)
     except Exception as e:
         print(e)
 

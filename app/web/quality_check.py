@@ -2,7 +2,7 @@
 import json
 import math
 import random
-
+from datetime import datetime
 from flask import request
 
 from app import db
@@ -63,10 +63,11 @@ def auto_generate_quality_check():
     else:
 
         # 当前时间
-        now_time = int(time.time())
+        # now_time = int(time.time())
         # 今天凌晨的时间戳
-        day_end_time = now_time - now_time % 86400 + time.timezone
-
+        # day_end_time = now_time - now_time % 86400 + time.timezone
+        day_end_time = int(datetime.timestamp(datetime.strptime(datetime.now().strftime('%Y%m%d'), '%Y%m%d')))
+        print('今天凌晨的时间戳为%s'%str(day_end_time))
         # 昨天凌晨的时间戳
         day_start_time = day_end_time - 86400
 
