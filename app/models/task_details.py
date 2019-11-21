@@ -53,6 +53,11 @@ class Task_details(Base):
         return user_already_count
 
     @classmethod
+    def get_user_today_count(cls, task_id, user, today_start_time):
+        user_today_count = Task_details.query.filter(Task_details.task_id == task_id, Task_details.operate_user == user, Task_details.operate_create_time >today_start_time, Task_details.is_complete == 1).count()
+        return user_today_count
+
+    @classmethod
     def get_has_locks(cls,user, task_id):
         locks = Task_details.query.filter_by(operate_user=user,task_id=task_id, locks=1, quality_inspection=0).first()
         return locks

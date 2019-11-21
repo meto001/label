@@ -95,7 +95,9 @@ def labeler_task():
     tasks = Task.get_undone_task(page, rows)
     undone_task_count = Task.get_undone_task_count()
     labeler_task = LabelTaskCollection()
-    labeler_task.fill(undone_task_count, tasks, user)
+    now_time = int(time.time())
+    today_start_time = now_time - (now_time - time.timezone) % 86400
+    labeler_task.fill(undone_task_count, tasks, user, today_start_time)
 
     # task.get('already_count') =Ta a
     # labeltaskviewmodel = LabelTaskViewModel()
