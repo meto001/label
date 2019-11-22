@@ -20,6 +20,8 @@ class Property(Base):
     # 1 单选， 2 文本框
     prop_type = Column(Integer, nullable=False)
 
+    order = Column(Integer,comment='排序，暂不支持页面修改，需要在数据库手动修改')
+
     @classmethod
     def get_property(cls):
         label_property = Property.query.filter_by().order_by(

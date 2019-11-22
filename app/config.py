@@ -16,5 +16,5 @@ class APSchedulerJobConfig(object):
         }
     }]
     SCHEDULER_API_ENABLED = True
-    SQLALCHEMY_ECHO = True
+    SQLALCHEMY_ECHO = False
 

@@ -104,9 +104,11 @@ class LabelTaskDetailCollection:
         self.detail_type = detail_type
 
         # 查询出所有的属性
-        prop_ids = Property.query.filter(Property.id.in_(prop_ids)).all()
-
+        # prop_ids = Property.query.filter(Property.id.in_(prop_ids)).all()
+        # prop_ids = [16,12]
+        prop_ids = Property.query.filter(Property.id.in_(prop_ids)).order_by(Property.order).all()
         task_details = Task_details().query.filter_by(id=task_detail_id).first()
+        #.order_by( asc(Task_details.id)).first()
         self.quality_lock = task_details.quality_lock
         self.quality_inspection = task_details.quality_inspection
         self.check_data_info_id = check_data_info_id
