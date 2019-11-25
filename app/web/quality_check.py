@@ -402,8 +402,10 @@ def check_task_details():
 
                                 rework_table.set_attrs(data1)
                                 db.session.add(rework_table)
-
-                    return json.dumps({'msg': '该任务已完成', 'status': 666})
+                    if check_user.status == 1:
+                        return json.dumps({'msg': '该任务已完成,正确率为:%s,质检结果为:通过'%str(correct_rate), 'status': 666})
+                    else:
+                        return json.dumps({'msg': '该任务已完成,正确率为:%s,质检结果为:未通过' % str(correct_rate), 'status': 666})
                     # return Completed()
 
                 else:
