@@ -32,6 +32,11 @@ def rework_list():
 
 @web.route('/rework_details', methods=['POST'])
 def rework_details():
+    """
+    返工请求新的数据
+    :return:
+    """
+
     if request.data:
         form = json.loads(request.data)
 
@@ -94,5 +99,6 @@ def rework_details():
         else:
             prop_ids = list(tuple_prop_ids)
         label_detail = LabelTaskDetailCollection()
-        label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, rework_data.id)
+        mongo_con = None
+        label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, rework_data.id, mongo_con)
         return json.dumps(label_detail, default=lambda o: o.__dict__)

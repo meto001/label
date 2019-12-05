@@ -1,11 +1,5 @@
 # _*_ coding:utf-8 _*_
 import os
-
-
-
-__author__ = 'meto'
-__date__ = '2019/3/20 18:18'
-
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from app.models.base import db
@@ -15,13 +9,20 @@ from flask_apscheduler import APScheduler
 from app.config import APSchedulerJobConfig
 from app.secure import cache_config
 from flask_cache import Cache
+from flask_pymongo import PyMongo
 from queue import Queue
+__author__ = 'meto'
+__date__ = '2019/3/20 18:18'
+
+
 login_manager = LoginManager()
 # 注册APScheduler
 scheduler = APScheduler()
 # q = Queue(100)
 dict1 ={}
 cache = Cache()
+mongo = PyMongo()
+
 def create_app():
     app = Flask(__name__)
 
@@ -51,6 +52,9 @@ def create_app():
     # else:
     #     print('scheduler is not start')
 
+    # 配置pymongo
+
+    mongo.init_app(app)
     return app
 
 

@@ -50,14 +50,21 @@ class LabelTaskCollection:
 
 class LabelTaskDetailViewModel:
 
-    def __init__(self, prop, task_detail_id, detail_type):
+    def __init__(self, prop, task_detail_id, detail_type, mongo_con):
         self.prop_type = prop.prop_type
         self.prop_id = prop.id
         self.prop_name = prop.prop_name
 
         # 如果是新数据，此值为空，如果是查询历史数据，使用此值
-        self.prop_option_value = 0
-        self.prop_option_value_final = 0
+
+        # 预处理修改这里，将里面的值进行替换
+        # mongo_con[task_detail_id][prop.id]
+        if mongo_con:
+            self.prop_option_value = mongo_con[str(task_detail_id)][str(prop.id)]
+            self.prop_option_value_final = mongo_con[str(task_detail_id)][str(prop.id)]
+        else:
+            self.prop_option_value = 0
+            self.prop_option_value_final = 0
         self.property_values = []
         self.__parse(task_detail_id, detail_type)
 
@@ -96,7 +103,7 @@ class LabelTaskDetailCollection:
         self.check_data_info_id = ''
         self.props = []
 
-    def fill(self, task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id):
+    def fill(self, task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id, mongo_con):
         self.photo_path = url
         self.task_id = task_id
         self.task_detail_id = task_detail_id
@@ -112,7 +119,7 @@ class LabelTaskDetailCollection:
         self.quality_lock = task_details.quality_lock
         self.quality_inspection = task_details.quality_inspection
         self.check_data_info_id = check_data_info_id
-        self.props = [LabelTaskDetailViewModel(prop, task_detail_id, detail_type) for prop in prop_ids]
+        self.props = [LabelTaskDetailViewModel(prop, task_detail_id, detail_type, mongo_con) for prop in prop_ids]
 
 
 class FramesViewModel:
@@ -146,3 +153,25 @@ class FramesCollection:
         self.quality_inspection = task_details.quality_inspection
         self.check_data_info_id = check_data_info_id
         self.frames = [FramesViewModel(frame) for frame in frames]
+
+
+class PreprocessingCollection:
+
+    def fill(self, details, task_id):
+        d = {}
+        for detail in details:
+            # 取到path，然后通过path和task_id去mysql中查询到task_details_id,将task_details_id作为键保存到mongodb中
+            path = detail['path']
+            task_detail = Task_details.query.filter_by(task_id=task_id, photo_path=path).first()
+
+        # 插入到mongodb中，这里需要将detail值做优化，只保存里面的prop_id和prop_value,prop_id作为键，prop_value作为值
+            d1 ={}
+            for prop in detail['props']:
+                key1 = prop['prop_id']
+                value1 = prop['prop_value']
+
+                d1[str(key1)] = value1
+            d[str(task_detail.id)] =d1
+
+        # print(d1)
+        return d

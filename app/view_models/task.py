@@ -83,7 +83,8 @@ class ExportTaskViewModel:
         else:
             detail_values = Task_details_value().query.filter_by(task_detail_id=task_detail_id).all()
             self.props = [self.__map_to_prop(detail_value) for detail_value in detail_values]
-
+    # 这里有两种选择，一是导出带属性名的，一是不带属性名，带属性名需要多去数据库中查询一次，以下为测试时间
+    # 以3000数据为例，不带属性名用时2分钟，查询数据库3000次；带属性名用时4分钟，查询数据库3000*属性类型（次）
     def __map_to_prop(self, detail_value):
         # 属性值名字
         prop_value = Property_value().query.filter_by(prop_id=detail_value.prop_id, option_value=detail_value.prop_option_value_final).first()

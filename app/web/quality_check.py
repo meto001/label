@@ -451,7 +451,8 @@ def check_task_details():
         else:
             prop_ids = list(tuple_prop_ids)
         label_detail = LabelTaskDetailCollection()
-        label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, quality_data.id)
+        mongo_con = None
+        label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, quality_data.id, mongo_con)
         return json.dumps(label_detail, default=lambda o: o.__dict__)
 
 

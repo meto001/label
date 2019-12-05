@@ -16,7 +16,7 @@ class SimpleMultiDict(dict):
 
 
 class LoginForm(Form):
-    print(type(Form))
+    # print(type(Form))
     nickname = StringField(validators=[DataRequired(), Length(2,24, message='昵称至少需要2个字符，最多24个字符')])
 
     password = PasswordField(validators=[DataRequired(message='密码不可以为空， 请输入你的密码')])

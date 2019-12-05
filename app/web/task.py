@@ -6,16 +6,17 @@ from queue import Queue
 from flask import request, json
 from sqlalchemy import desc
 
-from app import db, dict1
+from app import db, dict1, mongo
+from app.libs.make_data import caijian_save_data, label_save_data, caijian_modify_data, label_modify_data
 from app.models.property import Property
 from app.models.source import Source
 from app.models.task import Task
 from app.models.task_details import Task_details
 from app.models.task_details_cut import Task_details_cut
 from app.models.task_details_value import Task_details_value
-from app.view_models.labeler_task import LabelTaskCollection, LabelTaskDetailCollection, FramesCollection
+from app.view_models.labeler_task import LabelTaskCollection, LabelTaskDetailCollection, FramesCollection, \
+    PreprocessingCollection
 from app.view_models.task import TaskCollection, SourcesAndPorps, ExportTaskCollection
-from app.libs.make_data import caijian_save_data, label_save_data, caijian_modify_data, label_modify_data
 from .blue_print import web
 
 __author__ = 'meto'
@@ -111,25 +112,27 @@ def labeler_task():
 def show_task_detail():
     """
     任务详情界面，包括：新的一张，上一张，下一张。使用队列方式进行发放数据。如任务已完成，则修改任务状态。
+    如果任务为预处理，并且是新的一张，则访问mongodb数据库查找数据并处理返回。
     :return:
     """
-
     # detail_type 1,新的一页;2,上一张;3,下一张
-
     if request.data:
         form = json.loads(request.data)
     else:
-        form = {"nickname": "paopao", "group_id": 2, "task_id": 15, "label_type": 2, "detail_type": 1,
+        # 测试数据
+        form = {"nickname": "paopao", "group_id": 2, "task_id": 4, "label_type": 1, "detail_type": 1,
                 "task_detail_id": 4773}
     # 点击开始标注 接收一条已被该用户锁定或未标注的数据
-
     user = form.get('nickname')
     task_id = form.get('task_id')
     detail_type = form.get('detail_type')
 
     # 新的一页
     if detail_type == 1:
-
+        """
+         这里需插入逻辑：判断该任务是否为预处理任务，如果是，
+         读取mongodb数据库，得到数据，直接返回
+       """
         # 查询是否有锁定数据
         new_data = Task_details().get_has_locks(user, task_id)
         # 如果没有锁定数据
@@ -182,6 +185,8 @@ def show_task_detail():
                 return json.dumps({'msg': '该任务已完成', 'status': 666})
 
         task_detail_id = new_data.id
+
+        # 在这里拿到id后，去mongodb中查询此id.获取数据后返回。
         url = new_data.photo_path
 
         # 判断是裁剪类型
@@ -208,8 +213,13 @@ def show_task_detail():
                 prop_ids = list(tuple_prop_ids)
             label_detail = LabelTaskDetailCollection()
             check_data_info_id = ''
-            label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id)
-
+            if new_data.task.is_preprocess == 1:
+                col = mongo.db['%s' % str(task_id)]
+                # 查询mongodb数据
+                mongo_con = col.find_one({})
+            else:
+                mongo_con = None
+            label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id, mongo_con)
             return json.dumps(label_detail, default=lambda o: o.__dict__)
 
     elif detail_type == 2 or detail_type == 3:
@@ -252,7 +262,8 @@ def show_task_detail():
                 prop_ids = list(tuple_prop_ids)
             label_detail = LabelTaskDetailCollection()
             check_data_info_id = ''
-            label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id)
+            mongo_con = None
+            label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id, mongo_con)
 
             # select * from task_details WHERE  operate_user = 'meto' AND task_id = 4 and is_complete =1 and
             # operate_create_time >10000 and operate_create_time < 2556709299 and id < 6320 ORDER BY id DESC LIMIT 1
@@ -523,7 +534,7 @@ def export_data():
             prop_ids = list(tuple_prop_ids)
 
         export_task = ExportTaskCollection()
-        export_task.fill(task_details,prop_ids)
+        export_task.fill(task_details, prop_ids)
 
         # 将任务状态改为已导出，则自动质检时不再查询该任务 status=2 为已结束
         with db.auto_commit():
@@ -580,4 +591,39 @@ def load():
         dict1[id] = q
     if dict1[id].empty() is False:
         print(id, '--', dict1[id].get())
+    return 'success'
+
+
+@web.route('/task/upload_mongodb', methods=['GET', 'POST'])
+def preprocessing_upload_mongodb():
+    file = request.files.get('file')
+    json_file = file.read()
+    con = json.loads(json_file)
+    task_id = con['task_id']
+    print(task_id)
+    col = mongo.db['%s' % str(task_id)]
+
+
+    # 插入到mongodb中，这里需要将detail值做优化，只保存里面的prop_id和prop_value,prop_id作为键，prop_value作为值
+
+
+    preprocess = PreprocessingCollection()
+    d1 = preprocess.fill(con['details'],task_id)
+    # print(d1)
+    # 保存格式：task_details_id:{prop_id:prop_value}
+    res = col.insert_one(d1)
+
+    # 在task表中增加一个字段，插入完成之后，将值改为1，
+    with db.auto_commit():
+        task = Task().query.filter_by(id=task_id).first()
+        task.is_preprocess = 1
+    # print('inserted_id:%s' % (res.inserted_id))
+    # find_res = col.find_one({"_id": res.inserted_id})
+    #
+    # item = find_res['4593']
+    # for k,v in item.items():
+    #     print('%s:%s' % (k, v))
+    # for k, v in item.items():
+    #     print('%s:%s'%(k,v))
+    pass
     return 'success'

@@ -26,6 +26,7 @@ class Task(Base):
 
     is_complete = Column(Integer)
 
+    is_preprocess = Column(Integer,comment='是否预处理')
     # status:0废弃，1,生效，2 已结束
 
 

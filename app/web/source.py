@@ -110,8 +110,11 @@ def view_source_image():
 
 from pathlib import Path
 import zipfile
-@web.route('/add_source_by_upload',methods=['POST'])
+
+
+@web.route('/+',methods=['POST'])
 def add_source_by_upload():
+
     file = request.files.get('file')
     # ff = file.read()
     # with open('s.jpg','wb') as f:
