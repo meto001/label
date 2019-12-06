@@ -62,6 +62,9 @@ class LabelTaskDetailViewModel:
         if mongo_con:
             self.prop_option_value = mongo_con[str(task_detail_id)][str(prop.id)]
             self.prop_option_value_final = mongo_con[str(task_detail_id)][str(prop.id)]
+        elif self.prop_type == 5:
+            self.prop_option_value = [0]
+            self.prop_option_value_final = [0]
         else:
             self.prop_option_value = 0
             self.prop_option_value_final = 0

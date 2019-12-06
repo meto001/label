@@ -519,11 +519,11 @@ def modify_check_data():
                 prop_id = prop.get('prop_id')
                 task_details_value = Task_details_value().query.filter_by(prop_id=prop_id,
                                                                           task_detail_id=task_detail_id).first()
-                # 新增了一个属性，导致数据库里缺少值,task_details_value为NoneType，知道报错，临时增加一个try
+                # 新增了一个属性，导致数据库里缺少值,task_details_value为NoneType，导致报错，临时增加一个try
                 try:
                     if str(prop.get('prop_option_value_final')) != str(task_details_value.prop_option_value_final):
                         # 修改task_details_value表中的final值
-                        task_details_value.prop_option_value_final = prop.get('prop_option_value_final')
+                        task_details_value.prop_option_value_final = str(prop.get('prop_option_value_final'))
                 except Exception as e:
                     print(e)
 

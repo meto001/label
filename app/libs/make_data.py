@@ -39,8 +39,8 @@ def caijian_modify_data(form, frame):
 def label_modify_data(form, prop):
     data = {'photo_path': form.get('photo_path'), 'task_id': form.get('task_id'),
             'task_detail_id': form.get('task_detail_id'), 'create_user': form.get('create_user'),
-            'prop_id': prop.get('prop_id'), 'prop_option_value': prop.get('prop_option_value'),
-            'prop_option_value_final': prop.get('prop_option_value'), 'prop_type': prop.get('prop_type')}
+            'prop_id': prop.get('prop_id'), 'prop_option_value': str(prop.get('prop_option_value')),
+            'prop_option_value_final': str(prop.get('prop_option_value')), 'prop_type': prop.get('prop_type')}
     return data
 
 
