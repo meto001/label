@@ -63,9 +63,9 @@ class PropertyValueViewModel:
             self.prop_type = '文本框'
         if prop.property.prop_type == 3:
             self.prop_type = '画框'
-        if prop.property.label_type == 4:
+        if prop.property.prop_type == 4:
             self.prop_type = '多边形'
-        if prop.property.label_type == 5:
+        if prop.property.prop_type == 5:
             self.prop_type = '复选'
         # self.prop_type = prop.value_id
         self.property_values = [self.__map_to_property(label_property) for label_property in property_values]

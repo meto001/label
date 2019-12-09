@@ -523,7 +523,11 @@ def modify_check_data():
                 try:
                     if str(prop.get('prop_option_value_final')) != str(task_details_value.prop_option_value_final):
                         # 修改task_details_value表中的final值
-                        task_details_value.prop_option_value_final = str(prop.get('prop_option_value_final'))
+                        if prop.get('prop_type') == 5:
+                            prop_option_value_final = json.dumps(prop.get('prop_option_value'))
+                        else:
+                            prop_option_value_final = str(prop.get('prop_option_value_final'))
+                        task_details_value.prop_option_value_final = prop_option_value_final
                 except Exception as e:
                     print(e)
 

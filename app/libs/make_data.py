@@ -1,4 +1,6 @@
 # _*_ coding:utf-8 _*_
+import json
+
 __author__ = 'meto'
 __date__ = '2019/8/13 15:15'
 
@@ -20,10 +22,16 @@ def caijian_save_data(form, frame):
 
 
 def label_save_data(form, prop):
+    if prop.get('prop_type') == 5:
+        prop_option_value = json.dumps(prop.get('prop_option_value'))
+        prop_option_value_final = json.dumps(prop.get('prop_option_value'))
+    else:
+        prop_option_value = str(prop.get('prop_option_value'))
+        prop_option_value_final = str(prop.get('prop_option_value'))
     data = {'photo_path': form.get('photo_path'), 'task_id': form.get('task_id'),
             'task_detail_id': form.get('task_detail_id'), 'create_user': form.get('create_user'),
-            'prop_id': prop.get('prop_id'), 'prop_option_value': str(prop.get('prop_option_value')),
-            'prop_option_value_final': str(prop.get('prop_option_value')), 'prop_type': prop.get('prop_type')}
+            'prop_id': prop.get('prop_id'), 'prop_option_value': prop_option_value,
+            'prop_option_value_final': prop_option_value_final, 'prop_type': prop.get('prop_type')}
     return data
 
 
@@ -37,10 +45,16 @@ def caijian_modify_data(form, frame):
 
 
 def label_modify_data(form, prop):
+    if prop.get('prop_type') == 5:
+        prop_option_value = json.dumps(prop.get('prop_option_value'))
+        prop_option_value_final = json.dumps(prop.get('prop_option_value'))
+    else:
+        prop_option_value = str(prop.get('prop_option_value'))
+        prop_option_value_final = str(prop.get('prop_option_value'))
     data = {'photo_path': form.get('photo_path'), 'task_id': form.get('task_id'),
             'task_detail_id': form.get('task_detail_id'), 'create_user': form.get('create_user'),
-            'prop_id': prop.get('prop_id'), 'prop_option_value': str(prop.get('prop_option_value')),
-            'prop_option_value_final': str(prop.get('prop_option_value')), 'prop_type': prop.get('prop_type')}
+            'prop_id': prop.get('prop_id'), 'prop_option_value': prop_option_value,
+            'prop_option_value_final': prop_option_value_final, 'prop_type': prop.get('prop_type')}
     return data
 
 

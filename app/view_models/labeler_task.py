@@ -1,4 +1,5 @@
 # _*_ coding:utf-8 _*_
+import json
 
 from app.models.property import Property
 from app.models.property_value import Property_value
@@ -82,8 +83,12 @@ class LabelTaskDetailViewModel:
             #     self.prop_option_value = list(prop_option_value.prop_option_value)
             #     self.prop_option_value_final = list(prop_option_value.prop_option_value_final)
             # else:
-            self.prop_option_value = prop_option_value.prop_option_value
-            self.prop_option_value_final = prop_option_value.prop_option_value_final
+            if prop_option_value.prop_type == 5:
+                self.prop_option_value = json.loads(prop_option_value.prop_option_value)
+                self.prop_option_value_final = json.loads(prop_option_value.prop_option_value_final)
+            else:
+                self.prop_option_value = prop_option_value.prop_option_value
+                self.prop_option_value_final = prop_option_value.prop_option_value_final
 
         options = Property_value.query.filter_by(prop_id=self.prop_id).order_by(Property_value.option_value).all()
         self.property_values = [self.__map_to_option(option) for option in options]
