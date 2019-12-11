@@ -1,4 +1,6 @@
 # _*_ coding:utf-8 _*_
+import json
+
 from app.models.task_details_value import Task_details_value
 from app.models.property_value import Property_value
 from app.models.task_details_cut import Task_details_cut
@@ -62,7 +64,6 @@ class SourcesAndPorps:
         self.props = [self.__map_to_prop(prop) for prop in props]
 
 
-
 class ExportTaskViewModel:
     def __init__(self, task_detail):
         self.path = ''
@@ -83,6 +84,7 @@ class ExportTaskViewModel:
         else:
             detail_values = Task_details_value().query.filter_by(task_detail_id=task_detail_id).all()
             self.props = [self.__map_to_prop(detail_value) for detail_value in detail_values]
+
     # 这里有两种选择，一是导出带属性名的，一是不带属性名，带属性名需要多去数据库中查询一次，以下为测试时间
     # 以3000数据为例，不带属性名用时2分钟，查询数据库3000次；带属性名用时4分钟，查询数据库3000*属性类型（次）
     def __map_to_prop(self, detail_value):
@@ -93,11 +95,17 @@ class ExportTaskViewModel:
         else:
             prop_value_name = None
 
+        if detail_value.prop_type == 5:
+            prop_values = json.loads(detail_value.prop_option_value_final)
+            prop_value_name = None
+        else:
+            prop_values = detail_value.prop_option_value_final
+
         return dict(
             prop_id=detail_value.prop_id,
             prop_name=detail_value.prop.prop_name,
             prop_type=detail_value.prop_type,
-            prop_value=detail_value.prop_option_value_final,
+            prop_value=prop_values,
             prop_value_name =prop_value_name
         )
 
@@ -119,6 +127,7 @@ class ExportProps:
         self.prop_name = prop.prop_name
         self.property_values = []
         self.__parse()
+
     def __parse(self):
         options = Property_value.query.filter_by(prop_id=self.prop_id).order_by(Property_value.option_value).all()
         self.property_values = [self.__map_to_option(option) for option in options]
