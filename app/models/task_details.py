@@ -73,7 +73,7 @@ class Task_details(Base):
         # operate_create_time >10000 and operate_create_time < 2556709299 and id < 6320 ORDER BY id DESC LIMIT 1
         last_data = Task_details.query.filter(Task_details.operate_user == user, Task_details.task_id == task_id,
                                               Task_details.is_complete == 1, Task_details.operate_create_time > today_time,
-                                              Task_details.operate_create_time < now_time, Task_details.id < task_detail_id).order_by(
+                                              Task_details.operate_create_time <= now_time, Task_details.id < task_detail_id).order_by(
             desc(Task_details.id)).first()
         return last_data
 

@@ -224,6 +224,7 @@ def show_task_detail():
 
     elif detail_type == 2 or detail_type == 3:
         task_detail_id = form.get('task_detail_id')
+        # print('请求上一张，当前task_detail_id为%s'%task_detail_id)
         # 当前时间
         now_time = int(time.time())
         # 今天凌晨的时间戳
@@ -239,6 +240,7 @@ def show_task_detail():
             if history_data is None:
                 return json.dumps({'msg': '已经是今天做的最后一条数据了，如果想做新的，请点击“新的一张”'})
         task_detail_id = history_data.id
+        # print('上一张的id为%s'%task_detail_id)
         url = history_data.photo_path
 
         if form.get('label_type') == 2:
@@ -376,6 +378,7 @@ def save_data():
         task_detail.is_complete = 1
         task_detail.operate_create_time = time.time()
         task_detail.operate_time = time.time()
+
     return json.dumps({'status': 'success'})
 
 
