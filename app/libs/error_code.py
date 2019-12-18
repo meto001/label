@@ -12,13 +12,17 @@ class Success(APIException):
 
 
 class RegisterFailed(APIException):
-    code = 400
+    code = 209
     msg = 'register failed'
     error_code = 1000
 
+class ModifyFailed(APIException):
+    code = 210
+    msg = '密码错误'
+    error_code = 1003
 
 class LoginFailed(APIException):
-    code = 400
+    code = 250
     msg = 'login failed'
     error_code = 1001
 

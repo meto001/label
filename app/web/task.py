@@ -34,9 +34,9 @@ def add_task():
     # 判断如果是get方法，则返回对应类型的sources和props
     if request.method == 'GET':
         form = request.args.get('label_type_id')
-        props = Property.query.filter_by(label_type_id=form).order_by(
+        props = Property.query.filter_by(label_type_id=form,status=1).order_by(
             desc(Property.id)).all()
-        sources = Source.query.filter_by(label_type_id=form).order_by(
+        sources = Source.query.filter_by(label_type_id=form,status=1).order_by(
             desc(Source.id)).all()
         sources_and_props = SourcesAndPorps(sources, props, form)
 
