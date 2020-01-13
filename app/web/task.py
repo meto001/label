@@ -628,5 +628,4 @@ def preprocessing_upload_mongodb():
     #     print('%s:%s' % (k, v))
     # for k, v in item.items():
     #     print('%s:%s'%(k,v))
-    pass
     return 'success'

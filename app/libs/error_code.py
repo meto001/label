@@ -17,7 +17,7 @@ class RegisterFailed(APIException):
     error_code = 1000
 
 class ModifyFailed(APIException):
-    code = 210
+    code = 200
     msg = '密码错误'
     error_code = 1003
 

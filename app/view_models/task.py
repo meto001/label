@@ -89,11 +89,11 @@ class ExportTaskViewModel:
     # 以3000数据为例，不带属性名用时2分钟，查询数据库3000次；带属性名用时4分钟，查询数据库3000*属性类型（次）
     def __map_to_prop(self, detail_value):
         # 属性值名字
-        prop_value = Property_value().query.filter_by(prop_id=detail_value.prop_id, option_value=detail_value.prop_option_value_final).first()
-        if prop_value:
-            prop_value_name = prop_value.option_name
-        else:
-            prop_value_name = None
+        # prop_value = Property_value().query.filter_by(prop_id=detail_value.prop_id, option_value=detail_value.prop_option_value_final).first()
+        # if prop_value:
+        #     prop_value_name = prop_value.option_name
+        # else:
+        #     prop_value_name = None
 
         if detail_value.prop_type == 5:
             prop_values = json.loads(detail_value.prop_option_value_final)
@@ -106,7 +106,7 @@ class ExportTaskViewModel:
             prop_name=detail_value.prop.prop_name,
             prop_type=detail_value.prop_type,
             prop_value=prop_values,
-            prop_value_name =prop_value_name
+            # prop_value_name =prop_value_name
         )
 
     def __map_to_frame(detail_frame):
