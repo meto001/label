@@ -135,8 +135,10 @@ class ExportProps:
     def __map_to_option(self, option):
         return dict(
             option_value=option.option_value,
-            option_name=option.option_name
+            option_name=option.option_name.split('.')[-1] # 此处是为了优化导出的json结构，以便算法同学解析
         )
+
+
 class ExportTaskCollection:
     def __init__(self):
         self.task_id = ''

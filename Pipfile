@@ -22,6 +22,7 @@ flask-cache = "*"
 flask-script = "*"
 redis = "*"
 flask-pymongo = "*"
+flask-redis = "*"
 
 [requires]
 python_version = "3.6"

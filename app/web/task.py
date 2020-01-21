@@ -6,7 +6,9 @@ from queue import Queue
 from flask import request, json
 from sqlalchemy import desc
 
-from app import db, dict1, mongo
+from app.models.base import db
+
+from app import dict1, mongo, redis_client
 from app.libs.make_data import caijian_save_data, label_save_data, caijian_modify_data, label_modify_data
 from app.models.property import Property
 from app.models.source import Source
@@ -138,15 +140,16 @@ def show_task_detail():
         # 如果没有锁定数据
         if new_data is None:
             # 如果没有锁定数据，判断字典里是否有该任务的队列，如果有，则获取一个task_detail_id，否则，新建队列，获取task_detail_id
-            if dict1.get(task_id) is None:
-                q = Queue()
+            if redis_client.llen(task_id) == 0:
                 # 查询该任务下未完成的task_detail_id
                 undone_ids = Task_details().get_undone_ids(task_id)
                 for id in undone_ids:
-                    q.put(id)
-                dict1[task_id] = q
-            if dict1.get(task_id).empty() is False:
-                task_detail_id = dict1.get(task_id).get()
+                    redis_client.rpush(task_id,id)
+                    print(id)
+            if redis_client.llen(task_id):
+                task_detail_id = redis_client.lpop(task_id)
+                if task_detail_id:
+                    task_detail_id = task_detail_id.decode()
                 print(task_id, ':', task_detail_id)
             else:
                 # 此处为了少修改逻辑，否则应把下面的代码合并过来
@@ -155,9 +158,11 @@ def show_task_detail():
 
             # 当队列中获取的值查不到时，循环进行查询，直到队列为空
             while new_data is None:
-                if dict1.get(task_id).empty() is False:
-                    task_detail_id = dict1.get(task_id).get()
+                if redis_client.llen(task_id):
+                    task_detail_id = redis_client.lpop(task_id)
                     print('已经消失了的记录:', task_detail_id)
+                if task_detail_id:
+                    task_detail_id = task_detail_id.decode()
                 else:
                     break
                 new_data = Task_details().get_new_data(task_id, task_detail_id)
@@ -560,9 +565,12 @@ def export_data():
 @web.route('/helloo')
 # @cache.cached(timeout=6,key_prefix='meto')
 def hello():
-    request
-    name = 'hello redis 16'
-    return name
+    # pao = redis_client.rpush(3,1,2,3,4,5,6)
+    pao = redis_client.llen(37)
+    print(pao)
+    # redis_client.set('kill_total', 50)
+    # name = 'hello redis 16'
+    return 'yes'
 
 
 @web.route('/queue_test')

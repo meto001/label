@@ -61,8 +61,21 @@ class LabelTaskDetailViewModel:
         # 预处理修改这里，将里面的值进行替换
         # mongo_con[task_detail_id][prop.id]
         if mongo_con:
-            self.prop_option_value = mongo_con[str(task_detail_id)][str(prop.id)]
-            self.prop_option_value_final = mongo_con[str(task_detail_id)][str(prop.id)]
+            try:
+                self.prop_option_value = mongo_con[str(task_detail_id)][str(prop.id)]
+                self.prop_option_value_final = mongo_con[str(task_detail_id)][str(prop.id)]
+            except KeyError as e:
+                print(e)
+                if self.prop_type == 5:
+                    self.prop_option_value = []
+                    self.prop_option_value_final = []
+                elif self.prop_type == 2:
+                    self.prop_option_value = ''
+                    self.prop_option_value_final = ''
+                else:
+                    self.prop_option_value = 0
+                    self.prop_option_value_final = 0
+
         elif self.prop_type == 5:
             self.prop_option_value = []
             self.prop_option_value_final = []

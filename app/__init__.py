@@ -2,7 +2,7 @@
 import os
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from app.models.base import db
+# from app.models.base import db
 from flask_login import LoginManager
 from flask_cors import CORS
 from flask_apscheduler import APScheduler
@@ -11,8 +11,10 @@ from app.secure import cache_config
 from flask_cache import Cache
 from flask_pymongo import PyMongo
 from queue import Queue
+from flask_redis import FlaskRedis
 __author__ = 'meto'
 __date__ = '2019/3/20 18:18'
+
 
 
 login_manager = LoginManager()
@@ -22,7 +24,7 @@ scheduler = APScheduler()
 dict1 ={}
 cache = Cache()
 mongo = PyMongo()
-
+redis_client = FlaskRedis()
 def create_app():
     app = Flask(__name__)
 
@@ -36,14 +38,15 @@ def create_app():
     app.config.from_object(APSchedulerJobConfig)
 
     # 配置redis缓存
-    # app.config.ini.from_object(cache_config)
     cache.init_app(app,cache_config)
     register_blueprint(app)
-    db.init_app(app)
-    db.create_all(app=app)
+    register_pulgin(app)
     login_manager.init_app(app)
     login_manager.login_view = 'web.login'
     login_manager.login_message = '请先登录或注册'
+
+    redis_client.init_app(app)
+
 
     # if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
     print('scheduler is start')
@@ -53,9 +56,15 @@ def create_app():
     #     print('scheduler is not start')
 
     # 配置pymongo
-
     mongo.init_app(app)
     return app
+
+
+def register_pulgin(app):
+    from app.models.base import db
+    db.init_app(app)
+    with app.app_context():
+        db.create_all()
 
 
 def register_blueprint(app):

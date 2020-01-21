@@ -3,7 +3,8 @@ import json
 
 from flask import request
 from app import cache
-from app import db
+from app.models.base import db
+
 from app.libs.error_code import Success
 # 这里的Label_type不用但是也不能删。因为要使用这个初始化Label_type表
 from app.models.label_type import Label_type

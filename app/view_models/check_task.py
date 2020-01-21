@@ -1,7 +1,7 @@
 # _*_ coding:utf-8 _*_
 import time
 
-from app import db
+from app.models.base import db
 from app.models.check_data_info import Check_data_info
 from app.models.check_user import Check_user
 from app.models.task import Task

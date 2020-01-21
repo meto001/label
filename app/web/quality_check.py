@@ -4,8 +4,7 @@ import math
 import random
 from datetime import datetime
 from flask import request
-
-from app import db
+from app.models.base import db
 from app import scheduler
 from app.models.check_data_info import Check_data_info
 from app.models.check_task import Check_task
