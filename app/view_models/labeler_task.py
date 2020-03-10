@@ -76,7 +76,7 @@ class LabelTaskDetailViewModel:
                     self.prop_option_value = 0
                     self.prop_option_value_final = 0
 
-        elif self.prop_type == 5:
+        elif self.prop_type == 5 or self.prop_type == 6:
             self.prop_option_value = []
             self.prop_option_value_final = []
         elif self.prop_type == 2:
@@ -99,7 +99,8 @@ class LabelTaskDetailViewModel:
             #     self.prop_option_value = list(prop_option_value.prop_option_value)
             #     self.prop_option_value_final = list(prop_option_value.prop_option_value_final)
             # else:
-            if prop_option_value.prop_type == 5:
+            # 直接返回数组
+            if prop_option_value.prop_type == 5 or prop_option_value.prop_type == 6 :
                 self.prop_option_value = json.loads(prop_option_value.prop_option_value)
                 self.prop_option_value_final = json.loads(prop_option_value.prop_option_value_final)
             else:
