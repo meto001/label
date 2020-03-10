@@ -65,11 +65,11 @@ class LabelTaskDetailViewModel:
                 self.prop_option_value = mongo_con[str(task_detail_id)][str(prop.id)]
                 self.prop_option_value_final = mongo_con[str(task_detail_id)][str(prop.id)]
             except KeyError as e:
-                print(e)
+                # print(e)
                 if self.prop_type == 5:
                     self.prop_option_value = []
                     self.prop_option_value_final = []
-                elif self.prop_type == 2:
+                elif self.prop_type == 2 or self.prop_type == 6:
                     self.prop_option_value = ''
                     self.prop_option_value_final = ''
                 else:
