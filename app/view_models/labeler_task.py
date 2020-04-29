@@ -86,6 +86,8 @@ class LabelTaskDetailViewModel:
             self.prop_option_value = 0
             self.prop_option_value_final = 0
         self.property_values = []
+        if self.prop_type == 5:
+            self.right_status = []
         self.__parse(task_detail_id, detail_type)
 
     # property_values
@@ -107,8 +109,25 @@ class LabelTaskDetailViewModel:
                 self.prop_option_value = prop_option_value.prop_option_value
                 self.prop_option_value_final = prop_option_value.prop_option_value_final
 
+
         options = Property_value.query.filter_by(prop_id=self.prop_id).order_by(Property_value.option_value).all()
         self.property_values = [self.__map_to_option(option) for option in options]
+
+        if prop_option_value.prop_type == 5:
+
+            # 获取所有的选项值
+            all_index = []
+            for op in options:
+                all_index.append(op.option_value)
+            self.right_status = [None] * len(self.property_values)
+            for value in self.prop_option_value:
+                if value not in self.prop_option_value_final:
+                    v = all_index.index(value)
+                    self.right_status[v] = 'red'
+            for value in self.prop_option_value_final:
+                if value not in self.prop_option_value:
+                    v = all_index.index(value)
+                    self.right_status[v] = 'red'
 
     def __map_to_option(self, option):
         return dict(
