@@ -362,50 +362,51 @@ def check_task_details():
                     # 得到任务的通过率
                     pass_rate = Check_data_info().get_pass_rate(check_user_id)
                     check_user = Check_user().query.filter_by(id=check_user_id).first()
+                    # 这里需要增加一个已生成返工判断。避免重复生成返工。
+                    if check_user.right_rate is None:
+                        with db.auto_commit():
 
-                    with db.auto_commit():
+                            # 将正确率写入到check_user表中
+                            check_user.right_rate = correct_rate
+                            # 计算该质检任务的开始和结束时间
+                            date = check_user.check_date
+                            time_array = time.strptime(date, '%Y-%m-%d')
+                            start_time = time.mktime(time_array)
+                            # end_time = start_time+86400
 
-                        # 将正确率写入到check_user表中
-                        check_user.right_rate = correct_rate
-                        # 计算该质检任务的开始和结束时间
-                        date = check_user.check_date
-                        time_array = time.strptime(date, '%Y-%m-%d')
-                        start_time = time.mktime(time_array)
-                        # end_time = start_time+86400
-
-                        all_rework = Task_details.set_rework(start_time, task_id, check_user.user)
-                        if correct_rate >= pass_rate:
-                            check_user.status = 1
-                            for rework in all_rework:
-                                rework.quality_inspection = 2
-                        else:
-                            # 返工
-                            check_user.status = 2
-                            check_user.rework_status = 0
-                            # 将此user此任务当天的所有数据全部返工
-
-                            with db.auto_commit():
+                            all_rework = Task_details.set_rework(start_time, task_id, check_user.user)
+                            if correct_rate >= pass_rate:
+                                check_user.status = 1
                                 for rework in all_rework:
-                                    if rework.quality_inspection != 2:
-                                        rework.quality_inspection = -1
-                                    rework.is_complete = -1
-                                # 在rework表中写入一条数据
-                                rework_table = Rework()
-                                data1 = {}
-                                data1['task_id'] = task_id
-                                data1['rework_date'] = date
-                                data1['user'] = label_user
-                                data1['operate_time'] = time.time()
-                                data1['all_count'] = check_user.total_num
-                                data1['right_rate'] = correct_rate
+                                    rework.quality_inspection = 2
+                            else:
+                                # 返工
+                                check_user.status = 2
+                                check_user.rework_status = 0
+                                # 将此user此任务当天的所有数据全部返工
 
-                                rework_table.set_attrs(data1)
-                                db.session.add(rework_table)
-                    if check_user.status == 1:
-                        return json.dumps({'msg': '该任务已完成,正确率为:%s,质检结果为:通过'%str(correct_rate), 'status': 666})
-                    else:
-                        return json.dumps({'msg': '该任务已完成,正确率为:%s,质检结果为:未通过' % str(correct_rate), 'status': 666})
-                    # return Completed()
+                                with db.auto_commit():
+                                    for rework in all_rework:
+                                        if rework.quality_inspection != 2:
+                                            rework.quality_inspection = -1
+                                        rework.is_complete = -1
+                                    # 在rework表中写入一条数据
+                                    rework_table = Rework()
+                                    data1 = {}
+                                    data1['task_id'] = task_id
+                                    data1['rework_date'] = date
+                                    data1['user'] = label_user
+                                    data1['operate_time'] = time.time()
+                                    data1['all_count'] = check_user.total_num
+                                    data1['right_rate'] = correct_rate
+
+                                    rework_table.set_attrs(data1)
+                                    db.session.add(rework_table)
+                        if check_user.status == 1:
+                            return json.dumps({'msg': '该任务已完成,正确率为:%s,质检结果为:通过'%str(correct_rate), 'status': 666})
+                        else:
+                            return json.dumps({'msg': '该任务已完成,正确率为:%s,质检结果为:未通过' % str(correct_rate), 'status': 666})
+                        # return Completed()
 
                 else:
                     # 返回锁定数据的用户
