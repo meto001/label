@@ -96,6 +96,8 @@ class LabelTaskDetailViewModel:
         # if detail_type == 2 or detail_type == 3:
         prop_option_value = Task_details_value().query.filter_by(prop_id=self.prop_id,
                                                                  task_detail_id=task_detail_id).first()
+        options = Property_value.query.filter_by(prop_id=self.prop_id).order_by(Property_value.option_value).all()
+        self.property_values = [self.__map_to_option(option) for option in options]
         if prop_option_value:
             # if self.prop_type == 4:
             #     self.prop_option_value = list(prop_option_value.prop_option_value)
@@ -109,25 +111,27 @@ class LabelTaskDetailViewModel:
                 self.prop_option_value = prop_option_value.prop_option_value
                 self.prop_option_value_final = prop_option_value.prop_option_value_final
 
+            if prop_option_value.prop_type == 5:
+                # 获取所有的选项值
+                all_index = []
+                for op in options:
+                    all_index.append(op.option_value)
+                self.right_status = [None] * len(self.property_values)
+                for value in self.prop_option_value:
+                    if value not in self.prop_option_value_final:
+                        v = all_index.index(value)
+                        self.right_status[v] = 'red'
+                for value in self.prop_option_value_final:
+                    if value not in self.prop_option_value:
+                        v = all_index.index(value)
+                        self.right_status[v] = 'red'
+
 
         options = Property_value.query.filter_by(prop_id=self.prop_id).order_by(Property_value.option_value).all()
         self.property_values = [self.__map_to_option(option) for option in options]
 
-        if prop_option_value.prop_type == 5:
 
-            # 获取所有的选项值
-            all_index = []
-            for op in options:
-                all_index.append(op.option_value)
-            self.right_status = [None] * len(self.property_values)
-            for value in self.prop_option_value:
-                if value not in self.prop_option_value_final:
-                    v = all_index.index(value)
-                    self.right_status[v] = 'red'
-            for value in self.prop_option_value_final:
-                if value not in self.prop_option_value:
-                    v = all_index.index(value)
-                    self.right_status[v] = 'red'
+
 
     def __map_to_option(self, option):
         return dict(
