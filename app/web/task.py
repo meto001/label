@@ -486,6 +486,8 @@ def export_data():
     # 判断该任务所有数据quality_inspection是否都是质检完成状态
     task_id = form.get('task_id')
     quality_status = Task_details.get_quality_status(task_id)
+    # 提前导出测试用代码
+    # quality_status =1
     if quality_status:
         # 执行导出动作
         data = {"task_id": 16, "task_name": "1号任务",
@@ -536,6 +538,7 @@ def export_data():
         prop_ids = task_details[0].task.prop_ids
         tuple_prop_ids = eval(prop_ids)
         prop_option_value = 0
+        print('正在获取tuple_prop_ids')
         if type(tuple_prop_ids) is int:
             prop_ids = [tuple_prop_ids]
         else:

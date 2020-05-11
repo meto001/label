@@ -66,6 +66,7 @@ class SourcesAndPorps:
 
 class ExportTaskViewModel:
     def __init__(self, task_detail):
+
         self.path = ''
         self.props = []
         self.__parse(task_detail)
@@ -74,6 +75,7 @@ class ExportTaskViewModel:
         # 处理数据
         self.path = task_detail.photo_path
         task_detail_id = task_detail.id
+        print(task_detail_id)
 
         # 裁剪
         if task_detail.task.source.label_type == 2:
@@ -149,6 +151,7 @@ class ExportTaskCollection:
     def fill(self,task_details,prop_ids):
         self.task_id = task_details[0].task_id
         self.task_name = task_details[0].task.task_name
+
         self.details=[ExportTaskViewModel(task_detail) for task_detail in task_details]
 
         # 查询出所有的属性
