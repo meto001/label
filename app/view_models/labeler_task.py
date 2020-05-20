@@ -150,12 +150,14 @@ class LabelTaskDetailCollection:
         self.quality_inspection = ''
         self.check_data_info_id = ''
         self.props = []
+        self.result_status = ''
+        self.detail_type = ''
 
-    def fill(self, task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id, mongo_con):
+    def fill(self, task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id, mongo_con, result_status):
         self.photo_path = url
         self.task_id = task_id
         self.task_detail_id = task_detail_id
-
+        self.result_status = result_status
         self.detail_type = detail_type
 
         # 查询出所有的属性

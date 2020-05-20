@@ -181,7 +181,7 @@ class Task_details(Base):
     def get_task_all_data(cls, task_id):
         return Task_details.query.filter_by(task_id=task_id).all()
         # 只导出一小部分
-        # return Task_details.query.filter(Task_details.task_id == task_id, Task_details.operate_time <= 1588147768).all()
+        # return Task_details.query.filter(Task_details.task_id == task_id, Task_details.operate_time <= 1589644800).all()
 
     @classmethod
     def get_already_task(cls, start_time):

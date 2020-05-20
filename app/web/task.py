@@ -193,6 +193,9 @@ def show_task_detail():
 
         # 在这里拿到id后，去mongodb中查询此id.获取数据后返回。
         url = new_data.photo_path
+        # 这里增加临时解决方案，将旧的ip替换为新的ip
+        if '45982' in url:
+            url = 'http://192.168.0.196:8282' + str(url).split(':45982')[-1]
 
         # 判断是裁剪类型
         if form.get('label_type') == 2:
@@ -224,7 +227,8 @@ def show_task_detail():
                 mongo_con = col.find_one({})
             else:
                 mongo_con = None
-            label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id, mongo_con)
+            result_status = None
+            label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id, mongo_con, result_status)
             return json.dumps(label_detail, default=lambda o: o.__dict__)
 
     elif detail_type == 2 or detail_type == 3:
@@ -247,7 +251,9 @@ def show_task_detail():
         task_detail_id = history_data.id
         # print('上一张的id为%s'%task_detail_id)
         url = history_data.photo_path
-
+        # 这里增加临时解决方案，将旧的ip替换为新的ip
+        if '45982' in url:
+            url = 'http://192.168.0.196:8282' + str(url).split(':45982')[-1]
         if form.get('label_type') == 2:
             frames = Task_details_cut().get_frames(task_detail_id)
             frames_collection = FramesCollection()
@@ -270,7 +276,8 @@ def show_task_detail():
             label_detail = LabelTaskDetailCollection()
             check_data_info_id = ''
             mongo_con = None
-            label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id, mongo_con)
+            result_status = None
+            label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id, mongo_con,result_status)
 
             # select * from task_details WHERE  operate_user = 'meto' AND task_id = 4 and is_complete =1 and
             # operate_create_time >10000 and operate_create_time < 2556709299 and id < 6320 ORDER BY id DESC LIMIT 1
@@ -346,6 +353,7 @@ def save_data():
                 }
             ]
         }
+
     # 裁剪任务保存逻辑
     if form.get('label_type') == 2:
         frames = form.get('frames')

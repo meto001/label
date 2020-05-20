@@ -86,3 +86,12 @@ class Check_data_info(Base):
     def get_lock_user(cls, check_user_id):
         lock_user = Check_data_info.query.filter_by(check_user_id=check_user_id, locks=1).all()
         return lock_user
+
+    @classmethod
+    def get_result_status(cls, task_detail_id):
+        info = Check_data_info.query.filter_by(task_details_id=task_detail_id).first()
+        if info:
+            result_status = info.result_status
+            return result_status
+        else:
+            return None

@@ -23,7 +23,7 @@ import redis
 
 @web.route('/source', methods=['GET', 'POST'])
 # @login_required
-# @cache.cached(timeout=86400,key_prefix='source')#设置一个key_prefix来作为标记，然后，在内容更新的函数里面调用cache.delete('source')来删除缓存来保证用户访问到的内容是最新的
+# @cache.cached(timeout=86400,key_prefix='source')#设置一个key_prefix来作为标记，然后，在内容更新的函数里面调用cache.delete('source')来删除缓存来保证用户访问到的内容是最新的，此方案有个bug，无法处理分页。
 def source():
     """
         此处要使用view_models ,将testuser转化为对象。然后再进行__dict__操作

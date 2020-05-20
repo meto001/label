@@ -10,6 +10,7 @@ from app.models.task_details import Task_details
 from app.models.task_details_cut import Task_details_cut
 from app.view_models.labeler_task import LabelTaskDetailCollection, FramesCollection
 from app.view_models.rework import ReworkCollection
+from app.models.check_data_info import Check_data_info
 from .blue_print import web
 
 __author__ = 'meto'
@@ -83,6 +84,8 @@ def rework_details():
         with db.auto_commit():
             rework_data.is_complete = 1
     url = rework_data.photo_path
+    if '45982' in url:
+        url = 'http://192.168.0.196:8282' + str(url).split(':45982')[-1]
 
     if form.get('label_type') == 2:
         frames = Task_details_cut().get_frames(task_detail_id)
@@ -98,7 +101,11 @@ def rework_details():
             prop_ids = [tuple_prop_ids]
         else:
             prop_ids = list(tuple_prop_ids)
+
+        # 增加返回该条数据对错
+        result_status = Check_data_info().get_result_status(task_detail_id)
+
         label_detail = LabelTaskDetailCollection()
         mongo_con = None
-        label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, rework_data.id, mongo_con)
+        label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, rework_data.id, mongo_con, result_status)
         return json.dumps(label_detail, default=lambda o: o.__dict__)

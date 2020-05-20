@@ -18,6 +18,7 @@ from app.view_models.check_task import CheckTaskCollection, CheckUserCollection
 from app.view_models.labeler_task import LabelTaskDetailCollection, FramesCollection
 from app.libs.error_code import Success
 from app.libs.make_data import check_modify_data
+
 from .blue_print import web
 
 __author__ = 'meto'
@@ -439,6 +440,8 @@ def check_task_details():
     task_details = quality_data.task_details
     task_detail_id = task_details.id
     url = task_details.photo_path
+    if '45982' in url:
+        url = 'http://192.168.0.196:8282' + str(url).split(':45982')[-1]
 
     if form.get('label_type') == 2:
         frames = Task_details_cut().get_frames(task_detail_id)
@@ -453,9 +456,11 @@ def check_task_details():
             prop_ids = [tuple_prop_ids]
         else:
             prop_ids = list(tuple_prop_ids)
+        # 增加返回该条数据对错
+        result_status = Check_data_info().get_result_status(task_detail_id)
         label_detail = LabelTaskDetailCollection()
         mongo_con = None
-        label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, quality_data.id, mongo_con)
+        label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, quality_data.id, mongo_con, result_status)
         return json.dumps(label_detail, default=lambda o: o.__dict__)
 
 
