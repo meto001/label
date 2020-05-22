@@ -12,7 +12,7 @@ __date__ = '2019/4/25 17:09'
 
 class LabelTaskViewModel:
 
-    def __init__(self, task, completed_count, my_label_count, my_today_label_count):
+    def __init__(self, task, completed_count, my_label_count, my_today_label_count, be_left_doubt_count):
         self.task_id = task.id
         self.task_name = task.task_name
         self.label_type = task.source.label_type.name
@@ -27,6 +27,7 @@ class LabelTaskViewModel:
 
         self.my_today_label_count = my_today_label_count
 
+        self.be_left_doubt_count = be_left_doubt_count
         # 用户已完成框数（标注不需要）
         self.my_frame_count = ''
 
@@ -46,7 +47,8 @@ class LabelTaskCollection:
             completed_count = task_detail.get_already_count(task.id)
             my_label_count = task_detail.get_user_already_count(task.id, user)
             my_today_label_count = task_detail.get_user_today_count(task.id, user, today_start_time)
-            self.tasks.append(LabelTaskViewModel(task, completed_count, my_label_count, my_today_label_count))
+            be_left_doubt_count = task_detail.get_be_left_doubt_count(task.id, user)
+            self.tasks.append(LabelTaskViewModel(task, completed_count, my_label_count, my_today_label_count, be_left_doubt_count))
 
 
 class LabelTaskDetailViewModel:
@@ -152,14 +154,15 @@ class LabelTaskDetailCollection:
         self.props = []
         self.result_status = ''
         self.detail_type = ''
+        self.is_doubt = ''
 
-    def fill(self, task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id, mongo_con, result_status):
+    def fill(self, task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id, mongo_con, result_status, is_doubt):
         self.photo_path = url
         self.task_id = task_id
         self.task_detail_id = task_detail_id
         self.result_status = result_status
         self.detail_type = detail_type
-
+        self.is_doubt = is_doubt
         # 查询出所有的属性
         # prop_ids = Property.query.filter(Property.id.in_(prop_ids)).all()
         # prop_ids = [16,12]

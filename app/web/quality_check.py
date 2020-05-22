@@ -460,7 +460,8 @@ def check_task_details():
         result_status = Check_data_info().get_result_status(task_detail_id)
         label_detail = LabelTaskDetailCollection()
         mongo_con = None
-        label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, quality_data.id, mongo_con, result_status)
+        is_doubt = task_details.is_doubt
+        label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, quality_data.id, mongo_con, result_status, is_doubt)
         return json.dumps(label_detail, default=lambda o: o.__dict__)
 
 

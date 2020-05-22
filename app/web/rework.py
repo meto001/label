@@ -107,5 +107,6 @@ def rework_details():
 
         label_detail = LabelTaskDetailCollection()
         mongo_con = None
-        label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, rework_data.id, mongo_con, result_status)
+        is_doubt = rework_data.is_doubt
+        label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, rework_data.id, mongo_con, result_status, is_doubt)
         return json.dumps(label_detail, default=lambda o: o.__dict__)

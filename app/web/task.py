@@ -123,7 +123,7 @@ def show_task_detail():
     else:
         # 测试数据
         form = {"nickname": "paopao", "group_id": 2, "task_id": 4, "label_type": 1, "detail_type": 1,
-                "task_detail_id": 4773}
+                "task_detail_id": 4773, "is_doubt": 0}
     # 点击开始标注 接收一条已被该用户锁定或未标注的数据
     user = form.get('nickname')
     task_id = form.get('task_id')
@@ -131,63 +131,70 @@ def show_task_detail():
 
     # 新的一页
     if detail_type == 1:
-        """
-         这里需插入逻辑：判断该任务是否为预处理任务，如果是，
-         读取mongodb数据库，得到数据，直接返回
-       """
-        # 查询是否有锁定数据
-        new_data = Task_details().get_has_locks(user, task_id)
-        # 如果没有锁定数据
-        if new_data is None:
-            # 如果没有锁定数据，判断字典里是否有该任务的队列，如果有，则获取一个task_detail_id，否则，新建队列，获取task_detail_id
-            if redis_client.llen(task_id) == 0:
-                # 查询该任务下未完成的task_detail_id
-                undone_ids = Task_details().get_undone_ids(task_id)
-                for id in undone_ids:
-                    redis_client.rpush(task_id,id)
-                    print(id)
-            if redis_client.llen(task_id):
-                task_detail_id = redis_client.lpop(task_id)
-                if task_detail_id:
-                    task_detail_id = task_detail_id.decode()
-                print(task_id, ':', task_detail_id)
-            else:
-                # 此处为了少修改逻辑，否则应把下面的代码合并过来
-                task_detail_id = None
-            new_data = Task_details().get_new_data(task_id, task_detail_id)
 
-            # 当队列中获取的值查不到时，循环进行查询，直到队列为空
-            while new_data is None:
+        # 判断是否为存疑数据
+        if int(form.get("is_doubt")) == 1:
+            new_data = Task_details().get_has_doubt_locks(user, task_id)
+            # 如果没有锁定的存疑数据，则查找一条新的存疑数据
+            if new_data is None:
+                new_data = Task_details().get_new_doubt_data(task_id)
+                if new_data is None:
+                    return json.dumps({'msg': '存疑数据已经做完，请退出'})
+        else:
+
+            # 查询是否有锁定数据
+            new_data = Task_details().get_has_locks(user, task_id)
+            # 如果没有锁定数据
+            if new_data is None:
+                # 如果没有锁定数据，判断字典里是否有该任务的队列，如果有，则获取一个task_detail_id，否则，新建队列，获取task_detail_id
+                if redis_client.llen(task_id) == 0:
+                    # 查询该任务下未完成的task_detail_id
+                    undone_ids = Task_details().get_undone_ids(task_id)
+                    for id in undone_ids:
+                        redis_client.rpush(task_id,id)
+                        print(id)
                 if redis_client.llen(task_id):
                     task_detail_id = redis_client.lpop(task_id)
-                    print('已经消失了的记录:', task_detail_id)
-                if task_detail_id:
-                    task_detail_id = task_detail_id.decode()
+                    if task_detail_id:
+                        task_detail_id = task_detail_id.decode()
+                    print(task_id, ':', task_detail_id)
                 else:
-                    break
+                    # 此处为了少修改逻辑，否则应把下面的代码合并过来
+                    task_detail_id = None
                 new_data = Task_details().get_new_data(task_id, task_detail_id)
-            if new_data:
 
-                # 更新数据，将该条数据锁定
-                with db.auto_commit():
-                    new_data.locks = 1
-                    new_data.operate_user = user
-            else:
-                # 查询是否有锁定数据
-                label_undone_data = Task_details.check_is_complete(task_id)
-                if label_undone_data is None:
-                    # 将task表改为已完成
+                # 当队列中获取的值查不到时，循环进行查询，直到队列为空
+                while new_data is None:
+                    if redis_client.llen(task_id):
+                        task_detail_id = redis_client.lpop(task_id)
+                        print('已经消失了的记录:', task_detail_id)
+                    if task_detail_id:
+                        task_detail_id = task_detail_id.decode()
+                    else:
+                        break
+                    new_data = Task_details().get_new_data(task_id, task_detail_id)
+                if new_data:
+
+                    # 更新数据，将该条数据锁定
                     with db.auto_commit():
-                        task = Task.query.filter_by(id=task_id).first()
-                        task.is_complete = 1
-                        # status=666 页面需要跳出
-                    return json.dumps({'msg': '该任务已完成', 'status': 666})
+                        new_data.locks = 1
+                        new_data.operate_user = user
                 else:
-                    lock_user = db.session.query(Task_details.operate_user).filter(Task_details.task_id == task_id,
-                                                                                   Task_details.locks == 1).all()
-                    return json.dumps({'msg': '已没有新数据，请%s尽快将锁定数据完成' % (str(lock_user)), 'status': 666})
+                    # 查询是否有锁定数据
+                    label_undone_data = Task_details.check_is_complete(task_id)
+                    if label_undone_data is None:
+                        # 将task表改为已完成
+                        with db.auto_commit():
+                            task = Task.query.filter_by(id=task_id).first()
+                            task.is_complete = 1
+                            # status=666 页面需要跳出
+                        return json.dumps({'msg': '该任务已完成', 'status': 666})
+                    else:
+                        lock_user = db.session.query(Task_details.operate_user).filter(Task_details.task_id == task_id,
+                                                                                       Task_details.locks == 1).all()
+                        return json.dumps({'msg': '已没有新数据，请%s尽快将锁定数据完成' % (str(lock_user)), 'status': 666})
 
-                return json.dumps({'msg': '该任务已完成', 'status': 666})
+                    return json.dumps({'msg': '该任务已完成', 'status': 666})
 
         task_detail_id = new_data.id
 
@@ -228,7 +235,8 @@ def show_task_detail():
             else:
                 mongo_con = None
             result_status = None
-            label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id, mongo_con, result_status)
+            is_doubt = new_data.is_doubt
+            label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id, mongo_con, result_status, is_doubt)
             return json.dumps(label_detail, default=lambda o: o.__dict__)
 
     elif detail_type == 2 or detail_type == 3:
@@ -241,11 +249,19 @@ def show_task_detail():
         # 上一页
         if detail_type == 2:
             # form = {'nickname': 'meto', 'task_id': 4, 'detail_type': 2, 'task_detail_id':7657}
-            history_data = Task_details().get_last_data(user, task_id, task_detail_id, now_time, today_time)
+            # 判断是否为存疑数据
+            if int(form.get("is_doubt")) == 1:
+                history_data = Task_details().get_last_doubt_data(user, task_id, task_detail_id, now_time, today_time)
+            else:
+                history_data = Task_details().get_last_data(user, task_id, task_detail_id, now_time, today_time)
             if history_data is None:
                 return json.dumps({'msg': '已经是今天最早的数据了，想查询更多，请移步历史记录'})
         elif detail_type == 3:
-            history_data = Task_details().get_next_data(user, task_id, task_detail_id, now_time, today_time)
+            # 判断是否为存疑数据
+            if int(form.get('is_doubt')) == 1:
+                history_data = Task_details().get_next_doubt_data(user, task_id, task_detail_id, now_time, today_time)
+            else:
+                history_data = Task_details().get_next_data(user, task_id, task_detail_id, now_time, today_time)
             if history_data is None:
                 return json.dumps({'msg': '已经是今天做的最后一条数据了，如果想做新的，请点击“新的一张”'})
         task_detail_id = history_data.id
@@ -277,7 +293,8 @@ def show_task_detail():
             check_data_info_id = ''
             mongo_con = None
             result_status = None
-            label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id, mongo_con,result_status)
+            is_doubt = history_data.is_doubt
+            label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id, mongo_con, result_status, is_doubt)
 
             # select * from task_details WHERE  operate_user = 'meto' AND task_id = 4 and is_complete =1 and
             # operate_create_time >10000 and operate_create_time < 2556709299 and id < 6320 ORDER BY id DESC LIMIT 1
@@ -388,7 +405,11 @@ def save_data():
     with db.auto_commit():
         task_detail = Task_details().query.filter_by(id=form.get('task_detail_id')).first()
         task_detail.locks = 0
-        task_detail.is_complete = 1
+        # 增加存疑判断，如果doubt为1，则将doubt字段改为1，is_complete为0不变。
+        if form.get('doubt') == 1:
+            task_detail.is_doubt = 1
+        else:
+            task_detail.is_complete = 1
         task_detail.operate_create_time = time.time()
         task_detail.operate_time = time.time()
 
@@ -474,7 +495,7 @@ def modify_data():
                     task_details_value.set_attrs(data)
                     db.session.add(task_details_value)
         task_detail = Task_details.query.filter_by(id=task_detail_id).first()
-        # 新增修改时将状态改为1，返工时使用
+        # 新增修改时将状态改为1，返工和存疑时使用
         with db.auto_commit():
             task_detail.is_complete = 1
             task_detail.operate_time = time.time()

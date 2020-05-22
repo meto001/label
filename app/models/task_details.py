@@ -40,6 +40,9 @@ class Task_details(Base):
 
     quality_lock = Column(Integer,default=0,comment='质检锁，仅在返工时使用，1为锁定，当锁定时，此数据不允许标注员修改')
 
+    # 存疑，1为存在疑问，0为正常
+    is_doubt = Column(Integer, default=0, comment='存疑')
+
     @classmethod
     def get_already_count(cls,task_id):
         already_count = Task_details.query.filter_by(task_id=task_id,is_complete=1).count()
@@ -58,13 +61,26 @@ class Task_details(Base):
         return user_today_count
 
     @classmethod
+    def get_be_left_doubt_count(cls, task_id, user):
+        be_left_doubt_count = Task_details.query.filter_by(task_id=task_id, is_complete=0, operate_user=user, is_doubt=1).count()
+        return be_left_doubt_count
+
+    @classmethod
     def get_has_locks(cls,user, task_id):
         locks = Task_details.query.filter_by(operate_user=user,task_id=task_id, locks=1, quality_inspection=0).first()
         return locks
 
+    classmethod
+    def get_has_doubt_locks(cls, user, task_id):
+        locks = Task_details.query.filter_by(operate_user=user,task_id=task_id, locks=1, quality_inspection=0, is_doubt=1).first()
+        return locks
     @classmethod
     def get_new_data(cls, task_id, task_detail_id):
-        new_data =Task_details.query.filter_by(is_complete=0, locks=0, task_id=task_id,quality_inspection=0, id = task_detail_id).first()
+        new_data =Task_details.query.filter_by(is_complete=0, locks=0, task_id=task_id, quality_inspection=0, id=task_detail_id).first()
+        return new_data
+    @classmethod
+    def get_new_doubt_data(cls, task_id):
+        new_data = Task_details.query.filter_by(is_complete=0, locks=0, task_id=task_id, quality_inspection=0, is_doubt=1).first()
         return new_data
 
     @classmethod
@@ -72,16 +88,38 @@ class Task_details(Base):
         # select * from task_details WHERE  operate_user = 'meto' AND task_id = 4 and is_complete =1 and
         # operate_create_time >10000 and operate_create_time < 2556709299 and id < 6320 ORDER BY id DESC LIMIT 1
         last_data = Task_details.query.filter(Task_details.operate_user == user, Task_details.task_id == task_id,
-                                              Task_details.is_complete == 1, Task_details.operate_create_time > today_time,
+                                              Task_details.operate_create_time > today_time,
                                               Task_details.operate_create_time <= now_time, Task_details.id < task_detail_id).order_by(
+            desc(Task_details.id)).first()
+        return last_data
+
+    @classmethod
+    def get_last_doubt_data(cls, user, task_id, task_detail_id, now_time, today_time):
+        last_data = Task_details.query.filter(Task_details.operate_user == user,
+                                              Task_details.task_id == task_id,
+                                              Task_details.is_doubt == 1,
+                                              Task_details.operate_time > today_time,
+                                              Task_details.operate_time <= now_time,
+                                              Task_details.id < task_detail_id).order_by(
             desc(Task_details.id)).first()
         return last_data
 
     @classmethod
     def get_next_data(cls, user, task_id, task_detail_id, now_time, today_time):
         next_data = Task_details.query.filter(Task_details.operate_user == user, Task_details.task_id == task_id,
-                                              Task_details.is_complete == 1, Task_details.operate_create_time > today_time,
+                                              Task_details.operate_create_time > today_time,
                                               Task_details.operate_create_time < now_time, Task_details.id > task_detail_id).order_by(
+            asc(Task_details.id)).first()
+        return next_data
+
+    @classmethod
+    def get_next_doubt_data(cls, user, task_id, task_detail_id, now_time, today_time):
+        next_data = Task_details.query.filter(Task_details.operate_user == user,
+                                              Task_details.task_id == task_id,
+                                              Task_details.is_doubt == 1,
+                                              Task_details.operate_time > today_time,
+                                              Task_details.operate_time < now_time,
+                                              Task_details.id > task_detail_id).order_by(
             asc(Task_details.id)).first()
         return next_data
 
