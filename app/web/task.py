@@ -93,7 +93,9 @@ def labeler_task():
     page = request.args.get('page')
     rows = request.args.get('pagerows')
     user = request.args.get('nickname')
-
+    if redis_client.get('task_list_%s_%s_%s'%(user, page, rows)):
+        return redis_client.get('task_list_%s_%s_%s'%(user, page, rows))
+    print('获取新的任务列表')
     # 任务数量
     tasks = Task.get_undone_task(page, rows)
     undone_task_count = Task.get_undone_task_count()
@@ -106,8 +108,17 @@ def labeler_task():
     # labeltaskviewmodel = LabelTaskViewModel()
 
     # 此处还差已完成数量、当前用户标注量、当前用户框数三个信息。
-
+    redis_client.set('task_list_%s_%s_%s'%(user, page, rows), json.dumps(labeler_task, default=lambda o: o.__dict__))
     return json.dumps(labeler_task, default=lambda o: o.__dict__)
+
+
+@web.route('/task/refresh_task', methods=['GET'])
+def refresh_task():
+    page = request.args.get('page')
+    rows = request.args.get('pagerows')
+    user = request.args.get('nickname')
+    redis_client.delete('task_list_%s_%s_%s'%(user, page, rows))
+    return json.dumps("成功")
 
 
 @web.route('/task/show_task_detail', methods=['GET', 'POST'])
@@ -137,7 +148,7 @@ def show_task_detail():
             new_data = Task_details().get_has_doubt_locks(user, task_id)
             # 如果没有锁定的存疑数据，则查找一条新的存疑数据
             if new_data is None:
-                new_data = Task_details().get_new_doubt_data(task_id)
+                new_data = Task_details().get_new_doubt_data(task_id,user)
                 if new_data is None:
                     return json.dumps({'msg': '存疑数据已经做完，请退出'})
         else:
