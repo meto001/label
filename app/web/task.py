@@ -118,7 +118,7 @@ def refresh_task():
     rows = request.args.get('pagerows')
     user = request.args.get('nickname')
     redis_client.delete('task_list_%s_%s_%s'%(user, page, rows))
-    return json.dumps("成功")
+    return json.dumps("删除成功")
 
 
 @web.route('/task/show_task_detail', methods=['GET', 'POST'])
@@ -144,7 +144,7 @@ def show_task_detail():
     if detail_type == 1:
 
         # 判断是否为存疑数据
-        if int(form.get("is_doubt")) == 1:
+        if form.get("is_doubt") and int(form.get("is_doubt")) == 1:
             new_data = Task_details().get_has_doubt_locks(user, task_id)
             # 如果没有锁定的存疑数据，则查找一条新的存疑数据
             if new_data is None:
@@ -469,7 +469,10 @@ def modify_data():
 
     # 判断是否已经生成过质检
     boolean = Task_details().is_check(task_detail_id)
-    user = Task_details().query.filter_by(id=task_detail_id).first().operate_user
+    sdata = Task_details().query.filter_by(id=task_detail_id).first()
+    if sdata:
+        user = sdata.operate_user
+
     if boolean:
         return json.dumps({'msg': '该数据已生成质检，无法修改'})
     elif user == form.get('create_user'):

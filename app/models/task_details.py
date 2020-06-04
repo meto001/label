@@ -138,7 +138,7 @@ class Task_details(Base):
         boolean = True
         data = Task_details.query.filter_by(id=task_detail_id).first()
         # 生成过质检则为True，返工或者未生成质检为False
-        if data.quality_inspection <= 0:
+        if data and data.quality_inspection <= 0:
             boolean = False
         return boolean
 
