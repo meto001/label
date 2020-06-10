@@ -254,7 +254,7 @@ class Task_details(Base):
     @classmethod
     def get_undone_ids(cls, task_id):
         ids = db.session.query(Task_details.id).filter(Task_details.task_id == task_id, Task_details.is_complete == 0,
-                                                       Task_details.locks == 0).all()
+                                                       Task_details.locks == 0, Task_details.is_doubt == 0).all()
         undone_id = []
         for id in ids:
             undone_id.append(id[0])
