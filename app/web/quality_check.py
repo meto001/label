@@ -440,7 +440,7 @@ def check_task_details():
     task_details = quality_data.task_details
     task_detail_id = task_details.id
     url = task_details.photo_path
-    if '45982' in url:
+    if ':45982' in url:
         url = 'http://192.168.0.196:8282' + str(url).split(':45982')[-1]
 
     if form.get('label_type') == 2:

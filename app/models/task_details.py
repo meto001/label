@@ -134,6 +134,15 @@ class Task_details(Base):
         return next_data
 
     @classmethod
+    def get_first_data(cls, user, task_id, task_detail_id, now_time, today_time):
+        first_data = Task_details.query.filter(Task_details.operate_user == user,
+                                               Task_details.task_id == task_id,
+                                               Task_details.operate_create_time > today_time,
+                                               Task_details.id < task_detail_id).order_by(
+            asc(Task_details.id)).first()
+        return first_data
+
+    @classmethod
     def is_check(cls, task_detail_id):
         boolean = True
         data = Task_details.query.filter_by(id=task_detail_id).first()

@@ -84,7 +84,7 @@ def rework_details():
         with db.auto_commit():
             rework_data.is_complete = 1
     url = rework_data.photo_path
-    if '45982' in url:
+    if ':45982' in url:
         url = 'http://192.168.0.196:8282' + str(url).split(':45982')[-1]
 
     if form.get('label_type') == 2:

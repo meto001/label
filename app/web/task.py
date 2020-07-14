@@ -128,7 +128,7 @@ def show_task_detail():
     如果任务为预处理，并且是新的一张，则访问mongodb数据库查找数据并处理返回。
     :return:
     """
-    # detail_type 1,新的一页;2,上一张;3,下一张
+    # detail_type 1,新的一页;2,上一张;3,下一张;4.回到首页（今天的第一张）
     if request.data:
         form = json.loads(request.data)
     else:
@@ -170,7 +170,6 @@ def show_task_detail():
                         task_detail_id = task_detail_id.decode()
                     print(task_id, ':', task_detail_id)
                 else:
-                    # 此处为了少修改逻辑，否则应把下面的代码合并过来
                     task_detail_id = None
                 new_data = Task_details().get_new_data(task_id, task_detail_id)
 
@@ -212,8 +211,8 @@ def show_task_detail():
         # 在这里拿到id后，去mongodb中查询此id.获取数据后返回。
         url = new_data.photo_path
         # 这里增加临时解决方案，将旧的ip替换为新的ip
-        if '45982' in url:
-            url = 'http://192.168.0.196:8282' + str(url).split(':45982')[-1]
+        # if '45982' in url:
+        #     url = 'http://192.168.0.196:8282' + str(url).split(':45982')[-1]
 
         # 判断是裁剪类型
         if form.get('label_type') == 2:
@@ -250,7 +249,7 @@ def show_task_detail():
             label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id, mongo_con, result_status, is_doubt)
             return json.dumps(label_detail, default=lambda o: o.__dict__)
 
-    elif detail_type == 2 or detail_type == 3:
+    elif detail_type == 2 or 3 or 4:
         task_detail_id = form.get('task_detail_id')
         # print('请求上一张，当前task_detail_id为%s'%task_detail_id)
         # 当前时间
@@ -275,11 +274,19 @@ def show_task_detail():
                 history_data = Task_details().get_next_data(user, task_id, task_detail_id, now_time, today_time)
             if history_data is None:
                 return json.dumps({'msg': '已经是今天做的最后一条数据了，如果想做新的，请点击“新的一张”'})
+        elif detail_type == 4:
+            if int(form.get('is_doubt')) == 1:
+                return json.dumps({'msg':'存疑不支持跳转首页，如需支持，请联系开发人员'})
+            else:
+                history_data = Task_details().get_first_data(user, task_id, task_detail_id, now_time, today_time)
+            if history_data is None:
+                return json.dumps({'msg': '已经是今天最早的数据了，想查询更多，请移步历史记录'})
+
         task_detail_id = history_data.id
         # print('上一张的id为%s'%task_detail_id)
         url = history_data.photo_path
         # 这里增加临时解决方案，将旧的ip替换为新的ip
-        if '45982' in url:
+        if ':45982' in url:
             url = 'http://192.168.0.196:8282' + str(url).split(':45982')[-1]
         if form.get('label_type') == 2:
             frames = Task_details_cut().get_frames(task_detail_id)
