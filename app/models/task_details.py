@@ -142,6 +142,16 @@ class Task_details(Base):
             asc(Task_details.id)).first()
         return first_data
 
+    # 获取指定的跳转页数据
+    @classmethod
+    def get_quick_jump_data(cls, task_id, user, page, today_time):
+        data = Task_details.query.filter(Task_details.task_id == task_id,
+                                         Task_details.operate_user == user,
+                                         Task_details.operate_create_time > today_time).order_by(
+            asc(Task_details.id)).slice(page-1,page).first()
+        return data
+
+
     @classmethod
     def is_check(cls, task_detail_id):
         boolean = True
@@ -221,6 +231,8 @@ class Task_details(Base):
             asc(Task_details.id)).first()
         return rework_data
 
+
+
     @classmethod
     def get_rework_check_details(cls, start_time, task_id, label_user):
         # 获取返未质检的数据详情
@@ -268,3 +280,4 @@ class Task_details(Base):
         for id in ids:
             undone_id.append(id[0])
         return undone_id
+

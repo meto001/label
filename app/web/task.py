@@ -6,10 +6,9 @@ from queue import Queue
 from flask import request, json
 from sqlalchemy import desc
 
-from app.models.base import db
-
 from app import dict1, mongo, redis_client
 from app.libs.make_data import caijian_save_data, label_save_data, caijian_modify_data, label_modify_data
+from app.models.base import db
 from app.models.property import Property
 from app.models.source import Source
 from app.models.task import Task
@@ -36,9 +35,9 @@ def add_task():
     # 判断如果是get方法，则返回对应类型的sources和props
     if request.method == 'GET':
         form = request.args.get('label_type_id')
-        props = Property.query.filter_by(label_type_id=form,status=1).order_by(
+        props = Property.query.filter_by(label_type_id=form, status=1).order_by(
             desc(Property.id)).all()
-        sources = Source.query.filter_by(label_type_id=form,status=1).order_by(
+        sources = Source.query.filter_by(label_type_id=form, status=1).order_by(
             desc(Source.id)).all()
         sources_and_props = SourcesAndPorps(sources, props, form)
 
@@ -93,8 +92,8 @@ def labeler_task():
     page = request.args.get('page')
     rows = request.args.get('pagerows')
     user = request.args.get('nickname')
-    if redis_client.get('task_list_%s_%s_%s'%(user, page, rows)):
-        return redis_client.get('task_list_%s_%s_%s'%(user, page, rows))
+    if redis_client.get('task_list_%s_%s_%s' % (user, page, rows)):
+        return redis_client.get('task_list_%s_%s_%s' % (user, page, rows))
     print('获取新的任务列表')
     # 任务数量
     tasks = Task.get_undone_task(page, rows)
@@ -108,7 +107,7 @@ def labeler_task():
     # labeltaskviewmodel = LabelTaskViewModel()
 
     # 此处还差已完成数量、当前用户标注量、当前用户框数三个信息。
-    redis_client.set('task_list_%s_%s_%s'%(user, page, rows), json.dumps(labeler_task, default=lambda o: o.__dict__))
+    redis_client.set('task_list_%s_%s_%s' % (user, page, rows), json.dumps(labeler_task, default=lambda o: o.__dict__))
     return json.dumps(labeler_task, default=lambda o: o.__dict__)
 
 
@@ -117,7 +116,7 @@ def refresh_task():
     page = request.args.get('page')
     rows = request.args.get('pagerows')
     user = request.args.get('nickname')
-    redis_client.delete('task_list_%s_%s_%s'%(user, page, rows))
+    redis_client.delete('task_list_%s_%s_%s' % (user, page, rows))
     return json.dumps("删除成功")
 
 
@@ -148,7 +147,7 @@ def show_task_detail():
             new_data = Task_details().get_has_doubt_locks(user, task_id)
             # 如果没有锁定的存疑数据，则查找一条新的存疑数据
             if new_data is None:
-                new_data = Task_details().get_new_doubt_data(task_id,user)
+                new_data = Task_details().get_new_doubt_data(task_id, user)
                 if new_data is None:
                     return json.dumps({'msg': '存疑数据已经做完，请退出'})
         else:
@@ -162,7 +161,7 @@ def show_task_detail():
                     # 查询该任务下未完成的task_detail_id
                     undone_ids = Task_details().get_undone_ids(task_id)
                     for id in undone_ids:
-                        redis_client.rpush(task_id,id)
+                        redis_client.rpush(task_id, id)
                         print(id)
                 if redis_client.llen(task_id):
                     task_detail_id = redis_client.lpop(task_id)
@@ -246,10 +245,11 @@ def show_task_detail():
                 mongo_con = None
             result_status = None
             is_doubt = new_data.is_doubt
-            label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id, mongo_con, result_status, is_doubt)
+            label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id, mongo_con,
+                              result_status, is_doubt)
             return json.dumps(label_detail, default=lambda o: o.__dict__)
 
-    elif detail_type == 2 or 3 or 4:
+    elif detail_type == 2 or detail_type == 3 or detail_type == 4 or detail_type == 5 :
         task_detail_id = form.get('task_detail_id')
         # print('请求上一张，当前task_detail_id为%s'%task_detail_id)
         # 当前时间
@@ -276,12 +276,23 @@ def show_task_detail():
                 return json.dumps({'msg': '已经是今天做的最后一条数据了，如果想做新的，请点击“新的一张”'})
         elif detail_type == 4:
             if int(form.get('is_doubt')) == 1:
-                return json.dumps({'msg':'存疑不支持跳转首页，如需支持，请联系开发人员'})
+                return json.dumps({'msg': '存疑不支持跳转首页，如需支持，请联系开发人员'})
             else:
                 history_data = Task_details().get_first_data(user, task_id, task_detail_id, now_time, today_time)
             if history_data is None:
                 return json.dumps({'msg': '已经是今天最早的数据了，想查询更多，请移步历史记录'})
-
+        elif detail_type == 5:
+            page = form.get('page')
+            if page:
+                try:
+                    page = int(page)
+                except:
+                    return json.dumps({'msg': '传入的参数不正确，请重新输入'})
+                history_data = Task_details().get_quick_jump_data(task_id, user, page, today_time)
+                if history_data is None:
+                    return json.dumps({'msg': '传入的参数不正确，请重新输入'})
+            else:
+                return json.dumps({'msg': '传入的参数不正确，请重新输入'})
         task_detail_id = history_data.id
         # print('上一张的id为%s'%task_detail_id)
         url = history_data.photo_path
@@ -312,7 +323,8 @@ def show_task_detail():
             mongo_con = None
             result_status = None
             is_doubt = history_data.is_doubt
-            label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id, mongo_con, result_status, is_doubt)
+            label_detail.fill(task_id, task_detail_id, url, prop_ids, detail_type, check_data_info_id, mongo_con,
+                              result_status, is_doubt)
 
             # select * from task_details WHERE  operate_user = 'meto' AND task_id = 4 and is_complete =1 and
             # operate_create_time >10000 and operate_create_time < 2556709299 and id < 6320 ORDER BY id DESC LIMIT 1
@@ -667,12 +679,10 @@ def preprocessing_upload_mongodb():
     print(task_id)
     col = mongo.db['%s' % str(task_id)]
 
-
     # 插入到mongodb中，这里需要将detail值做优化，只保存里面的prop_id和prop_value,prop_id作为键，prop_value作为值
 
-
     preprocess = PreprocessingCollection()
-    d1 = preprocess.fill(con['details'],task_id)
+    d1 = preprocess.fill(con['details'], task_id)
     # print(d1)
     # 保存格式：task_details_id:{prop_id:prop_value}
     res = col.insert_one(d1)
@@ -690,3 +700,5 @@ def preprocessing_upload_mongodb():
     # for k, v in item.items():
     #     print('%s:%s'%(k,v))
     return 'success'
+
+

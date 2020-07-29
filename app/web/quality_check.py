@@ -435,6 +435,18 @@ def check_task_details():
         quality_data = Check_data_info().get_next_quality_data(quality_user, task_detail_id, check_user_id)
         if quality_data is None:
             return json.dumps({'msg': '没有更多了'})
+    elif detail_type == 5:
+        page = form.get('page')
+        if page:
+            try:
+                page = int(page)
+            except:
+                return json.dumps({'msg': '传入的参数不正确，请重新输入'})
+            quality_data = Check_data_info().get_page_quality_data(quality_user, page, check_user_id)
+            if quality_data is None:
+                return json.dumps({'msg': '传入的参数不正确，请重新输入'})
+        else:
+            return json.dumps({'msg': '传入的参数不正确，请重新输入'})
 
     # 根据new_quality_data.task_details获取数据详情
     task_details = quality_data.task_details
