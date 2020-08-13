@@ -107,7 +107,6 @@ class Task_details(Base):
         last_data = Task_details.query.filter(Task_details.operate_user == user,
                                               Task_details.task_id == task_id,
                                               Task_details.is_doubt == 1,
-                                              Task_details.operate_time > today_time,
                                               Task_details.operate_time <= now_time,
                                               Task_details.id < task_detail_id).order_by(
             desc(Task_details.id)).first()
@@ -127,7 +126,6 @@ class Task_details(Base):
         next_data = Task_details.query.filter(Task_details.operate_user == user,
                                               Task_details.task_id == task_id,
                                               Task_details.is_doubt == 1,
-                                              Task_details.operate_time > today_time,
                                               Task_details.operate_time < now_time,
                                               Task_details.id > task_detail_id).order_by(
             asc(Task_details.id)).first()
@@ -190,7 +188,7 @@ class Task_details(Base):
         end_time = start_time + 86400
         all_rework = Task_details.query.filter(Task_details.operate_user == user, Task_details.task_id == task_id,
                                                Task_details.operate_create_time <= end_time,
-                                               Task_details.operate_create_time > start_time).all()
+                                               Task_details.operate_create_time > start_time, Task_details.is_complete == 1).all()
         return all_rework
 
     @classmethod

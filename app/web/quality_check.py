@@ -374,8 +374,9 @@ def check_task_details():
                             time_array = time.strptime(date, '%Y-%m-%d')
                             start_time = time.mktime(time_array)
                             # end_time = start_time+86400
-
+                            # 查询该批次所有数据
                             all_rework = Task_details.set_rework(start_time, task_id, check_user.user)
+                            # 通过
                             if correct_rate >= pass_rate:
                                 check_user.status = 1
                                 for rework in all_rework:
