@@ -57,7 +57,8 @@ class Task_details(Base):
     @classmethod
     def get_user_today_count(cls, task_id, user, today_start_time):
         user_today_count = Task_details.query.filter(Task_details.task_id == task_id, Task_details.operate_user == user,
-                                                     Task_details.operate_create_time > today_start_time,
+                                                     Task_details.operate_time > today_start_time,
+                                                     Task_details.quality_inspection != -1,
                                                      Task_details.is_complete == 1).count()
         return user_today_count
 

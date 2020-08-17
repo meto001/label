@@ -37,9 +37,12 @@ class LabelTaskCollection:
     def __init__(self):
         self.total = 0
         self.tasks = []
+        # 是否有返工数据
+        self.rework_data =False
 
-    def fill(self, total, tasks, user, today_start_time):
+    def fill(self, total, tasks, user, today_start_time, rework_data):
         self.total = total
+        self.rework_data = rework_data
         for task in tasks:
             # print(task.id)
             # 已经完成的数量

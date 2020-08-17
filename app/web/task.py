@@ -18,6 +18,7 @@ from app.models.task_details_value import Task_details_value
 from app.view_models.labeler_task import LabelTaskCollection, LabelTaskDetailCollection, FramesCollection, \
     PreprocessingCollection
 from app.view_models.task import TaskCollection, SourcesAndPorps, ExportTaskCollection
+from app.models.rework import Rework
 from .blue_print import web
 
 __author__ = 'meto'
@@ -92,7 +93,9 @@ def labeler_task():
     page = request.args.get('page')
     rows = request.args.get('pagerows')
     user = request.args.get('nickname')
-    if redis_client.get('task_list_%s_%s_%s' % (user, page, rows)):
+    # 先查找是否有返工数据，如果有的话，不查询redis缓存
+    rework_data = True if Rework().get_rework_data(user) else ''
+    if rework_data is None and redis_client.get('task_list_%s_%s_%s' % (user, page, rows)):
         return redis_client.get('task_list_%s_%s_%s' % (user, page, rows))
     print('获取新的任务列表')
     # 任务数量
@@ -101,7 +104,8 @@ def labeler_task():
     labeler_task = LabelTaskCollection()
     now_time = int(time.time())
     today_start_time = now_time - (now_time - time.timezone) % 86400
-    labeler_task.fill(undone_task_count, tasks, user, today_start_time)
+
+    labeler_task.fill(undone_task_count, tasks, user, today_start_time, rework_data)
 
     # task.get('already_count') =Ta a
     # labeltaskviewmodel = LabelTaskViewModel()
