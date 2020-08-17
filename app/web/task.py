@@ -94,8 +94,7 @@ def labeler_task():
     rows = request.args.get('pagerows')
     user = request.args.get('nickname')
     # 先查找是否有返工数据，如果有的话，不查询redis缓存
-    rework_data = True if Rework().get_rework_data(user) else ''
-    if rework_data is None and redis_client.get('task_list_%s_%s_%s' % (user, page, rows)):
+    if redis_client.get('task_list_%s_%s_%s' % (user, page, rows)):
         return redis_client.get('task_list_%s_%s_%s' % (user, page, rows))
     print('获取新的任务列表')
     # 任务数量
@@ -104,7 +103,7 @@ def labeler_task():
     labeler_task = LabelTaskCollection()
     now_time = int(time.time())
     today_start_time = now_time - (now_time - time.timezone) % 86400
-
+    rework_data = True if Rework().get_rework_data(user) else ''
     labeler_task.fill(undone_task_count, tasks, user, today_start_time, rework_data)
 
     # task.get('already_count') =Ta a

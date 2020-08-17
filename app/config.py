@@ -10,9 +10,9 @@ class APSchedulerJobConfig(object):
         'args': '',
         'trigger': {
             'type': 'cron',
-            'day_of_week': '0-6',
-            'hour': '00',
-            'minute':'10'
+            'day_of_week': '6',
+            'hour': '05',
+            'minute':'50'
         }
     }]
     SCHEDULER_API_ENABLED = True
