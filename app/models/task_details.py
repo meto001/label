@@ -163,8 +163,8 @@ class Task_details(Base):
     @classmethod
     def get_uncheck_user_task_details(cls, yesterday_time, today_time, task, user):
         return Task_details.query.filter(Task_details.task_id == task.id,
-                                         Task_details.operate_create_time > yesterday_time,
-                                         Task_details.operate_create_time <= today_time,
+                                         Task_details.operate_time > yesterday_time,
+                                         Task_details.operate_time <= today_time,
                                          Task_details.operate_user == user, Task_details.quality_inspection == 0,
                                          Task_details.is_complete == 1).all()
 
@@ -173,15 +173,15 @@ class Task_details(Base):
         return db.session.query(Task_details.operate_user, func.count(Task_details.operate_user)).filter(
             Task_details.task_id == task.id,
             Task_details.is_complete == 1,
-            Task_details.operate_create_time > yesterday_time,
-            Task_details.operate_create_time <= today_time).group_by(
+            Task_details.operate_time > yesterday_time,
+            Task_details.operate_time <= today_time).group_by(
             Task_details.operate_user,
         ).all()
 
     @classmethod
     def is_have_new_data(cls, yesterday_time, today_time):
-        return Task_details.query.filter(Task_details.operate_create_time > yesterday_time,
-                                         Task_details.operate_create_time <= today_time,
+        return Task_details.query.filter(Task_details.operate_time > yesterday_time,
+                                         Task_details.operate_time <= today_time,
                                          Task_details.quality_inspection == 0).all()
 
     @classmethod
